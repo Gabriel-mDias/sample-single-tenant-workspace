@@ -1,0 +1,8 @@
+﻿---
+description: Convenções backend Java
+globs: backend/**/*
+alwaysApply: false
+---
+
+Siga `backend/AGENTS.md` (inclui o mapa de domínios de `app-core`). Carregue somente a regra GEMS
+da camada tocada e um domínio equivalente.
