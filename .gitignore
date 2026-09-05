@@ -31,3 +31,4 @@ CLAUDE.local.md
 
 # Telemetria bruta de custo (pode conter identificadores de sessões)
 .agents/metrics/*.csv
+target/
