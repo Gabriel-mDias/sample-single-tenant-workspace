@@ -152,14 +152,14 @@
     0 24px 48px -12px rgba(26, 43, 60, 0.14);
 }
 
-/* Barra tricolore no topo do cartão. Paradas DURAS — um tricolore com gradiente
+/* Barra de marca no topo do cartão. Paradas DURAS — uma faixa multicolor com gradiente
    suave entre as cores parece defeito de renderização.
 
    A faixa central usa o NAVY do painel, não branco: contra o cartão off-white,
    uma faixa branca simplesmente desaparece e a barra lê como dois blocos
    desconexos. O navy dá a separação necessária, amarra a barra visualmente ao
-   painel do retrato e mantém a leitura de tricolore único e contínuo (o
-   "branco" do tricolore é o próprio corpo off-white do documento, logo abaixo). */
+   painel do retrato e mantém a leitura de faixa única e contínua (a
+   cor do meio é o próprio corpo off-white do documento, logo abaixo). */
 .app-doc::before {
   content: '';
   position: absolute;
@@ -928,7 +928,7 @@
   }
 
   /* O painel do retrato sai de cena e a logo colorida assume o topo do
-     formulário. A barra tricolore permanece: é o sinal de marca mais barato. */
+     formulário. A barra de marca permanece: é o sinal de identidade mais barato. */
   .app-doc__aside {
     display: none;
   }

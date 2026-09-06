@@ -14,7 +14,7 @@
 # do arquivo. Restaure sempre o par â€” nunca um sÃ³. Se um dia a janela entre eles incomodar, a saÃ­da
 # Ã© backup fÃ­sico do cluster (`pg_basebackup` + WAL), atÃ´mico entre bancos.
 #
-# POR QUE AS SENHAS DOS COLABORADORES DEPENDEM DISTO
+# POR QUE AS SENHAS DOS USUARIOS DEPENDEM DISTO
 # --------------------------------------------------
 # As contas e senhas da equipe existem APENAS no keycloak-db. O `security.USUARIO`
 # guarda login e identificador externo, nunca a senha. Perder o keycloak-db sem backup significa que
