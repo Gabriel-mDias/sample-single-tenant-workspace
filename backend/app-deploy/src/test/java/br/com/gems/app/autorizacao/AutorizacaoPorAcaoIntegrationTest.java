@@ -14,6 +14,7 @@ import br.com.gems.app.parceiro.repository.ParceiroRepository;
 import br.com.gems.app.parceiro.service.ParceiroService;
 import br.com.gems.app.support.AbstractIntegrationTest;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -50,8 +51,12 @@ class AutorizacaoPorAcaoIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    // Instanciado, e não injetado: o contexto de teste não registra um ObjectMapper como bean, e
+    // aqui ele serve só para montar o corpo da requisição.
+    //
+    // O JavaTimeModule é obrigatório: sem ele o Jackson recusa LocalDate com uma mensagem que
+    // parece defeito de DTO (Java 8 date/time type not supported by default), e não de mapper.
+    private final ObjectMapper objectMapper = new ObjectMapper().registerModule( new JavaTimeModule() );
 
     @Autowired
     private ParceiroService parceiroService;

@@ -60,7 +60,7 @@
             <column name="DS_LOGRADOURO" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="CD_NUMERO" type="VARCHAR(255)"/>
+            <column name="NR_NUMERO" type="VARCHAR(255)"/>
             <column name="DS_COMPLEMENTO" type="VARCHAR(255)"/>
             <column name="DT_CRIACAO" type="TIMESTAMP">
                 <constraints nullable="false"/>
@@ -78,13 +78,17 @@
 
     <changeSet id="create-table-pessoa" author="app">
         <comment>
-            Identidade civil normalizada (RF001/FR-006). Pessoa.java estende EntidadeAuditavel,
-            como CONTATO e ENDERECO. Será reaproveitada por Cliente (RF002) e Familiar (RF005),
-            por isso nasce aqui e não no domínio do vínculo de serviço.
+            Identidade civil normalizada. Pessoa.java estende EntidadeAuditavel, como CONTATO e
+            ENDERECO. É reaproveitada por todo domínio que precise de identidade civil, e por isso
+            nasce aqui em vez de dentro de um domínio específico.
 
             CD_CPF NÃO recebe constraint UNIQUE: a regra é "único entre os registros ativos", e
             soft delete não compõe com UNIQUE de banco sem índice parcial. A checagem vive no
             PessoaService — mesma decisão já tomada para NM_PARCEIRO.
+
+            DT_NASCIMENTO e CD_CPF são NULÁVEIS: nem todo domínio que grava uma Pessoa tem os dois
+            em mãos no momento do cadastro, e a obrigatoriedade real é decidida pelo service, que
+            sabe de qual cadastro veio a chamada. Uma constraint aqui obrigaria todos.
         </comment>
         <createTable tableName="PESSOA">
             <column name="ID_PESSOA" type="UUID" defaultValueComputed="${uuid_function}">
@@ -96,13 +100,16 @@
             <column name="NM_SOBRENOME" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="DT_NASCIMENTO" type="DATE">
-                <constraints nullable="false"/>
-            </column>
-            <column name="CD_CPF" type="VARCHAR(11)">
-                <constraints nullable="false"/>
-            </column>
+            <column name="DT_NASCIMENTO" type="DATE"/>
+            <column name="CD_CPF" type="VARCHAR(11)"/>
             <column name="CD_RG" type="VARCHAR(20)"/>
+            <column name="CD_SEXO" type="VARCHAR(20)"/>
+            <column name="DT_OBITO" type="DATE"/>
+            <!-- Marca que a data de nascimento é aproximada. NOT NULL com DEFAULT: a coluna nunca
+                 fica indefinida, e o `false` do builder da entidade bate com o do banco. -->
+            <column name="FL_DATA_APROXIMADA" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
             <column name="DT_CRIACAO" type="TIMESTAMP">
                 <constraints nullable="false"/>
             </column>

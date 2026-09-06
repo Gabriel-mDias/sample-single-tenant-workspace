@@ -12,6 +12,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -173,8 +174,8 @@ class ActuatorSecurityIntegrationTest extends AbstractIntegrationTest {
     @Test
     @DisplayName( "UUID malformado na rota responde 400, não 500" )
     void uuidMalformadoResponde400() throws Exception {
-        var resposta = mockMvc.perform( get( "/api/familias/isto-nao-e-um-uuid" )
-                        .with( jwt().authorities( new SimpleGrantedAuthority( "ROLE_CONSULTAR_FAMILIA" ) ) ) )
+        var resposta = mockMvc.perform( post( "/api/solicitacoes/isto-nao-e-um-uuid/abrir" )
+                        .with( jwt().authorities( new SimpleGrantedAuthority( "ROLE_ABRIR_SOLICITACAO" ) ) ) )
                 .andReturn()
                 .getResponse();
 

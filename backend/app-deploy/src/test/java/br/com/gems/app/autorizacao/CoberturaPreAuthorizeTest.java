@@ -132,10 +132,8 @@ class CoberturaPreAuthorizeTest extends AbstractIntegrationTest {
         // ContratoController e ProcessoController na 017. Todas as vezes esta linha falhou de
         // propósito, e atualizá-la era tarefa do roteiro, não conserto de teste quebrado.
         assertThat( controllersDoProjeto ).containsExactly(
-                "ArquivoController", "AuditoriaController", "CepController", "ClienteController",
-                "ParceiroController", "SolicitacaoController",
-                "LeadController", "LocalidadeController", "ProcessoController", "ServicoController",
-                "VinculoServicoController" );
+                "AuditoriaController", "CepController", "LocalidadeController",
+                "ParceiroController", "SolicitacaoController" );
     }
 
     private boolean ehEndpointMapeado( Method metodo ) {

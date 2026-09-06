@@ -63,10 +63,11 @@ class AuditoriaCoberturaIntegrationTest extends AbstractIntegrationTest {
                 .isEmpty();
 
         // A varredura só vale alguma coisa se de fato enxergar as entidades. Um metamodelo vazio
-        // faria o teste acima passar sem examinar nada.
+        // faria o teste acima passar sem examinar nada. O piso é ordem de grandeza, não contagem:
+        // suba-o quando o projeto crescer.
         assertThat( entidadesDeNegocio() )
                 .as( "a varredura precisa enxergar as entidades de negócio do projeto" )
-                .hasSizeGreaterThanOrEqualTo( 15 );
+                .hasSizeGreaterThanOrEqualTo( 5 );
     }
 
     @Test
