@@ -32,9 +32,21 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class AuditoriaIsolamentoTest {
 
-    private static final Path RAIZ = Path.of( "src", "main", "java", "br", "com", "gems", "app" );
+    /**
+     * O pacote raiz do projeto, derivado do pacote <b>desta</b> classe.
+     *
+     * <p>Cravar {@code "br.com.gems.app"} aqui faria o teste quebrar no dia em que o projeto fosse
+     * renomeado — e quebrar por um motivo que não tem nada a ver com o que ele verifica. Derivar do
+     * próprio pacote resolve: a classe está em {@code <raiz>.auditoria.interceptor}, então a raiz é
+     * o que sobra ao tirar os dois últimos segmentos.
+     */
+    private static final String PACOTE_RAIZ =
+            AuditoriaIsolamentoTest.class.getPackageName().replaceFirst( "\\.auditoria\\.interceptor$", "" );
 
-    private static final String PACOTE_AUDITORIA = "br.com.gems.app.auditoria";
+    private static final Path RAIZ = Path.of( "src", "main", "java" )
+            .resolve( Path.of( "", PACOTE_RAIZ.split( "\\." ) ) );
+
+    private static final String PACOTE_AUDITORIA = PACOTE_RAIZ + ".auditoria";
 
     @Test
     @DisplayName( "SC-141: nenhum pacote de negócio referencia a auditoria" )
@@ -86,7 +98,7 @@ class AuditoriaIsolamentoTest {
     @DisplayName( "A própria auditoria pode se referenciar — ela está fora da varredura" )
     void oPacoteDeAuditoriaEstaForaDaVarredura() {
         var dentroDaAuditoria = List.of(
-                "src/main/java/br/com/gems/app/auditoria/interceptor/AuditoriaInterceptor.java" );
+                RAIZ.resolve( Path.of( "auditoria", "interceptor", "AuditoriaInterceptor.java" ) ).toString() );
 
         assertThat( dentroDaAuditoria )
                 .allSatisfy( caminho -> assertThat( caminho.replace( '\\', '/' ) )
