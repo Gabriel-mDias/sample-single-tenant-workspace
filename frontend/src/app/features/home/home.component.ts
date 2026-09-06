@@ -7,9 +7,9 @@ import { buildMenu } from '../../core/menu/menu.builder';
  * Sem widgets, indicadores ou dados de exemplo: os domínios reais do App
  * (dashboards, indicadores) ainda não existem.
  *
- * A partir da rodada 011, role deixou de ser nível (ADMIN/USER) e passou a ser ação — um perfil
- * pode não ter nenhuma ação de consulta, e nesse caso o menu
- * lateral fica vazio (FR-018c). Sem aviso explícito, essa tela em branco se lê como defeito.
+ * Role aqui não é nível (ADMIN/USER) e sim ação — um perfil pode não ter nenhuma ação de consulta,
+ * e nesse caso o menu lateral fica vazio. Sem aviso explícito, essa tela em branco se lê como
+ * defeito.
  */
 @Component({
   selector: 'app-home',

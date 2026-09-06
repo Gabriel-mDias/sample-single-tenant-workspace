@@ -8,7 +8,7 @@ import { routes as APP_ROUTES } from '../../app.routes';
 import { roleGuard } from './role.guard';
 
 /**
- * Varredura de rotas — espelho, no frontend, do `CoberturaPreAuthorizeTest` do backend (FR-018b).
+ * Varredura de rotas — espelho, no frontend, do `CoberturaPreAuthorizeTest` do backend.
  *
  * Percorre **todas** as rotas alcançáveis a partir de `app.routes.ts` e falha, nomeando o caminho
  * completo, se alguma rota guardada por `roleGuard` não declarar `data.roles` como array não vazio.
@@ -16,7 +16,7 @@ import { roleGuard } from './role.guard';
  * negada em runtime — esta varredura existe para pegar o erro em CI, antes de chegar lá.
  *
  * <h2>Por que a lista de rotas não é escrita à mão</h2>
- * Até a 013 este arquivo enumerava as tabelas de rotas uma a uma, por importação direta. O
+ * Este arquivo já enumerou as tabelas de rotas uma a uma, por importação direta. O
  * resultado previsível aconteceu: `SOLICITACAO_ROUTES`, a feature mais nova, **nunca entrou na lista** —
  * a rede montada exatamente para pegar o esquecimento foi vítima do mesmo esquecimento, e passou
  * verde ignorando as cinco rotas dela. Uma varredura que precisa ser lembrada não é uma varredura.

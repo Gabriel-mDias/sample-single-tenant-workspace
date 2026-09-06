@@ -44,9 +44,9 @@ class EnderecoServiceTest {
     private static final UUID ID_ENDERECO = UUID.fromString( "11111111-1111-1111-1111-111111111111" );
     private static final UUID ID_OUTRO_ENDERECO = UUID.fromString( "22222222-2222-2222-2222-222222222222" );
     private static final UUID ID_BRASIL = UUID.fromString( "33333333-3333-3333-3333-333333333333" );
-    private static final UUID ID_ITALIA = UUID.fromString( "44444444-4444-4444-4444-444444444444" );
+    private static final UUID ID_PORTUGAL = UUID.fromString( "44444444-4444-4444-4444-444444444444" );
     private static final UUID ID_RJ = UUID.fromString( "55555555-5555-5555-5555-555555555555" );
-    private static final UUID ID_ROMA = UUID.fromString( "66666666-6666-6666-6666-666666666666" );
+    private static final UUID ID_LISBOA = UUID.fromString( "66666666-6666-6666-6666-666666666666" );
 
     @Mock
     private EnderecoRepository repository;
@@ -61,7 +61,7 @@ class EnderecoServiceTest {
 
     private Pais brasil;
     private Estado rioDeJaneiro;
-    private Estado roma;
+    private Estado lisboa;
 
     @BeforeEach
     void setUp() {
@@ -72,14 +72,14 @@ class EnderecoServiceTest {
         service = new EnderecoService( modelMapper, repository, estadoRepository, paisRepository );
 
         brasil = Pais.builder().id( ID_BRASIL ).nome( "Brasil" ).build();
-        var italia = Pais.builder().id( ID_ITALIA ).nome( "Itália" ).build();
+        var portugal = Pais.builder().id( ID_PORTUGAL ).nome( "Portugal" ).build();
         rioDeJaneiro = Estado.builder().id( ID_RJ ).nome( "Rio de Janeiro" ).siglaEstado( "RJ" ).pais( brasil ).build();
-        roma = Estado.builder().id( ID_ROMA ).nome( "Roma" ).siglaEstado( "RM" ).pais( italia ).build();
+        lisboa = Estado.builder().id( ID_LISBOA ).nome( "Lisboa" ).siglaEstado( "LI" ).pais( portugal ).build();
 
         when( paisRepository.findById( ID_BRASIL ) ).thenReturn( Optional.of( brasil ) );
-        when( paisRepository.findById( ID_ITALIA ) ).thenReturn( Optional.of( italia ) );
+        when( paisRepository.findById( ID_PORTUGAL ) ).thenReturn( Optional.of( portugal ) );
         when( estadoRepository.findById( ID_RJ ) ).thenReturn( Optional.of( rioDeJaneiro ) );
-        when( estadoRepository.findById( ID_ROMA ) ).thenReturn( Optional.of( roma ) );
+        when( estadoRepository.findById( ID_LISBOA ) ).thenReturn( Optional.of( lisboa ) );
         when( repository.save( any( Endereco.class ) ) ).thenAnswer( invocation -> invocation.getArgument( 0 ) );
     }
 
@@ -168,8 +168,8 @@ class EnderecoServiceTest {
     void estrangeiroSemCepESemEstadoPassa() {
         var errors = new ArrayList<String>();
         var dto = new EnderecoDTO();
-        dto.setPais( paisDTO( ID_ITALIA ) );
-        dto.setCidade( "Roma" );
+        dto.setPais( paisDTO( ID_PORTUGAL ) );
+        dto.setCidade( "Lisboa" );
         dto.setBairro( "Trastevere" );
         dto.setLogradouro( "Via della Lungaretta" );
 
@@ -183,7 +183,7 @@ class EnderecoServiceTest {
     void estrangeiroSemCidadeFalha() {
         var errors = new ArrayList<String>();
         var dto = new EnderecoDTO();
-        dto.setPais( paisDTO( ID_ITALIA ) );
+        dto.setPais( paisDTO( ID_PORTUGAL ) );
         dto.setLogradouro( "Via della Lungaretta" );
 
         service.validar( dto, errors );
@@ -199,7 +199,7 @@ class EnderecoServiceTest {
     void estadoDeOutroPaisFalha() {
         var errors = new ArrayList<String>();
         var dto = enderecoBrasileiro();
-        dto.setEstado( estadoDTO( ID_ROMA ) );
+        dto.setEstado( estadoDTO( ID_LISBOA ) );
 
         service.validar( dto, errors );
 
@@ -211,7 +211,7 @@ class EnderecoServiceTest {
     void paisAusenteNaoRelaxaRegraBrasileira() {
         var errors = new ArrayList<String>();
         var dto = new EnderecoDTO();
-        dto.setCidade( "Roma" );
+        dto.setCidade( "Lisboa" );
         dto.setBairro( "Trastevere" );
         dto.setLogradouro( "Via della Lungaretta" );
 
@@ -239,11 +239,11 @@ class EnderecoServiceTest {
     }
 
     @Test
-    @DisplayName( "AUSÊNCIA DE TRAVA DE PAÍS: endereço na Itália passa sem erro — a regra de "
+    @DisplayName( "AUSÊNCIA DE TRAVA DE PAÍS: endereço fora do Brasil passa sem erro — a regra de "
             + "sede em território brasileiro é do ParceiroService, e não pode vazar para cá" )
-    void enderecoComEstadoItalianoPassaSemErro() {
+    void enderecoComEstadoEstrangeiroPassaSemErro() {
         var errors = new ArrayList<String>();
-        var dto = enderecoValido( ID_ITALIA, ID_ROMA );
+        var dto = enderecoValido( ID_PORTUGAL, ID_LISBOA );
 
         service.validar( dto, errors );
 
@@ -280,15 +280,15 @@ class EnderecoServiceTest {
     @DisplayName( "save de endereço estrangeiro sem estado grava com estado nulo, sem estourar" )
     void saveEstrangeiroSemEstadoGravaComEstadoNulo() {
         var dto = new EnderecoDTO();
-        dto.setPais( paisDTO( ID_ITALIA ) );
-        dto.setCidade( "Roma" );
+        dto.setPais( paisDTO( ID_PORTUGAL ) );
+        dto.setCidade( "Lisboa" );
         dto.setBairro( "Trastevere" );
         dto.setLogradouro( "Via della Lungaretta" );
 
         var salvo = service.save( new Endereco(), dto );
 
         assertThat( salvo.getEstado() ).isNull();
-        assertThat( salvo.getPais().getNome() ).isEqualTo( "Itália" );
+        assertThat( salvo.getPais().getNome() ).isEqualTo( "Portugal" );
     }
 
     @Test

@@ -3,7 +3,7 @@
 # Imagem do frontend App. O build de produção troca environment.ts por environment.prod.ts
 # (fileReplacements em angular.json), mas os dois só definem DEFAULTS compilados: o valor real de
 # runtime vem de env.js, gerado pelo docker-entrypoint.sh a partir de variáveis de ambiente do
-# contêiner — é o que permite repontar a API sem rebuild (FR-014/SC-007).
+# contêiner — é o que permite repontar a API sem rebuild.
 
 # ---------------------------------------------------------------------------
 # Stage 1 — build
@@ -12,7 +12,7 @@ FROM node:22 AS build
 
 # Credenciais do registry privado GEMS (@gabriel-mdias/angular-gems-sdk).
 #
-# O pacote NÃO resolve sem credencial: a PF-3 mediu 401 em npm.pkg.github.com com token ausente.
+# O pacote NÃO resolve sem credencial: npm.pkg.github.com responde 401 com token ausente.
 # Na máquina do desenvolvedor ele resolve porque o ~/.npmrc global tem _authToken; num build limpo,
 # não. O CI repassa GEMS_REGISTRY_USER/GEMS_REGISTRY_TOKEN como build args.
 #

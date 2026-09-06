@@ -173,7 +173,7 @@ users:
     realmRoles: [ADMIN]
 
   # Permissões administrativas do backend. Sem elas, a criação de usuário pela Admin API devolve 403
-  # e todo o cadastro de vínculo de serviço falha. Isso passa despercebido enquanto ninguém chama a API — porque
+  # e todo o cadastro de usuário falha. Isso passa despercebido enquanto ninguém chama a API — porque
   # o `KeycloakUserService` existia desde o início e nunca havia sido chamado por linha de código.
   # É o que aposenta o antigo `grant-realm-management-roles.sh`.
   - username: service-account-app-backend

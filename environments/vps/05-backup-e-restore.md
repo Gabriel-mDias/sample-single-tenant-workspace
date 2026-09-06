@@ -10,7 +10,7 @@ não há como recriar as credenciais.
 ## 5.1 As duas cópias formam um par
 
 `security.USUARIO.CD_KEYCLOAK_ID` é uma **chave estrangeira entre dois bancos**, e nenhum banco a
-garante. `pg_dump` é por banco: dois dumps são dois instantes distintos. Um vínculo de serviço criado
+garante. `pg_dump` é por banco: dois dumps são dois instantes distintos. Um usuário criado
 entre eles deixaria um `USUARIO` apontando para uma conta inexistente, ou uma conta órfã no realm — o
 mesmo defeito que a compensação transacional evita em runtime, voltando pela porta do backup.
 

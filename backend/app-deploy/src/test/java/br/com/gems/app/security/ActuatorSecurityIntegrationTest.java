@@ -16,11 +16,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Prova, em nível HTTP, que a superfície de diagnóstico do backend não é anônima (PF-11).
+ * Prova, em nível HTTP, que a superfície de diagnóstico do backend não é anônima.
  *
  * <h2>Por que este teste existe</h2>
- * Até esta rodada, {@code SecurityConfig} liberava {@code /actuator/**} inteiro com
- * {@code permitAll()}, e a exposição default do {@code application.yml} incluía {@code metrics}.
+ * O default que se costuma escrever sem pensar libera {@code /actuator/**} inteiro com
+ * {@code permitAll()}, e a exposição default do {@code application.yml} inclui {@code metrics}.
  * Publicado na internet, isso entrega {@code /actuator/metrics/http.server.requests} a quem não tem
  * token nenhum — e esse endpoint <b>enumera todos os URIs da API</b>, com contagem e latência por
  * rota. É o mapa da aplicação servido de graça, antes de qualquer tentativa de autenticação.
@@ -74,7 +74,7 @@ class ActuatorSecurityIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @DisplayName( "/actuator/metrics responde 401 sem token — era 200 antes da PF-11" )
+    @DisplayName( "/actuator/metrics responde 401 sem token" )
     void metricsExigeAutenticacao() throws Exception {
         mockMvc.perform( get( "/actuator/metrics" ) )
                 .andExpect( status().isUnauthorized() );
@@ -106,7 +106,7 @@ class ActuatorSecurityIntegrationTest extends AbstractIntegrationTest {
 
     /**
      * O {@code /v3/api-docs} continua na lista de rotas públicas do {@code SecurityConfig} — o que o
-     * fecha em produção é o springdoc estar desligado, não uma regra de autorização (PF-11 D3).
+     * fecha em produção é o springdoc estar desligado, não uma regra de autorização.
      * Desligar por configuração em vez de por rota mantém o Swagger disponível em desenvolvimento,
      * que é onde ele serve.
      *

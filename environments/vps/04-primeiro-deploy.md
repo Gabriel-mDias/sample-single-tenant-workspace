@@ -97,13 +97,13 @@ docker compose ps --format '{{.Service}} {{.Ports}}'
 
 Apenas 22, 80 e 443 abertas; e apenas o `caddy` com porta publicada.
 
-**5. Falha do provedor de identidade responde 502, não 401.** Cadastre um vínculo de serviço com uma
+**5. Falha do provedor de identidade responde 502, não 401.** Cadastre um usuário com uma
 senha fraca de propósito. A resposta deve ser **502** com a mensagem da causa. Um **401** aqui seria
 lido como sessão expirada — o operador seria mandado para o login no meio do wizard, e a causa real
 ficaria escondida.
 
-**6. A superfície de diagnóstico está fechada (PF-11).** Quatro verificações, todas **de fora** da
-máquina. Cada uma cobre uma porta que ficou aberta até a auditoria de fechamento da Onda 1:
+**6. A superfície de diagnóstico está fechada.** Quatro verificações, todas **de fora** da
+máquina. Cada uma cobre uma porta que costuma ficar aberta por omissão:
 
 ```bash
 # O actuator: só o health responde. `metrics` enumerava TODOS os URIs da API, anonimamente.

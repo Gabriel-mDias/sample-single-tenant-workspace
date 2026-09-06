@@ -1,10 +1,14 @@
 <#--
-  Layout base do tema App — conceito "página de dados de passaporte".
+  Layout base do tema App — um documento aberto em duas páginas.
 
   Estrutura: um único cartão (.app-doc) dividido em dois painéis.
-    .app-doc__aside — 42%, navy, foto da Itália sob overlay, logo branca,
-                        guilhoché, selo carimbado e brasão em marca d'água.
-    .app-doc__main  — 58%, off-white, cabeçalho + formulário + MRZ + rodapé.
+    .app-doc__aside — 42%, navy, imagem sob overlay, logo branca, guilhoché,
+                        selo carimbado e brasão em marca d'água.
+    .app-doc__main  — 58%, off-white, cabeçalho + formulário + faixa de código
+                        + rodapé.
+
+  A ILUSTRAÇÃO E AS CORES SÃO DO MOLDE. Troque-as pela identidade do seu
+  projeto; a estrutura de painéis não depende delas.
 
   Este arquivo é cópia adaptada de base/login/template.ftl. A assinatura da macro
   `registrationLayout` e os nomes das seções `<#nested>` foram preservados

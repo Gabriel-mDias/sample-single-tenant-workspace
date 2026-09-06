@@ -21,8 +21,8 @@
         3. O `hibernate.default_schema: public` do application.yml continua valendo para todas as
            demais entidades: ele só se aplica a mapeamentos que não declaram schema explicitamente.
 
-        Este arquivo precisa vir ANTES de changelog-vinculo-servico.xml no master, porque
-        entidades com autoria têm chave estrangeira para security.USUARIO.
+        Este arquivo precisa vir ANTES dos changelogs de negócio no master, porque entidades com
+        autoria têm chave estrangeira para security.USUARIO.
     -->
 
     <changeSet id="create-schema-security" author="app">
@@ -42,15 +42,15 @@
     <changeSet id="create-table-usuario" author="app">
         <comment>
             Credencial de acesso de um usuário. A SENHA NÃO É COLUNA DESTA
-            TABELA (FR-022): ela trafega do formulário até o Keycloak e não é persistida aqui.
+            TABELA: ela trafega do formulário até o Keycloak e não é persistida aqui.
 
             CD_KEYCLOAK_ID é NOT NULL porque o identificador do Keycloak é obtido ANTES de a linha
             ser gravada — o serviço publica o evento, o listener cria a conta e devolve o `sub`, e só
             então o INSERT acontece. Se a criação no Keycloak falhar, a transação inteira cai e
             nenhuma linha órfã fica para trás.
 
-            FL_ATIVO — e não DT_EXCLUSAO — governa a semântica ativo/inativo: encerrar um vínculo
-            DESATIVA o acesso, nunca o exclui (FR-017).
+            FL_ATIVO — e não DT_EXCLUSAO — governa a semântica ativo/inativo: encerrar o acesso de
+            um usuário o DESATIVA, nunca o exclui.
 
             NM_LOGIN não recebe UNIQUE pelo mesmo motivo de CD_CPF em PESSOA.
         </comment>

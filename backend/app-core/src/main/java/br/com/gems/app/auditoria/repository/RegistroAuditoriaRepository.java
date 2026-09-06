@@ -163,7 +163,7 @@ public interface RegistroAuditoriaRepository
         }
 
         if ( ObjectUtil.isNotNullAndNotEmpty( filterParams.getDataFim() ) ) {
-            // INCLUSIVO até o fim do dia (decisão D10). O filtro é LocalDate e a coluna é TIMESTAMP:
+            // INCLUSIVO até o fim do dia. O filtro é LocalDate e a coluna é TIMESTAMP:
             // comparar direto descartaria tudo que aconteceu depois da meia-noite do próprio dia
             // pedido, e uma busca por "hoje" voltaria vazia.
             hql.append( " AND r.dataOperacao <= :dataFim " );

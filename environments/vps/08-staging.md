@@ -28,7 +28,7 @@ Entregue pela rodada `specs/022-ambiente-de-staging`.
 3. **As imagens.** Staging roda exatamente a imagem que vai para produção, repontada em runtime.
 
 > ⚠️ **Derrubar a stack de produção derruba o acesso a staging.** A borda mora em `app`. É a
-> consequência aceita da decisão D8 desta decisão, e ela é real: `docker compose -f
+> consequência aceita de manter uma borda única na máquina, e ela é real: `docker compose -f
 > environments/production/docker-compose.yml down` deixa os dois ambientes inacessíveis de fora,
 > ainda que os contêineres de staging continuem de pé. Separar a borda numa terceira stack é a
 > correção, e está registrada como fora de escopo até haver um terceiro ambiente.

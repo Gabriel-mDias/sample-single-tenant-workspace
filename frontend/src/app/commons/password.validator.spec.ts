@@ -19,7 +19,7 @@ describe('passwordValidator', () => {
 
   it('rejeita senhas com menos de 12 caracteres', () => {
     expect(passwordValidator(mockControl('Aa@1234'))).toEqual({ passwordPattern: true });
-    // 11 caracteres, forte em todo o resto: o limite é o que recusa, e é o que a PF-11 mudou.
+    // 11 caracteres, forte em todo o resto: aqui o que recusa é só o comprimento mínimo.
     expect(passwordValidator(mockControl('Aa@1234567b'))).toEqual({ passwordPattern: true });
   });
 

@@ -86,15 +86,15 @@ Em **Settings → Secrets and variables → Actions**, no repositório:
 | `VPS_USER` | `app` |
 | `VPS_SSH_KEY` | chave **privada** com acesso à VPS |
 
-> ## ✅ O backend CONSTRÓI em CI desde a PF-3 (2026-08-26)
+> ## ✅ O backend CONSTRÓI em CI
 >
-> Até 2026-08-11 este capítulo trazia um box dizendo que os módulos Maven `br.com.gems:gems-*` não
-> estavam publicados em repositório nenhum e que a imagem do backend só podia ser construída numa
-> máquina com os jars no `~/.m2`. **O diagnóstico estava errado**, e a PF-3 o corrigiu: os artefatos
+> Vale registrar o diagnóstico errado que já custou tempo aqui: concluiu-se, uma vez, que os módulos
+> Maven `br.com.gems:gems-*` não estavam publicados em repositório nenhum e que a imagem do backend
+> só podia ser construída numa máquina com os jars no `~/.m2`. **Estava errado**: os artefatos
 > **já estavam publicados** em `https://maven.pkg.github.com/Gabriel-mDias/Java-GEMS-SDK`; o que
 > faltava era o `<repositories>` no `backend/pom.xml` e o rótulo certo de `${gems.version}`.
 >
-> **O que vale hoje:** as duas dependências GEMS — a npm do frontend e a Maven do backend — exigem
+> **O que vale:** as duas dependências GEMS — a npm do frontend e a Maven do backend — exigem
 > credencial, porque o GitHub Packages autentica até para leitura. Com `GEMS_REGISTRY_USER` e
 > `GEMS_REGISTRY_TOKEN` preenchidos, os dois builds passam. Sem eles, os dois falham com **401** —
 > e o 401 é de credencial ausente, não de artefato inexistente.

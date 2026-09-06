@@ -62,15 +62,15 @@ backend nem sobe.
 
 ## O que este roteiro não cobre
 
-Está registrado como fora de escopo na [spec](../../specs/008-infraestrutura-e-deploy/spec.md): alta
-disponibilidade, réplica de banco, deploy sem interrupção, monitoração com alerta e cofre de segredos
-dedicado. Um host, um contêiner por serviço, diagnóstico por log.
+Está deliberadamente fora de escopo: alta disponibilidade, réplica de banco, deploy sem
+interrupção, monitoração com alerta e cofre de segredos dedicado. Um host, um contêiner por
+serviço, diagnóstico por log.
 
 O **ambiente de homologação** também constava dessa lista; ele deixou de constar com o
 [capítulo 07](./07-homologacao.md), que não muda a topologia — descreve como subir uma **segunda
 instância** dela, com domínios e segredos próprios, para ensaiar o procedimento antes de produção.
 
-Continuam valendo, e importam para quem for além do ensaio: **não há escopo horizontal de dado**
-(qualquer autenticado com `BAIXAR_ARQUIVO` alcança o acervo inteiro — PF-10) e **não há auditoria de
-alteração de dado de negócio** (PF-6). Os dois são aceitáveis com dado sintético e viram bloqueantes
-com dado real.
+Continua valendo, e importa para quem for além do ensaio: **não há escopo horizontal de dado**.
+A autorização é por ação, não por recorte de registro — quem tem a ação de consulta alcança todo o
+acervo daquele recurso. É correto para o modelo single-tenant, e é aceitável com dado sintético;
+com dado real, é a primeira coisa a reavaliar.

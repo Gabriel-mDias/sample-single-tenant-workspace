@@ -79,7 +79,9 @@ Write-Host "Renomeando o molde para '$Nome'" -ForegroundColor Cyan
 Write-Host "  módulos ....... app-*            -> $Nome-*"
 Write-Host "  pacote ........ br.com.gems.app  -> $Grupo.$Nome"
 Write-Host "  classe main ... AppApplication   -> ${Pascal}Application"
-Write-Host "  infra ......... app-db, app-realm, app_containers -> $Nome-*"
+Write-Host "  infra ......... app-db, app-realm, app-postgres  -> $Nome-*"
+Write-Host "  volume/rede ... app_postgres_data, app_network   -> ${Nome}_*"
+Write-Host "  env vars ...... APP_*                            -> $($Nome.ToUpper())_*"
 if ($DryRun) { Write-Host '  MODO SECO: nada será alterado.' -ForegroundColor Yellow }
 Write-Host ''
 
@@ -108,25 +110,45 @@ $substituicoes = [ordered]@{
     'app-deploy'                        = "$Nome-deploy"
     # classe principal
     'AppApplication'                    = "${Pascal}Application"
-    # infraestrutura
+    # infraestrutura — nomes de projeto Compose, redes e volumes.
+    #
+    # Volume e rede NÃO são cosméticos. Eles vivem no daemon do Docker, fora de qualquer stack:
+    # dois projetos derivados deste molde na MESMA máquina — produção de um e staging de outro,
+    # por exemplo — compartilhariam `app_postgres_data` e escreveriam no mesmo banco. É o modo de
+    # falha mais caro que um rename incompleto produz, e ele não dá erro: dá dado misturado.
     'app_containers'                    = "${Nome}_containers"
+    'app_staging_postgres_data'         = "${Nome}_staging_postgres_data"
     'app_staging_network'               = "${Nome}_staging_network"
+    'app_postgres_data'                 = "${Nome}_postgres_data"
+    'app_caddy_config'                  = "${Nome}_caddy_config"
+    'app_caddy_data'                    = "${Nome}_caddy_data"
+    'app_network'                       = "${Nome}_network"
+    'app-staging-network'               = "$Nome-staging-network"
+    'app-network'                       = "$Nome-network"
     'app-postgres'                      = "$Nome-postgres"
-    'app-keycloak'                       = "$Nome-keycloak"
+    'app-keycloak'                      = "$Nome-keycloak"
     'app-localstack'                    = "$Nome-localstack"
     'app-backend'                       = "$Nome-backend"
     'app-frontend'                      = "$Nome-frontend"
+    'app-staging'                       = "$Nome-staging"
     'app-db'                            = "$Nome-db"
     'app-access'                        = "$Nome-access"
     'app-realm'                         = "$Nome-realm"
     'app-bucket'                        = "$Nome-bucket"
     'app-test'                          = "$Nome-test"
     'app-login.css'                     = "$Nome-login.css"
-    # variáveis de ambiente
-    'APP_DB_'                           = ($Nome.ToUpper() + '_DB_')
-    'APP_ADMIN_'                        = ($Nome.ToUpper() + '_ADMIN_')
-    'APP_CORS_'                         = ($Nome.ToUpper() + '_CORS_')
-    'APP_CEP_'                          = ($Nome.ToUpper() + '_CEP_')
+    # Diretório do clone na VPS, assumido pelo workflow de deploy.
+    'app-project'                       = "$Nome-project"
+    # Variáveis de ambiente: o prefixo INTEIRO, e não uma regra por família.
+    #
+    # A forma antiga listava APP_DB_, APP_ADMIN_, APP_CORS_ e APP_CEP_ uma a uma, e por isso
+    # APP_DOMAIN, APP_ORIGIN e APP_NAME sobreviviam ao rename — o `.env` do projeto derivado saía
+    # com dois prefixos misturados. Nenhuma variável de terceiro no repositório começa com `APP_`.
+    'APP_'                              = ($Nome.ToUpper() + '_')
+    # `spring.application.name` traz o default `app` embutido no próprio placeholder. Sem esta
+    # regra ele sobrevive — não há (nem pode haver) troca de `app` solto —, e o projeto renomeado
+    # se identifica como "app" em log, métrica e trace.
+    ':app}'                             = ":$Nome}"
     # namespace de configuração tipada
     'app.security.'                     = "$Nome.security."
     'app.cep.'                          = "$Nome.cep."
@@ -134,7 +156,7 @@ $substituicoes = [ordered]@{
 }
 
 $extensoes = @('.java', '.xml', '.yml', '.yaml', '.json', '.md', '.ts', '.html', '.css', '.sh',
-    '.properties', '.ftl', '.mdc', '.toml', '.conf', '.example', '.smoke', '.gitignore', '.dockerignore')
+    '.properties', '.ftl', '.mdc', '.toml', '.conf', '.example', '.gitignore', '.dockerignore')
 
 $arquivos = Get-ChildItem -Recurse -File $raiz -Force |
     Where-Object {
@@ -252,7 +274,9 @@ if ($DryRun) {
 Write-Host 'Pronto. Agora, nesta ordem:' -ForegroundColor Cyan
 Write-Host ''
 Write-Host '  1. Confira que não sobrou nada do molde:'
-Write-Host '       git grep -in "\bapp-\|br\.com\.gems\.app\|AppApplication"'
+Write-Host '       git grep -inE "\bapp-|\bapp_|br\.com\.gems\.app|AppApplication|APP_"'
+Write-Host '     Só devem sobrar os seletores Angular (app-root, app-footer, ...) e o'
+Write-Host '     "prefix": "app" de angular.json — são convenção do framework, não nome de projeto.'
 Write-Host ''
 Write-Host '  2. Rode o gate completo:'
 Write-Host '       cd backend  ; .\mvnw.cmd clean install'
@@ -262,10 +286,21 @@ Write-Host '  3. Suba o ambiente:'
 Write-Host '       cd environments\local ; docker compose up -d'
 Write-Host ''
 Write-Host '  4. Ajuste o que é decisão sua, não renomeação:'
+Write-Host '     Identidade visível ao usuário — o script NÃO toca, porque nome de exibição não é'
+Write-Host '     nome técnico:'
+Write-Host '       - APP_NAME em frontend/src/app/app.ts (nome na casca autenticada)'
+Write-Host '       - <title> em frontend/src/index.html'
+Write-Host '       - "name" em frontend/package.json e o projeto em frontend/angular.json'
 Write-Host '       - a paleta em frontend/src/app/app.config.ts (provideGemsTheme)'
-Write-Host '       - o logo do tema em environments/keycloak-theme/'
+Write-Host '       - a identidade do tema de login em environments/keycloak-theme/ (logo, cores e'
+Write-Host '         o conceito visual — o molde traz um layout de documento, não uma marca)'
+Write-Host '     Metadados e governança:'
+Write-Host '       - <developer> e <description> em backend/pom.xml'
 Write-Host '       - o preâmbulo de .specify/memory/constitution.md'
 Write-Host '       - o README.md'
+Write-Host '     Publicação, se e quando houver VPS:'
+Write-Host '       - o caminho do clone em .github/workflows/deploy.yml (o script assume'
+Write-Host "         $Nome-project na home do usuário SSH)"
 Write-Host ''
 Write-Host '  5. Quando o primeiro domínio real existir, remova `parceiro` e `solicitacao`' -ForegroundColor Yellow
 Write-Host '     POR INTEIRO — backend, frontend, testes, changeset e specs/001.' -ForegroundColor Yellow

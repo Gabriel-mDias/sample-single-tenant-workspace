@@ -5,7 +5,6 @@
     "deny": [
       "Read(./.env)",
       "Read(./.env.*)",
-      "Read(./.kilo/**)",
       "Read(./frontend/node_modules/**)",
       "Read(./frontend/.angular/**)",
       "Read(./frontend/dist/**)",

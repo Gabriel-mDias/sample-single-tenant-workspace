@@ -1,8 +1,9 @@
-# Atualização de dependências (PF-11).
+# Atualização de dependências.
 #
-# O projeto vai para a internet e não tinha nenhuma verificação de dependência vulnerável — nem SCA,
-# nem Dependabot. O componente que mais importa aqui é o PDFBox: é ele que abre PDF arbitrário
-# enviado por usuário, e é a única superfície do sistema que processa conteúdo hostil por desenho.
+# Um projeto que vai para a internet sem nenhuma verificação de dependência vulnerável descobre a
+# CVE pelo incidente. Vigie com atenção redobrada toda biblioteca que processe conteúdo enviado por
+# usuário — parser de documento, de imagem, de planilha: é a superfície que trata entrada hostil
+# por desenho.
 #
 # Semanal e com teto de PRs abertos: um projeto solo não absorve enxurrada de atualização, e um
 # Dependabot que gera 30 PRs abandonados é pior que Dependabot nenhum — vira ruído que ensina a

@@ -14,10 +14,10 @@
 	<packaging>pom</packaging>
 	<name>App</name>
 	<description>POM agregador: gerencia versões e plugins comuns; não contém código.</description>
+	<!-- Preencha com a equipe do seu projeto. O molde não carrega autoria. -->
 	<developers>
 		<developer>
-			<name>Gabriel Magalhães Dias</name>
-			<email>gemstecnologia@gmail.com</email>
+			<name>Equipe do projeto</name>
 		</developer>
 	</developers>
 	<modules>

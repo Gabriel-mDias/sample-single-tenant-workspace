@@ -127,7 +127,7 @@ services:
       APP_ADMIN_EMAIL: ${APP_ADMIN_EMAIL:?defina no .env}
       APP_ADMIN_PASSWORD: ${APP_ADMIN_PASSWORD:?defina no .env}
     volumes:
-      # O MESMO arquivo de realm de produção, montado sem cópia (decisão D7). Um segundo arquivo
+      # O MESMO arquivo de realm de produção, montado sem cópia. Um segundo arquivo
       # divergiria em silêncio da produção, e o ambiente que deveria provar a entrega passaria a
       # provar outra coisa. Ele difere só pelas variáveis substituídas acima.
       - ../shared/keycloak:/config:ro

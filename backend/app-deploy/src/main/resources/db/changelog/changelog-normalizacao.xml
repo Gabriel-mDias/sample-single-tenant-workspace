@@ -119,7 +119,7 @@
 
     <changeSet id="create-index-pessoa-cpf" author="app">
         <comment>
-            Índice de apoio para a busca por CPF da primeira etapa do cadastro (FR-006a).
+            Índice de apoio para a busca por CPF da primeira etapa do cadastro.
             Deliberadamente NÃO único — ver o comentário de create-table-pessoa.
         </comment>
         <createIndex indexName="IDX_PESSOA_CPF" tableName="PESSOA">

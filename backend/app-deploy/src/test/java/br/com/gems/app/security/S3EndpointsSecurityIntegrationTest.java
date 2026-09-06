@@ -19,7 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * Prova, em nível HTTP, que {@code /api/aws/s3/**} está fechado para todo mundo — inclusive
- * ADMIN — depois do bloqueio deliberado acrescentado em {@code SecurityConfig} (PF-2).
+ * ADMIN — pelo bloqueio deliberado declarado em {@code SecurityConfig}.
  *
  * <p><b>Por que este teste existe.</b> O {@code S3Controller} pertence ao {@code gems-aws-web}
  * (jar de terceiro) e nunca teve {@code @PreAuthorize}: qualquer usuário autenticado conseguia
