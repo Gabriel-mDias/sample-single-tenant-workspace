@@ -127,6 +127,7 @@ $substituicoes = [ordered]@{
     'app-network'                       = "$Nome-network"
     'app-postgres'                      = "$Nome-postgres"
     'app-keycloak'                      = "$Nome-keycloak"
+    'app-caddy'                         = "$Nome-caddy"
     'app-localstack'                    = "$Nome-localstack"
     'app-backend'                       = "$Nome-backend"
     'app-frontend'                      = "$Nome-frontend"
@@ -137,8 +138,17 @@ $substituicoes = [ordered]@{
     'app-bucket'                        = "$Nome-bucket"
     'app-test'                          = "$Nome-test"
     'app-login.css'                     = "$Nome-login.css"
-    # Diretório do clone na VPS, assumido pelo workflow de deploy.
+    # Artefatos que vivem no HOST da VPS, fora do Compose: unidades systemd do backup, o
+    # EnvironmentFile delas, a chave SSH de deploy e o diretório do clone. Nada disso quebra o
+    # build se ficar para trás — quebra a operação de uma segunda máquina, meses depois.
+    'app-backup'                        = "$Nome-backup"
+    'app_deploy'                        = "${Nome}_deploy"
     'app-project'                       = "$Nome-project"
+    # Nomes de variável psql dentro do init-postgres.sh. São internos ao script (os VALORES vêm
+    # das env vars já renomeadas acima), mas deixá-los sujaria a conferência do passo 1.
+    'app_user'                          = "${Nome}_user"
+    'app_password'                      = "${Nome}_password"
+    'app_db'                            = "${Nome}_db"
     # Variáveis de ambiente: o prefixo INTEIRO, e não uma regra por família.
     #
     # A forma antiga listava APP_DB_, APP_ADMIN_, APP_CORS_ e APP_CEP_ uma a uma, e por isso
@@ -288,7 +298,7 @@ Write-Host ''
 Write-Host '  4. Ajuste o que é decisão sua, não renomeação:'
 Write-Host '     Identidade visível ao usuário — o script NÃO toca, porque nome de exibição não é'
 Write-Host '     nome técnico:'
-Write-Host '       - APP_NAME em frontend/src/app/app.ts (nome na casca autenticada)'
+Write-Host '       - a constante de nome em frontend/src/app/app.ts (o rótulo da casca autenticada)'
 Write-Host '       - <title> em frontend/src/index.html'
 Write-Host '       - "name" em frontend/package.json e o projeto em frontend/angular.json'
 Write-Host '       - a paleta em frontend/src/app/app.config.ts (provideGemsTheme)'
