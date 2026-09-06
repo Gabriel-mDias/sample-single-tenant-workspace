@@ -1,0 +1,7 @@
+﻿---
+description: Convenções de ambiente
+globs: environments/**/*
+alwaysApply: false
+---
+
+Siga `environments/AGENTS.md`. Nunca execute `docker compose down -v`.

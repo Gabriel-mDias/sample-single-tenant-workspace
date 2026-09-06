@@ -1,0 +1,45 @@
+# Atualização de dependências (PF-11).
+#
+# O projeto vai para a internet e não tinha nenhuma verificação de dependência vulnerável — nem SCA,
+# nem Dependabot. O componente que mais importa aqui é o PDFBox: é ele que abre PDF arbitrário
+# enviado por usuário, e é a única superfície do sistema que processa conteúdo hostil por desenho.
+#
+# Semanal e com teto de PRs abertos: um projeto solo não absorve enxurrada de atualização, e um
+# Dependabot que gera 30 PRs abandonados é pior que Dependabot nenhum — vira ruído que ensina a
+# ignorar alerta de dependência.
+version: 2
+
+updates:
+  - package-ecosystem: maven
+    directory: /backend
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    labels: [dependencias, backend]
+    # Major de Spring Boot ou de Java muda o projeto inteiro e não cabe num PR automático — a
+    # atualização existe para trazer correção de segurança, não para migrar plataforma.
+    ignore:
+      - dependency-name: org.springframework.boot:spring-boot-starter-parent
+        update-types: [version-update:semver-major]
+      # Os artefatos GEMS são internos e versionados à mão junto com a SDK (ver ${gems.version}).
+      - dependency-name: br.com.gems:*
+
+  - package-ecosystem: npm
+    directory: /frontend
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    labels: [dependencias, frontend]
+    ignore:
+      # Angular major é rodada própria: o projeto já convive com --legacy-peer-deps por causa do
+      # descompasso entre a SDK (peer ^20) e o Angular 22.
+      - dependency-name: '@angular/*'
+        update-types: [version-update:semver-major]
+      - dependency-name: '@gabriel-mdias/angular-gems-sdk'
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 3
+    labels: [dependencias, ci]
