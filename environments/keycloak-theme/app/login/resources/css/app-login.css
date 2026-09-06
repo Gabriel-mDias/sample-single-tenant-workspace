@@ -63,9 +63,9 @@
 
 /* --- Tokens ---------------------------------------------------------------- */
 :root {
-  --app-green: #008c45; /* verde bandeira — só como tinta/acento */
+  --app-green: #008c45; /* acento do molde — só como tinta, nunca em área grande */
   --app-green-ink: #007038; /* verde escurecido: 5,3:1 com texto branco (AA) */
-  --app-red: #cd212a; /* vermelho bandeira — só como tinta/acento */
+  --app-red: #cd212a; /* acento do molde — só como tinta, nunca em área grande */
   --app-red-ink: #b01b22; /* vermelho escurecido: 5,9:1 sobre off-white (AA) */
   --app-navy: #1a2b3c; /* texto principal e painel do retrato */
   --app-offwhite: #f8fafc; /* fundo dominante */
@@ -282,8 +282,8 @@
   gap: 4px;
   padding: 0 30px;
   text-align: center;
-  /* Verde mais claro que --app-green: sobre o navy escuro do painel, o verde
-     bandeira some. Com 0.38 de opacidade o carimbo fica legível sem virar
+  /* Verde mais claro que --app-green: sobre o navy escuro do painel, o tom
+     original some. Com 0.38 de opacidade o carimbo fica legível sem virar
      elemento principal. */
   border: 2px solid #2fae72;
   border-radius: 50%;
@@ -616,7 +616,7 @@
   transition: all 0.2s var(--app-ease);
 }
 
-/* Fundo em --app-green-ink (#007038), não no verde da bandeira: com texto
+/* Fundo em --app-green-ink (#007038), não no verde base: com texto
    branco a 15px, #008C45 dá apenas ~3,9:1 e reprovaria no WCAG AA. */
 .app-btn--primary {
   color: #fff;

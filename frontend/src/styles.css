@@ -69,15 +69,16 @@ body:has(.gems-modal-backdrop) .app-content {
 }
 
 :root {
-  /* Fundo do cabeçalho: verde da bandeira (primary do tema). */
+  /* Fundo do cabeçalho: a primária do tema, seja ela qual for. Trocar a paleta em
+   * app.config.ts basta — nada aqui embute o valor. */
   --app-header-bg: var(--gems-primary-600);
 
-  /* Texto sobre o verde: off-white do tema (#F8FAFC).
+  /* Texto sobre a primária: off-white do tema (#F8FAFC).
    * Não usamos --gems-primary-contrast porque ele resolve para #ffffff puro. */
   --app-header-fg: var(--gems-bg);
 
   /* Texto secundário (subtítulos, previews). A SDK aplica opacity nos subtítulos;
-   * como isso lava o texto sobre o verde, neutralizamos a opacity e usamos esta
+   * como isso lava o texto sobre a primária, neutralizamos a opacity e usamos esta
    * cor já esmaecida no lugar. */
   --app-header-fg-muted: color-mix(in srgb, var(--gems-bg) 78%, transparent);
 
@@ -129,7 +130,7 @@ html .gems-form-card-header .gems-form-card-title i {
 
 html .gems-form-card-header .gems-form-card-subtitle.gems-form-card-subtitle {
   color: var(--app-header-fg-muted);
-  /* A SDK aplica opacity:.8 aqui; sobre o verde isso lava demais o texto.
+  /* A SDK aplica opacity:.8 aqui; sobre a primária isso lava demais o texto.
      A cor acima já embute o esmaecimento. */
   opacity: 1;
 }
@@ -144,13 +145,13 @@ html .table-container .gems-table.gems-table thead th {
   border-bottom-color: var(--app-header-border);
 }
 
-/* A SDK usa um véu preto (#00000008) imperceptível sobre o verde. */
+/* A SDK usa um véu preto (#00000008) imperceptível sobre a primária. */
 html .table-container .gems-table.gems-table thead th.sortable:hover {
   background-color: var(--app-header-hover);
 }
 
 /* Ícone de ordenação: ativo em off-white, inativo esmaecido.
-   Sem isto o `.text-muted` da SDK (#9ca3af) fica ilegível no verde. */
+   Sem isto o `.text-muted` da SDK (#9ca3af) fica ilegível sobre a primária. */
 html .table-container .gems-table.gems-table thead th .sort-icon {
   color: var(--app-header-fg);
 }
@@ -180,8 +181,8 @@ html .gems-summary-card-header .gems-header-actions.gems-header-actions {
   color: var(--app-header-fg-muted);
 }
 
-/* Chevron do card expandido — a SDK o pinta de --gems-primary-600 (o próprio
-   verde do fundo), o que o tornaria invisível. */
+/* Chevron do card expandido — a SDK o pinta de --gems-primary-600 (a própria
+   cor do fundo), o que o tornaria invisível. */
 html
   .gems-summary-card-container.gems-is-expanded
   .gems-summary-card-header
@@ -189,7 +190,7 @@ html
   color: var(--app-header-fg);
 }
 
-/* Ícone circular do summary-card: inverte para ler sobre o verde. */
+/* Ícone circular do summary-card: inverte para ler sobre a primária. */
 html .gems-summary-card-header .gems-icon-wrapper.gems-icon-wrapper {
   background-color: color-mix(in srgb, var(--gems-bg) 18%, transparent);
   color: var(--app-header-fg);

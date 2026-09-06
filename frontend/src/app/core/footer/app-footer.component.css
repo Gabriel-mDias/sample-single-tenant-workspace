@@ -15,7 +15,7 @@
   align-items: center;
   justify-content: center;
 
-  /* Vermelho da bandeira, um passo mais escuro que o token base para
+  /* A secundária do tema, um passo mais escura que o token base para
      contraste suficiente com o texto branco. */
   background: var(--gems-secondary-600);
   color: #fff;
