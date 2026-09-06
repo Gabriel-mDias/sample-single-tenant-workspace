@@ -1,8 +1,9 @@
-# Atualização de dependências (PF-11).
+# Atualização de dependências.
 #
-# O projeto vai para a internet e não tinha nenhuma verificação de dependência vulnerável — nem SCA,
-# nem Dependabot. O componente que mais importa aqui é o PDFBox: é ele que abre PDF arbitrário
-# enviado por usuário, e é a única superfície do sistema que processa conteúdo hostil por desenho.
+# Um projeto que vai para a internet sem nenhuma verificação de dependência vulnerável descobre a
+# CVE pelo incidente. Vigie com atenção redobrada toda biblioteca que processe conteúdo enviado por
+# usuário — parser de documento, de imagem, de planilha: é a superfície que trata entrada hostil
+# por desenho.
 #
 # Semanal e com teto de PRs abertos: um projeto solo não absorve enxurrada de atualização, e um
 # Dependabot que gera 30 PRs abandonados é pior que Dependabot nenhum — vira ruído que ensina a
@@ -30,12 +31,25 @@ updates:
       interval: weekly
     open-pull-requests-limit: 5
     labels: [dependencias, frontend]
+    # Os pacotes do Angular são liberados em lote e precisam subir juntos: `@angular/core` 22.1.5
+    # com `@angular/compiler` 22.0.4 é combinação que nem instala limpa. Sem agrupar, uma release
+    # do time do Angular vira quatro ou cinco PRs que só passam no CI se forem mergeados na ordem
+    # certa — e cada merge invalida o lockfile dos outros. Um PR por release resolve os dois.
+    groups:
+      angular:
+        patterns: ['@angular/*']
+        update-types: [minor, patch]
     ignore:
       # Angular major é rodada própria: o projeto já convive com --legacy-peer-deps por causa do
       # descompasso entre a SDK (peer ^20) e o Angular 22.
       - dependency-name: '@angular/*'
         update-types: [version-update:semver-major]
       - dependency-name: '@gabriel-mdias/angular-gems-sdk'
+      # O TypeScript não é escolha livre: `@angular/compiler-cli` declara um peer estreito (hoje
+      # `>=6.0 <6.1`) e o compilador recusa versão fora dele. Um PR de major de TS nunca tem como
+      # ser mergeado sozinho — ele só existe junto com o major do Angular que o acompanha.
+      - dependency-name: typescript
+        update-types: [version-update:semver-major]
 
   - package-ecosystem: github-actions
     directory: /

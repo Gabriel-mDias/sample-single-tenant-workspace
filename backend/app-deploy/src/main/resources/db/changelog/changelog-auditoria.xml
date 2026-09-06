@@ -5,17 +5,16 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
     <!--
-        Schema `auditoria`: a trilha de alterações (rodada 015, Lote A). Terceiro schema do
-        projeto, ao lado de `public` (domínio) e `security`.
+        Schema `auditoria`: a trilha de alterações. Terceiro schema do projeto, ao lado de
+        `public` (domínio) e `security`.
 
-        Entra ANTES dos changelogs de negócio da Onda 2 (changelog-lead.xml e os demais) porque o
-        mecanismo de auditoria precisa existir quando as tabelas novas nascerem.
+        Entra ANTES dos changelogs de negócio porque o mecanismo de auditoria precisa existir
+        quando as tabelas de negócio nascerem — inclusive as que um projeto derivado acrescentar.
 
         REGISTRO_AUDITORIA e CAMPO_ALTERADO NÃO estendem EntidadeAuditavel e NÃO levam
-        @SQLDelete / @SQLRestriction — decisão D11, aprovada pelo product owner: o MUST de soft
-        delete do Princípio II é escopado a entidades DE NEGÓCIO, e um registro de trilha não é
-        uma. Auditar a auditoria seria recursão sem fim, e o FR-148 já garante que o registro não é
-        editável nem excluível.
+        @SQLDelete / @SQLRestriction: o MUST de soft delete do Princípio II é escopado a entidades
+        DE NEGÓCIO, e um registro de trilha não é uma. Auditar a auditoria seria recursão sem fim,
+        e a trilha não é editável nem excluível por caminho nenhum da aplicação.
     -->
 
     <changeSet id="create-schema-auditoria" author="app">
@@ -34,8 +33,7 @@
 
     <changeSet id="create-table-registro-auditoria" author="app">
         <comment>
-            Uma linha por operação (INSERCAO/ALTERACAO/EXCLUSAO) sobre uma entidade de negócio
-            (FR-146).
+            Uma linha por operação (INSERCAO/ALTERACAO/EXCLUSAO) sobre uma entidade de negócio.
 
             ID_REGISTRO_AFETADO NÃO é FK: precisa sobreviver à exclusão do alvo e aponta para
             tabelas diferentes, conforme NM_ENTIDADE.
@@ -70,13 +68,13 @@
 
     <changeSet id="create-index-registro-auditoria-entidade" author="app">
         <comment>
-            É literalmente a consulta do FR-146 (GET /api/auditoria/{entidade}/{id}) e o filtro
+            É literalmente a consulta de GET /api/auditoria/{entidade}/{id} e o filtro
             mais comum de POST /api/auditoria/search: sem este índice, a tela do histórico varre a
             tabela inteira.
 
             Índice via SQL nativo, e não &lt;createIndex&gt;: o atributo "descending" no &lt;column&gt;
             de &lt;createIndex&gt; não é aceito pelo XSD 3.1 que este changelog declara
-            (cvc-complex-type.3.2.2), e DT_OPERACAO DESC é o que a consulta do FR-146 precisa.
+            (cvc-complex-type.3.2.2), e DT_OPERACAO DESC é o que essa consulta precisa.
         </comment>
         <sql>
             CREATE INDEX IDX_REGISTRO_AUDITORIA_ENTIDADE ON auditoria.REGISTRO_AUDITORIA
@@ -87,8 +85,8 @@
     <changeSet id="create-table-campo-alterado" author="app">
         <comment>
             Uma linha por campo que mudou, apenas para CD_OPERACAO = ALTERACAO. FL_SIGILOSO
-            governa o FR-144: quando verdadeiro, DS_VALOR_ANTERIOR e DS_VALOR_NOVO são gravados
-            NULOS — nem cifrados, porque chave existe, chave vaza.
+            governa o campo marcado com @CampoSigiloso: quando verdadeiro, DS_VALOR_ANTERIOR e
+            DS_VALOR_NOVO são gravados NULOS — nem cifrados, porque chave existe, chave vaza.
         </comment>
         <createTable schemaName="auditoria" tableName="CAMPO_ALTERADO">
             <column name="ID_CAMPO_ALTERADO" type="UUID" defaultValueComputed="${uuid_function}">
@@ -112,9 +110,9 @@
         <comment>
             FK dentro do próprio schema `auditoria`, das duas tabelas novas entre si. Declarada com
             addForeignKeyConstraint e os dois schemaName explícitos, e não pela forma inline dentro
-            de createTable — mesma razão de FK_PARCEIRO_PESSOA em
-            changelog-vinculo-servico.xml: a forma inline não é portável quando a tabela não está
-            no schema padrão, e aqui NENHUMA das duas tabelas está.
+            de createTable: a forma inline (usada em changelog-parceiro.xml, onde as tabelas estão
+            no schema padrão) não é portável quando a tabela vive fora dele, e aqui NENHUMA das
+            duas tabelas está.
         </comment>
         <addForeignKeyConstraint
                 baseTableSchemaName="auditoria"
@@ -128,7 +126,7 @@
 
     <changeSet id="create-index-campo-alterado-registro" author="app">
         <comment>
-            Índice de apoio para a FK acima: toda consulta do FR-146 navega
+            Índice de apoio para a FK acima: toda consulta do histórico navega
             RegistroAuditoria → camposAlterados por este lado, via o @NamedEntityGraph que mora em
             RegistroAuditoria.
         </comment>

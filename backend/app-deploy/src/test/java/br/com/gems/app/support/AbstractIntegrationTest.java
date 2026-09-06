@@ -6,9 +6,9 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
 /**
- * Base dos testes de integração do sistema (PF-4).
+ * Base dos testes de integração do sistema.
  *
- * <p>Antes desta classe, os quatro {@code @SpringBootTest} do projeto subiam contra o mesmo Postgres
+ * <p>Antes desta classe, os {@code @SpringBootTest} do projeto subiam contra o mesmo Postgres
  * que a homologação manual vinha preenchendo. A consequência não era teórica: um cadastro feito pela
  * tela podia derrubar um teste sem que nada tivesse regredido, e toda asserção precisava se defender
  * de dado alheio por disciplina de revisão, não por ferramenta.
@@ -16,7 +16,7 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
  * <p><b>O container é estático e nunca é parado.</b> Isso é deliberado e é o ponto mais importante
  * daqui. Se ele fosse um campo de instância anotado com {@code @Container} — o exemplo mais comum na
  * documentação do Testcontainers —, o JUnit subiria <b>um Postgres por classe de teste</b>. Com
- * quatro classes hoje e mais chegando a cada rodada, a suíte sairia de segundos para minutos, e uma
+ * poucas classes hoje e mais chegando a cada rodada, a suíte sairia de segundos para minutos, e uma
  * suíte lenta é uma suíte que as pessoas param de rodar. Um único container, iniciado no primeiro
  * carregamento da classe e derrubado pelo Ryuk ao fim da JVM, é o que mantém o custo constante.
  *
@@ -24,11 +24,11 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
  * classe, que é exatamente o que se quer evitar aqui.
  *
  * <p><b>O schema nasce do Liquibase</b>, dos mesmos changesets da produção, e o {@code ddl-auto}
- * continua {@code validate} (PF-4 D4). Não é detalhe de configuração: é o que dá sentido ao
+ * continua {@code validate}. Não é detalhe de configuração: é o que dá sentido ao
  * {@code AppApplicationTests.contextLoads}, cujo trabalho é justamente provar que as entidades JPA
  * e os changesets descrevem o mesmo banco. Trocar por {@code create-drop} destruiria a verificação.
  *
- * <p><b>A disciplina de fixtures continua valendo</b> (PF-4 D3). Restringir cada asserção ao dado que
+ * <p><b>A disciplina de fixtures continua valendo.</b> Restringir cada asserção ao dado que
  * só o próprio teste cria — sufixo de e-mail próprio, {@code "Integracao-" + UUID.randomUUID()}, CPF
  * derivado de {@code System.nanoTime()} — segue sendo boa prática. Isolamento é rede de segurança,
  * não licença para asserção ampla.

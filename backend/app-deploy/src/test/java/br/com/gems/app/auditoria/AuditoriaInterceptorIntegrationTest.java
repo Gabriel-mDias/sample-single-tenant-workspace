@@ -22,7 +22,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * O mecanismo da rodada 015 (Fase 3), provado contra o banco.
+ * O mecanismo da trilha de auditoria, provado contra o banco.
  *
  * <h2>Por que integração, e não teste unitário com Mockito</h2>
  * O que se quer provar aqui é <b>comportamento de persistência</b>: que o interceptador enxerga o
@@ -33,12 +33,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * <h2>Por que {@code TransactionTemplate} em vez de {@code @Transactional} na classe</h2>
  * A trilha é gravada no <b>beforeCommit</b>. Um teste transacional nunca commita, então ele não veria
- * registro nenhum — e o teste de rollback (FR-145) seria impossível de escrever, porque a própria
+ * registro nenhum — e o teste de rollback seria impossível de escrever, porque a própria
  * anotação já desfaz tudo ao final. Controlar a transação à mão é o que torna os dois observáveis.
  *
  * <h2>Disciplina de fixtures</h2>
  * Todo dado deste teste carrega um sufixo único por execução, e toda asserção é restrita a ele
- * (PF-4 D3). A trilha é uma tabela que todas as outras classes de teste também alimentam, sem querer:
+ * A trilha é uma tabela que todas as outras classes de teste também alimentam, sem querer:
  * asserção ampla aqui quebraria por dado alheio legítimo.
  */
 class AuditoriaInterceptorIntegrationTest extends AbstractIntegrationTest {
@@ -125,10 +125,10 @@ class AuditoriaInterceptorIntegrationTest extends AbstractIntegrationTest {
                 .contains( OperacaoAuditoria.EXCLUSAO );
     }
 
-    // ------------------------------------------------------------------ T014
+    // ------------------------------------------------------------------ rollback
 
     @Test
-    @DisplayName( "T014: rollback do dado é rollback da trilha (FR-145)" )
+    @DisplayName( "rollback do dado é rollback da trilha" )
     void rollbackNaoDeixaRegistro() {
         var id = UUID.randomUUID();
 

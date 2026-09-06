@@ -105,13 +105,13 @@ torcer para dar igual.
 
 Este ambiente recebe **apenas dado fictício**. Não é preciosismo:
 
-- O acervo de documentos guarda **certidões, RG e CPF de terceiros** — pessoas que não são clientes
-  do ambiente de teste e nunca consentiram com isso.
-- **Não existe escopo horizontal** (PF-10): qualquer autenticado com `BAIXAR_ARQUIVO` alcança o
-  acervo inteiro, de todas as famílias. Correto para o modelo single-tenant de hoje, e inofensivo com
+- O cadastro guarda **identidade civil de terceiros** — CPF, RG, endereço de pessoas que não são
+  usuárias do ambiente de teste e nunca consentiram com isso.
+- **Não existe escopo horizontal**: a autorização é por ação, e quem tem a ação de consulta alcança
+  todos os registros daquele recurso. Correto para o modelo single-tenant de hoje, e inofensivo com
   dado inventado — não com dado real.
-- **Não existe auditoria de dado de negócio** (PF-6). A trilha do Keycloak registra quem entrou; nada
-  registra quem leu ou alterou qual cliente.
+- **A trilha registra alteração, não leitura.** Ela responde "quem mudou isto?"; não responde "quem
+  leu isto?", e é a leitura que vaza dado de terceiro sem deixar rastro.
 
 Se um dia este ambiente precisar de dado realista, use **massa anonimizada** — nunca uma cópia da
 produção.

@@ -22,7 +22,7 @@
 		?Cache-Control "no-store"
 		-Server
 
-		# --- Cabeçalhos de segurança (PF-11 D5) ---------------------------------------------
+		# --- Cabeçalhos de segurança ---------------------------------------------------------
 		# Ficam SÓ aqui, não no nginx da imagem do frontend: o Caddy é a borda e é onde o TLS
 		# termina. Declarar nos dois lugares cria a dúvida de qual vence.
 		Strict-Transport-Security "max-age=31536000; includeSubDomains"
@@ -31,7 +31,7 @@
 		Referrer-Policy "strict-origin-when-cross-origin"
 		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
 
-		# --- CSP, em REPORT-ONLY (PF-11 D4) -------------------------------------------------
+		# --- CSP, em REPORT-ONLY -------------------------------------------------------------
 		# Ela NÃO bloqueia nada ainda: reporta violação no console do navegador. Promover para
 		# `Content-Security-Policy` só depois de exercitar login, wizard, upload, chancela e
 		# esteira com o console limpo. Ligar bloqueante sem observar é aplicar denyAll() sem teste.
@@ -73,7 +73,7 @@
 {$AUTH_DOMAIN} {
 	encode gzip zstd
 
-	# --- Console administrativo FECHADO (PF-11 D1) ------------------------------------------
+	# --- Console administrativo FECHADO -------------------------------------------------------
 	# O console do Keycloak administra o realm `master`, cuja conta é a chave-mestra da identidade
 	# do sistema. E o app-realm.yaml configura SÓ o app-realm: o `master` fica nos defaults do
 	# Keycloak, onde bruteForceProtected é FALSE. Publicar isso na internet é oferecer um painel de
@@ -106,9 +106,9 @@
 # STAGING
 #
 # Os três blocos abaixo servem o ambiente de homologação, que roda na MESMA máquina, em outra
-# stack Compose (`app-staging`). Este Caddy é o único da VPS e participa das duas redes —
-# decisão D8. A consequência incômoda, e ela precisa estar dita: **derrubar a stack de produção
-# derruba também o acesso a staging**, porque a borda mora aqui.
+# stack Compose (`app-staging`). Este Caddy é o único da VPS e participa das duas redes. A
+# consequência incômoda, e ela precisa estar dita: **derrubar a stack de produção derruba também
+# o acesso a staging**, porque a borda mora aqui.
 #
 # Os três subdomínios de staging precisam resolver para o IP da VPS antes do primeiro `up`,
 # exatamente como os de produção. São seis certificados, não três.

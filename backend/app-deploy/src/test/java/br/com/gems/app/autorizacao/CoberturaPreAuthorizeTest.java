@@ -49,7 +49,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * <p>Eles não estão desprotegidos — são tratados por <b>regra de caminho</b> no {@code SecurityConfig},
  * que é o único lugar de onde se pode alcançá-los:
  * <ul>
- *   <li>{@code /api/aws/s3/**} tem {@code denyAll()} desde a PF-2, e quem prova isso é o
+ *   <li>{@code /api/aws/s3/**} tem {@code denyAll()}, e quem prova isso é o
  *       {@code S3EndpointsSecurityIntegrationTest} — com 403 verificado nos três endpoints;</li>
  *   <li>{@code /v3/api-docs/**} e {@code /swagger-ui/**} são deliberadamente públicos, declarados
  *       entre os padrões fixos de {@code getPublicEndpoints()}.</li>
@@ -124,13 +124,12 @@ class CoberturaPreAuthorizeTest extends AbstractIntegrationTest {
                 .toList();
 
         // Sem esta asserção, um erro no filtro de pacote faria o teste acima passar por não olhar
-        // nada — a pior forma de teste verde. Os 11 controllers são a lista fechada de hoje; um
-        // controller novo quebra aqui, e quebrar aqui é a intenção: ele precisa entrar na conta.
+        // nada — a pior forma de teste verde. Os cinco controllers abaixo são a lista fechada de
+        // hoje; um controller novo quebra aqui, e quebrar aqui é a intenção: ele precisa entrar na
+        // conta.
         //
-        // Foram 6 até a rodada 011. ArquivoController e DocumentoController entraram na 012,
-        // ServicoController na 013, AuditoriaController na 015 e LeadController na 016 — e
-        // ContratoController e ProcessoController na 017. Todas as vezes esta linha falhou de
-        // propósito, e atualizá-la era tarefa do roteiro, não conserto de teste quebrado.
+        // Atualizar esta lista é tarefa do roteiro da rodada que acrescentou o controller, não
+        // conserto de teste quebrado.
         assertThat( controllersDoProjeto ).containsExactly(
                 "AuditoriaController", "CepController", "LocalidadeController",
                 "ParceiroController", "SolicitacaoController" );

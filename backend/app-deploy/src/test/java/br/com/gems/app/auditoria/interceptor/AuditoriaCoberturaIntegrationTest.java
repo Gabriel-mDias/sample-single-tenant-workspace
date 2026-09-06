@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * A varredura de cobertura da trilha (Fase 7 — FR-149 e SC-140).
+ * A varredura de cobertura da trilha de auditoria.
  *
  * <h2>Ela parte do metamodelo JPA, nunca de uma lista escrita à mão</h2>
  * Este é o ponto inteiro da fase, e o projeto já pagou por errá-lo: o
@@ -24,13 +24,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  * na lista. A rede montada para pegar o esquecimento foi vítima do mesmo esquecimento.
  *
  * <p>Aqui a fonte é o {@code Metamodel} do Hibernate: tudo que é entidade mapeada aparece, queira o
- * autor ou não. Uma entidade criada na rodada 019 entra nesta varredura no instante em que for
- * mapeada, sem que ninguém precise lembrar de nada.
+ * autor ou não. Uma entidade criada em qualquer rodada futura entra nesta varredura no instante em
+ * que for mapeada, sem que ninguém precise lembrar de nada.
  *
  * <h2>O que a varredura prova, e o que ela deliberadamente não tenta provar</h2>
  * Ela prova que <b>toda entidade de negócio está dentro da fronteira</b> do interceptador e que
- * <b>nenhuma delas tem chave que o mecanismo não saiba registrar</b>. Ela não persiste as 17
- * entidades para observar os três registros de cada uma: isso exigiria montar o grafo de chaves
+ * <b>nenhuma delas tem chave que o mecanismo não saiba registrar</b>. Ela não persiste cada
+ * entidade para observar os três registros de todas elas: isso exigiria montar o grafo de chaves
  * estrangeiras de todas elas, e o teste ficaria caro e quebradiço sem cobrir risco novo — as três
  * operações compartilham a <b>mesma</b> guarda, e o caminho de cada uma já é provado ponta a ponta
  * em {@code AuditoriaInterceptorIntegrationTest}.
@@ -50,7 +50,7 @@ class AuditoriaCoberturaIntegrationTest extends AbstractIntegrationTest {
     private static final List<String> DA_TRILHA = List.of( "RegistroAuditoria", "CampoAlterado" );
 
     @Test
-    @DisplayName( "FR-149: toda entidade de negócio mapeada está coberta pela trilha" )
+    @DisplayName( "toda entidade de negócio mapeada está coberta pela trilha" )
     void todaEntidadeDeNegocioEstaCoberta() {
         var descobertas = entidadesDeNegocio().stream()
                 .filter( tipo -> !interceptor.deveAuditar( instanciar( tipo ) ) )
@@ -109,7 +109,7 @@ class AuditoriaCoberturaIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @DisplayName( "FR-149: nenhuma entidade mapeada escapa sem classificação" )
+    @DisplayName( "nenhuma entidade mapeada escapa sem classificação" )
     void nenhumaEntidadeMapeadaFicaSemClassificacao() {
         var semClassificacao = entityManagerFactory.getMetamodel().getEntities().stream()
                 .map( EntityType::getJavaType )
@@ -136,7 +136,7 @@ class AuditoriaCoberturaIntegrationTest extends AbstractIntegrationTest {
 
     // ------------------------------------------------------------------ apoio
 
-    /** A fonte da verdade: o metamodelo, filtrado pela fronteira da decisão D8. */
+    /** A fonte da verdade: o metamodelo, filtrado pela fronteira do interceptador. */
     private List<Class<?>> entidadesDeNegocio() {
         return entityManagerFactory.getMetamodel().getEntities().stream()
                 .map( EntityType::getJavaType )

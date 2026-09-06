@@ -183,8 +183,8 @@ public class AuditoriaInterceptor implements Interceptor, HibernatePropertiesCus
     // ------------------------------------------------------------------ regras
 
     /**
-     * <b>Entidade de negócio é toda subclasse de {@link EntidadeAuditavel}</b> — decisão D8 da
-     * rodada, e ela resolve três coisas de uma vez.
+     * <b>Entidade de negócio é toda subclasse de {@link EntidadeAuditavel}</b>, e essa fronteira
+     * resolve três coisas de uma vez.
      *
      * <p>Primeiro, dá ao requisito uma fronteira que não é lista escrita à mão: uma entidade nova nasce
      * auditada por estender a base, que é o que ela já faz por convenção. Segundo, exclui

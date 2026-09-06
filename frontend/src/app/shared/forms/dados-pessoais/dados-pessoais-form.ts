@@ -1,8 +1,9 @@
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 /**
- * Sexo da pessoa. Definição canônica do projeto: `Parceiro`, `Usuário` e `Membro de família`
- * compartilham a mesma `Pessoa`, então o tipo precisa ser um só. Espelha o enum `Sexo` do backend.
+ * Sexo da pessoa. Definição canônica do projeto: `Parceiro`, `Usuário` e todo cadastro que um
+ * projeto derivado acrescentar compartilham a mesma `Pessoa`, então o tipo precisa ser um só.
+ * Espelha o enum `Sexo` do backend.
  */
 export type Sexo = 'MASCULINO' | 'FEMININO' | 'NAO_INFORMADO';
 
@@ -10,8 +11,8 @@ export type Sexo = 'MASCULINO' | 'FEMININO' | 'NAO_INFORMADO';
  * Opções do select de sexo.
  *
  * <p>`NAO_INFORMADO` é uma escolha **explícita**, não a ausência de escolha: o campo é obrigatório
- * para que o operador decida, em vez de deixar o registro em branco por esquecimento. Na árvore
- * de negócio essa informação pode decidir uma regra inteira.
+ * para que o operador decida, em vez de deixar o registro em branco por esquecimento. Num domínio
+ * que dependa dessa informação, o branco por esquecimento decide a regra errada.
  */
 export const SEXO_OPTIONS: ReadonlyArray<{ label: string; value: Sexo }> = [
   { label: 'Masculino', value: 'MASCULINO' },
@@ -46,16 +47,19 @@ export const ERRO_SEXO = { required: 'O sexo é obrigatório.' };
 export const ERRO_DATA_NASCIMENTO = { required: 'A data de nascimento é obrigatória.' };
 
 /**
- * Opções da estrutura canônica. Os dois padrões são os do Parceiro e do Vínculo de Serviço; quem
- * diverge é o **Membro de família**, e por razões de negócio registradas no RF005:
+ * Opções da estrutura canônica. O padrão — tudo obrigatório — é o do Parceiro e o do Usuário:
+ * identidade civil de pessoa viva e presente, que tem documento e o informa.
+ *
+ * <p>As duas opções existem para o cadastro que diverge disso, e um projeto derivado quase sempre
+ * tem um:
  *
  * <ul>
- *   <li><b>CPF opcional</b> — o antepassado italiano de 1890 não tem CPF, e exigi-lo impediria
- *       cadastrar exatamente a pessoa que o processo existe para tratar. Quando
- *       informado, continua tendo de estar completo.</li>
- *   <li><b>Sem data de nascimento aqui</b> — no cadastro de membro ela vive no passo de datas, ao
- *       lado do falecimento e da origem, porque lá ela é dado genealógico e não identidade civil.
- *       </li>
+ *   <li><b>CPF opcional</b> — pessoa histórica, estrangeira, ou terceiro que nunca se apresentou
+ *       não tem CPF, e exigi-lo impediria cadastrar exatamente quem o domínio existe para tratar.
+ *       Quando informado, continua tendo de estar completo.</li>
+ *   <li><b>Sem data de nascimento aqui</b> — quando o nascimento não é identidade civil e sim um
+ *       dado entre outros (ao lado de falecimento, origem, vigência), ele pertence ao passo que
+ *       trata desses dados, não a este.</li>
  * </ul>
  */
 export interface DadosPessoaisFormOpcoes {
@@ -64,13 +68,11 @@ export interface DadosPessoaisFormOpcoes {
 }
 
 /**
- * Cria a estrutura canônica compartilhada por Parceiro, Vínculo, Membro de família e futuros
- * cadastros de Pessoa.
+ * Cria a estrutura canônica compartilhada por Parceiro, Usuário e futuros cadastros de Pessoa.
  *
- * <p>Os cadastros gravam a **mesma** `Pessoa` no backend. Um passo de
- * identidade do Membro reconstruía este `FormGroup` à mão, junto com os validadores — que é
- * literalmente o cenário que deixou `sexo` de fora dos cadastros de Parceiro e de Vínculo até
- * 2026-08-26. Campo civil novo entra aqui, uma vez.
+ * <p>Todos gravam a **mesma** `Pessoa` no backend, então o `FormGroup` e seus validadores existem
+ * aqui uma vez só. Um cadastro que reconstrua a identidade civil à mão é como um campo novo deixa
+ * de aparecer em metade das telas — o defeito não dá erro, só some. Campo civil novo entra aqui.
  */
 export function createDadosPessoaisForm(
   fb: FormBuilder,

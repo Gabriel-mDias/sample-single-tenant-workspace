@@ -30,7 +30,7 @@ import java.util.UUID;
  * ou {@link OperacaoAuditoria#EXCLUSAO}) sobre uma entidade de negócio.
  *
  * <h2>Por que não estende {@code EntidadeAuditavel} e não tem {@code @SQLDelete}</h2>
- * Decisão D11, aprovada pelo product owner: o MUST de soft delete do Princípio II é escopado a
+ * O MUST de soft delete do Princípio II é escopado a
  * entidades <b>de negócio</b>, e um registro de trilha não é uma. Auditar a auditoria seria
  * recursão sem fim, e o registro não é editável nem excluível.
  *

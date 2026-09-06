@@ -28,7 +28,7 @@ import java.util.UUID;
  * gravado.
  *
  * <h2>Sem {@code EntidadeAuditavel} e sem {@code @SQLDelete}</h2>
- * Mesma decisão D11 de {@link RegistroAuditoria} — ver o javadoc de lá.
+ * Mesma razão de {@link RegistroAuditoria} — ver o javadoc de lá.
  *
  * <h2>O {@code @NamedEntityGraph} NÃO mora aqui</h2>
  * Está em {@link RegistroAuditoria}, cobrindo a coleção {@code camposAlterados}: grafo é por

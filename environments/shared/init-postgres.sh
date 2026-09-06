@@ -15,7 +15,7 @@
 #
 # POR QUE OS DOIS BANCOS NO MESMO SERVIDOR
 # ----------------------------------------
-# Decisão registrada em specs/008: num host único, duas instâncias dobrariam o piso de memória sem
+# Num host único, duas instâncias dobrariam o piso de memória sem
 # ganho de disponibilidade — se o host cai, as duas caem. O que protege o dado é backup por banco,
 # não isolamento de volume. E é por isso que `docker compose down -v` continua proibido: ele destrói
 # o banco da aplicação E as senhas dos usuários, que existem apenas no keycloak-db.

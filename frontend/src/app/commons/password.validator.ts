@@ -18,7 +18,7 @@ import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
  * wizard de cadastro de usuário. O operador vê "erro do servidor" onde deveria ver "a senha
  * precisa de 12 caracteres".
  *
- * Subiu de 8 para 12 na PF-11.
+ * O mínimo é 12, e não os 8 habituais: é o que a `passwordPolicy` do realm exige.
  */
 export const PASSWORD_PATTERN = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=\S+$).{12,}$/;
 

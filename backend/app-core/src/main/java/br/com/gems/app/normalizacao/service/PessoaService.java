@@ -19,7 +19,7 @@ import java.util.UUID;
  * Serviço de apoio da identidade civil normalizada.
  *
  * <p>Nasce já pensado para ser reaproveitado por todo domínio que precise de identidade civil —
- * daí viver em {@code normalizacao} e não no domínio do vínculo de serviço.
+ * daí viver em {@code normalizacao} e não no domínio do parceiro nem no do usuário.
  *
  * <p>O CPF é a chave natural: {@link #buscarPorCpf} é o que permite reaproveitar uma pessoa já
  * cadastrada em vez de duplicá-la. A unicidade é verificada aqui, no serviço, e não por
@@ -110,9 +110,11 @@ public class PessoaService {
     /**
      * Valida a identidade civil de acordo com o papel que a consome.
      *
-     * <p>Cliente e Usuario passam {@code exigeCpf=true}, preservando também a obrigatoriedade
-     * histórica da data de nascimento. Membro de Família passa {@code false}: antepassados podem
-     * não possuir CPF nem data conhecida, mas qualquer valor informado continua sendo validado.
+     * <p>{@code Parceiro} e {@code Usuario} passam {@code exigeCpf=true}, preservando também a
+     * obrigatoriedade da data de nascimento — são identidades civis de pessoas vivas e presentes.
+     * Um cadastro que registre pessoa sem documento (histórica, estrangeira, ou de terceiro que
+     * nunca se apresentou) passa {@code false}: o CPF e a data deixam de ser exigidos, mas
+     * qualquer valor informado continua sendo validado.
      */
     public void validar( PessoaDTO pessoa, UUID idExistente, boolean exigeCpf, List<String> errors ) {
         if ( ObjectUtil.isNullOrEmpty( pessoa ) ) {

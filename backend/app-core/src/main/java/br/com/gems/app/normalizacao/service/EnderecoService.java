@@ -18,12 +18,12 @@ import java.util.Optional;
 /**
  * Serviço de apoio dos endereços normalizados.
  *
- * <p><b>Não trava país.</b> A regra "a sede precisa estar em território brasileiro" é específica do
- * parceiro e permanece no {@code ParceiroService}; empurrá-la para cá faria o vínculo de serviço
- * herdar uma restrição que o requisito explicitamente remove — um parceiro externo pode morar na
- * Itália.
+ * <p><b>Não trava país.</b> Uma regra do tipo "a sede precisa estar em território brasileiro" é
+ * específica do cadastro que a exige e permanece no serviço dele; empurrá-la para cá faria todo
+ * cadastro que reaproveita {@code Endereco} herdar uma restrição que não é dele — um parceiro
+ * externo pode morar fora do Brasil.
  *
- * <p>O que o serviço faz, desde a feature 009, é <b>usar</b> o país para decidir a obrigatoriedade de
+ * <p>O que o serviço faz é <b>usar</b> o país para decidir a obrigatoriedade de
  * CEP e de estado. Essa condicional não cabe no banco: uma constraint não sabe
  * condicionar-se ao valor de outra coluna. Com {@code ID_ESTADO} e {@code CD_CEP} agora anuláveis, é
  * este serviço — e só ele — que impede um endereço brasileiro incompleto.

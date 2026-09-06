@@ -105,14 +105,14 @@ public class UsuarioAutenticadoService {
      * O login de quem está fazendo a requisição: o {@code preferred_username} do token.
      *
      * <p><b>Por que o login, se {@link #idDoUsuarioAutenticado()} já identifica.</b> A trilha de
-     * auditoria (FR-141) grava os dois, e a coluna {@code NM_AUTOR} é <b>desnormalizada de
-     * propósito</b>: ela precisa continuar legível anos depois, mesmo que o usuário tenha saído
-     * e a linha de {@code security.USUARIO} não exista mais para resolver o identificador. Um
-     * histórico que responde "quem alterou isso?" com um UUID órfão não responde nada.
+     * auditoria grava os dois, e a coluna {@code NM_AUTOR} é <b>desnormalizada de propósito</b>:
+     * ela precisa continuar legível anos depois, mesmo que o usuário tenha saído e a linha de
+     * {@code security.USUARIO} não exista mais para resolver o identificador. Um histórico que
+     * responde "quem alterou isso?" com um UUID órfão não responde nada.
      *
-     * <p>Este método nasceu porque o {@code /speckit-analyze} encontrou o vão: o
-     * FR-141 exigia o login e nada neste serviço o expunha, enquanto {@code NM_AUTOR} era
-     * {@code NOT NULL}. O requisito era literalmente inexequível.
+     * <p>Este método nasceu porque o {@code /speckit-analyze} encontrou o vão: a trilha exigia o
+     * login e nada neste serviço o expunha, enquanto {@code NM_AUTOR} era {@code NOT NULL}. O
+     * requisito era literalmente inexequível.
      *
      * <p>Vazio quando não há JWT no contexto — o caso do bootstrap da aplicação, em que a trilha
      * registra o autor como o próprio sistema.

@@ -41,8 +41,8 @@ services:
       - app-frontend
       - app-backend
       - app-keycloak
-    # Duas redes: este é o ÚNICO Caddy da máquina e ele serve os seis domínios (decisão D8 da
-    # Alcançar os contêineres de staging exige participar da rede deles.
+    # Duas redes: este é o ÚNICO Caddy da máquina e ele serve os domínios de produção e os de
+    # staging. Alcançar os contêineres de staging exige participar da rede deles.
     networks:
       - app-network
       - app-staging-network

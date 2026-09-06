@@ -1,10 +1,13 @@
 /* =============================================================================
    App — tema de login do Keycloak
-   Conceito: "página de dados de passaporte".
+   Conceito: um documento oficial aberto em duas páginas.
 
-   O cartão central É o documento: painel esquerdo (retrato) com foto da Itália
-   sob overlay navy, guilhoché, selo carimbado e brasão em marca d'água; painel
-   direito (dados) off-white com o formulário e a faixa MRZ.
+   O cartão central É o documento: painel esquerdo (ilustrado) com imagem sob
+   overlay navy, guilhoché, selo carimbado e brasão em marca d'água; painel
+   direito (dados) off-white com o formulário e a faixa de código.
+
+   A IDENTIDADE VISUAL É DO MOLDE — imagem, paleta e logo são o primeiro item
+   que um projeto derivado troca. A estrutura abaixo não depende delas.
 
    Regra que rege a paleta: VERDE E VERMELHO SÃO TINTA, NUNCA GRANDES ÁREAS.
    Off-white e navy fazem todo o trabalho estrutural. É isso que mantém o
@@ -60,9 +63,9 @@
 
 /* --- Tokens ---------------------------------------------------------------- */
 :root {
-  --app-green: #008c45; /* verde bandeira — só como tinta/acento */
+  --app-green: #008c45; /* acento do molde — só como tinta, nunca em área grande */
   --app-green-ink: #007038; /* verde escurecido: 5,3:1 com texto branco (AA) */
-  --app-red: #cd212a; /* vermelho bandeira — só como tinta/acento */
+  --app-red: #cd212a; /* acento do molde — só como tinta, nunca em área grande */
   --app-red-ink: #b01b22; /* vermelho escurecido: 5,9:1 sobre off-white (AA) */
   --app-navy: #1a2b3c; /* texto principal e painel do retrato */
   --app-offwhite: #f8fafc; /* fundo dominante */
@@ -141,8 +144,8 @@
   /* Sem isto, o `white-space:nowrap` da MRZ impõe uma largura mínima à coluna e
      estoura o grid horizontalmente em telas estreitas. */
   min-width: 0;
-  /* Assimetria deliberada: espelha a abertura de um passaporte real, em que a
-     página do retrato é mais estreita que a de dados. 50/50 leria genérico. */
+  /* Assimetria deliberada: espelha a abertura de um documento real, em que a
+     página ilustrada é mais estreita que a de dados. 50/50 leria genérico. */
   grid-template-columns: 42% 58%;
   background: var(--app-offwhite);
   border-radius: var(--app-card-radius);
@@ -279,8 +282,8 @@
   gap: 4px;
   padding: 0 30px;
   text-align: center;
-  /* Verde mais claro que --app-green: sobre o navy escuro do painel, o verde
-     bandeira some. Com 0.38 de opacidade o carimbo fica legível sem virar
+  /* Verde mais claro que --app-green: sobre o navy escuro do painel, o tom
+     original some. Com 0.38 de opacidade o carimbo fica legível sem virar
      elemento principal. */
   border: 2px solid #2fae72;
   border-radius: 50%;
@@ -613,7 +616,7 @@
   transition: all 0.2s var(--app-ease);
 }
 
-/* Fundo em --app-green-ink (#007038), não no verde da bandeira: com texto
+/* Fundo em --app-green-ink (#007038), não no verde base: com texto
    branco a 15px, #008C45 dá apenas ~3,9:1 e reprovaria no WCAG AA. */
 .app-btn--primary {
   color: #fff;
@@ -804,7 +807,7 @@
    MRZ E CRÉDITOS
 ============================================================================= */
 
-/* Zona de leitura mecânica — o detalhe que "vende" o conceito de passaporte.
+/* Zona de leitura mecânica — o detalhe que "vende" o conceito de documento.
    Decorativa: o template marca aria-hidden, e user-select:none evita que seja
    copiada por acidente junto com o conteúdo real. */
 .app-mrz {

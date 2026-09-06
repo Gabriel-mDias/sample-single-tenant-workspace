@@ -7,9 +7,9 @@
  * ela agrupa e pontua o que reconhece e devolve o resto intacto, nunca descartando caractere
  * digitado — ao contrário do `maskType="rg"` da SDK, que remove letras e trunca em 9 dígitos.
  *
- * <p>Como `Pessoa` é compartilhada entre Parceiro, Usuário e Membro de família, um RG
- * gravado por um módulo é reaberto por outro: qualquer perda de caractere aqui corromperia
- * o cadastro alheio.
+ * <p>Como `Pessoa` é compartilhada entre Parceiro, Usuário e todo cadastro que um projeto
+ * derivado acrescentar, um RG gravado por um módulo é reaberto por outro: qualquer perda de
+ * caractere aqui corromperia o cadastro alheio.
  */
 
 /** Máximo de caracteres crus. Garante que o valor formatado nunca ultrapasse 20 caracteres. */
