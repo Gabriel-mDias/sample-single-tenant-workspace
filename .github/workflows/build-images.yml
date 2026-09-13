@@ -38,7 +38,7 @@ jobs:
 
       - name: Extrair metadados (tags/labels)
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ghcr.io/${{ steps.owner.outputs.lowercase }}/app-backend
           tags: |
@@ -92,7 +92,7 @@ jobs:
 
       - name: Extrair metadados (tags/labels)
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ghcr.io/${{ steps.owner.outputs.lowercase }}/app-frontend
           tags: |
