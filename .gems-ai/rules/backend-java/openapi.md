@@ -3,6 +3,9 @@ stack: backend-java
 module: gems-openapi
 severity: recommended
 see-also: [controllers.md, security.md]
+origem: local
+precedencia: local-vence
+versao: 2.0.0
 ---
 
 # OpenAPI / Swagger — gems-openapi

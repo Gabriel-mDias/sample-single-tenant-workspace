@@ -3,6 +3,9 @@ stack: backend-java
 module: junit, mockito
 severity: mandatory
 see-also: [services.md, repositories.md, controllers.md]
+origem: local
+precedencia: local-vence
+versao: 2.0.0
 ---
 
 # Testes — Backend Java / Spring Boot
@@ -22,7 +25,7 @@ see-also: [services.md, repositories.md, controllers.md]
 class {Entidade}ServiceTest {
 
     @Mock
-    private ModelMapper mapper;
+    private {Entidade}Mapper mapper;
 
     @Mock
     private {Entidade}Repository repository;
@@ -48,7 +51,7 @@ class {Entidade}ServiceTest {
         var dto = new {Entidade}DTO();
 
         when( repository.findById( id ) ).thenReturn( Optional.of( entity ) );
-        when( mapper.map( entity, {Entidade}DTO.class ) ).thenReturn( dto );
+        when( mapper.toResponse( entity ) ).thenReturn( dto );
 
         // Act
         var result = service.findById( id );
@@ -80,9 +83,9 @@ class {Entidade}ServiceTest {
         var savedEntity = new {Entidade}();
         var responseDto = new {Entidade}DTO();
 
-        when( mapper.map( dto, {Entidade}.class ) ).thenReturn( entity );
+        when( mapper.toEntity( dto ) ).thenReturn( entity );
         when( repository.save( entity ) ).thenReturn( savedEntity );
-        when( mapper.map( savedEntity, {Entidade}DTO.class ) ).thenReturn( responseDto );
+        when( mapper.toResponse( savedEntity ) ).thenReturn( responseDto );
 
         // Act
         var result = service.insert( dto );

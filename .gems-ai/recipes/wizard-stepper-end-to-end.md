@@ -1,3 +1,9 @@
+---
+origem: local
+precedencia: local-vence
+versao: 2.0.0
+---
+
 # Recipe: Wizard / Stepper Ponta-a-Ponta
 
 **Objetivo:** Implementar um fluxo de cadastro em múltiplos passos com StateService baseado em signals, orquestrador, steps isolados, step de resumo e persistência no backend.
@@ -256,9 +262,9 @@ export class StepResumoComponent {
 
 ```java
 // {Entidade}Service.java — persiste entidade principal + sub-entidades
-@Transactional(rollbackOn = Exception.class)
+@Transactional(rollbackFor = Exception.class)
 public {Entidade} save({Entidade}DTO dto) {
-    {Entidade} entidade = modelMapper.map(dto, {Entidade}.class);
+    {Entidade} entidade = mapper.toEntity(dto);
     repository.save(entidade);
     applicationEventPublisher.publishEvent(new {Entidade}CriadoEvent(entidade.getId()));
     return entidade;

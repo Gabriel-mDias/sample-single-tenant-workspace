@@ -1,3 +1,4 @@
+// origem: local; precedencia: local-vence; versao: 2.0.0
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';

@@ -1,3 +1,9 @@
+---
+origem: local
+precedencia: local-vence
+versao: 2.0.0
+---
+
 # Recipe: Search Paginado Ponta-a-Ponta
 
 **Objetivo:** Implementar uma consulta paginada completa, da HQL no repositório até a `gems-table` com filtros, paginação, ordenação e skeleton de loading.

@@ -3,6 +3,9 @@ stack: frontend-angular
 module: gems-sdk
 severity: mandatory
 see-also: [signals-standards.md, stores.md, forms.md, lists.md, stepper.md]
+origem: local
+precedencia: local-vence
+versao: 2.0.0
 ---
 
 # Organização de Módulos & Estrutura de Feature — Angular
@@ -10,7 +13,7 @@ see-also: [signals-standards.md, stores.md, forms.md, lists.md, stepper.md]
 > **TL;DR:**
 > - Estrutura por feature em `src/app/features/{modulo}/`: `models/`, `services/`, `list/`, `form/steps/`.
 > - CRUD simples: `list/` + `form/`. Stepper/Wizard: `list/` + `form/steps/` + `{modulo}-state.service.ts`.
-> - `NavigationService` para toda navegação programática — **nunca** `Router` diretamente nos componentes.
+> - `GemsNavigationService` para toda navegação programática — **nunca** `Router` diretamente nos componentes.
 > - Responsividade: Bootstrap grid (`col-md-6`) dentro dos cards SDK. `gems-table` scroll horizontal automático em mobile.
 
 ## 1. Estrutura de Pastas por Feature
@@ -70,13 +73,13 @@ export interface {Entidade}FilterModel {
 
 ---
 
-## 3. NavigationService
+## 3. GemsNavigationService
 
-Para toda navegação programática, use o `NavigationService` da SDK — nunca o `Router` diretamente nos componentes:
+Para toda navegação programática, use o `GemsNavigationService` da SDK — nunca o `Router` diretamente nos componentes:
 
 ```typescript
 export class {Entidade}ListComponent {
-  private navigationService = inject(NavigationService);
+  private navigationService = inject(GemsNavigationService);
 
   navegarParaForm() {
     this.navigationService.navigate(['/{modulo}/form']);

@@ -3,6 +3,9 @@ stack: backend-java
 module: gems-utils
 severity: mandatory
 see-also: [services.md, repositories.md, validation.md]
+origem: local
+precedencia: local-vence
+versao: 2.0.0
 ---
 
 # Utilitários — gems-utils

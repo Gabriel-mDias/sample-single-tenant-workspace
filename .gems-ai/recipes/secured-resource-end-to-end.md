@@ -1,3 +1,9 @@
+---
+origem: local
+precedencia: local-vence
+versao: 2.0.0
+---
+
 # Recipe: Recurso Protegido Ponta-a-Ponta
 
 **Objetivo:** Proteger endpoints do backend com JWT (Resource Server) e rotas do frontend com AuthGuard + SessionService, com validação por roles.

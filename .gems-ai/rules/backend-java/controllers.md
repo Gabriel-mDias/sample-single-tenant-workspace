@@ -3,6 +3,9 @@ stack: backend-java
 module: gems-exception
 severity: mandatory
 see-also: [services.md, rest-common.md, openapi.md, validation.md]
+origem: local
+precedencia: local-vence
+versao: 2.0.0
 ---
 
 # Controllers — Java / Spring Boot

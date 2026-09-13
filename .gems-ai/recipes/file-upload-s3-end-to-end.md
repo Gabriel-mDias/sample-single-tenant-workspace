@@ -1,3 +1,9 @@
+---
+origem: local
+precedencia: local-vence
+versao: 2.0.0
+---
+
 # Recipe: Upload de Arquivo S3 Ponta-a-Ponta
 
 **Objetivo:** Implementar upload de arquivo via presigned URL do S3, com validação de existência antes de persistir a referência no banco.
@@ -71,10 +77,10 @@ public class {Entidade}DTO {
 ## Passo 3: Validar Existência no Service
 
 ```java
-@Transactional(rollbackOn = Exception.class)
+@Transactional(rollbackFor = Exception.class)
 public {Entidade} insert({Entidade}DTO dto) {
     validate(dto);
-    {Entidade} entidade = modelMapper.map(dto, {Entidade}.class);
+    {Entidade} entidade = mapper.toEntity(dto);
     return repository.save(entidade);
 }
 

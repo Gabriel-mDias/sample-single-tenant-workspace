@@ -1,3 +1,9 @@
+---
+origem: local
+precedencia: local-vence
+versao: 2.0.0
+---
+
 # Recipe: Setup Backend — Java GEMS SDK
 
 **Objetivo:** Configurar um novo projeto Spring Boot com a GEMS SDK via Maven BOM, GitHub Packages e módulos opcionais.
@@ -170,11 +176,12 @@ server:
 
 ```
 br.com.gems.{app}/
-├── config/              # @Configuration: Security, ModelMapper, etc.
+├── config/              # @Configuration: Security, observabilidade, etc.
 ├── {modulo}/
 │   ├── controller/
 │   ├── service/
 │   ├── repository/
+│   ├── mapper/          # @Mapper( config = GemsMappingConfig.class )
 │   ├── entity/
 │   └── dto/
 └── {modulo2}/

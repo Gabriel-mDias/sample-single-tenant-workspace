@@ -1,3 +1,4 @@
+// origem: local; precedencia: local-vence; versao: 2.0.0
 import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';

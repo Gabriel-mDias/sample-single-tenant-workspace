@@ -1,3 +1,4 @@
+// origem: local; precedencia: local-vence; versao: 2.0.0
 package br.com.gems.{app}.{modulo}.service;
 
 import br.com.gems.exception.exception.BusinessException;
@@ -8,7 +9,7 @@ import br.com.gems.{app}.{modulo}.dto.{Entidade}ResponseDTO;
 import br.com.gems.{app}.{modulo}.entity.{Entidade};
 import br.com.gems.{app}.{modulo}.repository.{Entidade}Repository;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
+import br.com.gems.{app}.{modulo}.mapper.{Entidade}Mapper;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,7 +24,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class {Entidade}Service {
 
-    private final ModelMapper modelMapper;
+    private final {Entidade}Mapper mapper;
     private final {Entidade}Repository repository;
     // private final ApplicationEventPublisher applicationEventPublisher;  // descomentar se usar eventos
 
@@ -36,7 +37,7 @@ public class {Entidade}Service {
     public {Entidade}DTO findById(UUID id) {
         {Entidade} entidade = repository.findById(id)
             .orElseThrow(() -> new BusinessException("{Entidade} não encontrado."));
-        return modelMapper.map(entidade, {Entidade}DTO.class);
+        return mapper.toResponse(entidade);
     }
 
     public Page<{Entidade}ResponseDTO> search({Entidade}FilterParams filter, Pageable pageable) {
@@ -53,10 +54,10 @@ public class {Entidade}Service {
     @Transactional(rollbackFor = Exception.class)
     public {Entidade}DTO insert({Entidade}DTO dto) {
         validate(dto);
-        {Entidade} entidade = modelMapper.map(dto, {Entidade}.class);
+        {Entidade} entidade = mapper.toEntity(dto);
         repository.save(entidade);
         // applicationEventPublisher.publishEvent(new {Entidade}CriadoEvent(entidade.getId()));
-        return modelMapper.map(entidade, {Entidade}DTO.class);
+        return mapper.toResponse(entidade);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -64,9 +65,9 @@ public class {Entidade}Service {
         validate(dto);
         {Entidade} entidade = repository.findById(UUID.fromString(id))
             .orElseThrow(() -> new BusinessException("{Entidade} não encontrado."));
-        modelMapper.map(dto, entidade);
+        mapper.atualizar(dto, entidade);
         repository.save(entidade);
-        return modelMapper.map(entidade, {Entidade}DTO.class);
+        return mapper.toResponse(entidade);
     }
 
     private void validate({Entidade}DTO dto) {

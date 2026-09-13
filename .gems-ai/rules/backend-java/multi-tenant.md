@@ -1,15 +1,17 @@
 ---
 stack: backend-java
 module: gems-jpa-multi-tenant
-severity: not-applicable
+severity: mandatory
 see-also: [security.md, persistence-db.md]
+origem: local
+precedencia: local-vence
+versao: 2.0.0
 ---
 
-> ⛔ **NÃO SE APLICA A ESTE PROJETO.** Este é um sistema **single-tenant**: o schema é fixo
-> (`public`, `security`, `auditoria`, Princípio II) e `gems-jpa-multi-tenant` não está no reator.
-> Este arquivo fica como referência do módulo da SDK caso um projeto derivado precise dele — não
-> introduza `JpaTenantContext`, filtro de tenant ou troca de schema aqui. Se o projeto vier a
-> precisar de multi-tenancy, isso é emenda ao Princípio II, com bump e Sync Impact Report.
+> **FUNDAÇÃO APROVADA, MECANISMO AINDA NÃO IMPLEMENTADO.** O Meduc é multitenant por organização.
+> `administracao` e `security` são globais; negócio e sua auditoria vivem em `tenant_<alias>`.
+> RF002 fornecerá a organização comprovada e RF003 adaptará contexto, provider e migrations. Até
+> essas rodadas, é proibido introduzir fallback para `public` ou uma solução parcial.
 
 # Multi-Tenancy — gems-jpa-multi-tenant
 
@@ -99,7 +101,10 @@ gems:
 
 - **Sempre limpe o contexto** no `finally` — evita vazamento entre requisições no pool de threads.
 - O `JpaTenantContext.setCurrentTenant()` deve ser chamado **antes** de qualquer operação JPA na thread.
-- Dados compartilhados entre tenants (tabelas de referência) devem ficar no schema `public` ou em um schema dedicado.
+- Dados administrativos globais ficam explicitamente em `administracao`; identidade persistida fica
+  em `security`. `public` nunca é fallback de operação tenant.
+- Dado escolar e sua auditoria ficam no schema `tenant_<alias>` da organização comprovada.
+- `ADMIN` global não herda acesso a dado escolar; autorização tenant vem do contexto da organização.
 - Testes de integração precisam configurar o contexto do tenant explicitamente.
 - Não armazene o `tenantId` em variáveis de instância — use apenas o `JpaTenantContext` (ThreadLocal).
 

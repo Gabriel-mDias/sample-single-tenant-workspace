@@ -1,3 +1,9 @@
+---
+origem: local
+precedencia: local-vence
+versao: 2.0.0
+---
+
 # Recipe: Setup Frontend — Angular GEMS SDK
 
 **Objetivo:** Configurar um novo projeto Angular com a GEMS SDK via GitHub Packages npm, design tokens e interceptors obrigatórios.

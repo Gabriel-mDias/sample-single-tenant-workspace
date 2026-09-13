@@ -3,13 +3,17 @@ stack: backend-java
 module: gems-validation, gems-exception
 severity: mandatory
 see-also: [services.md, rest-common.md, controllers.md]
+origem: local
+precedencia: local-vence
+versao: 2.0.0
 ---
 
 # Validação — gems-validation + BusinessException
 
 > **TL;DR:**
+>
 > - `gems-validation`: Bean Validation constraints para documentos BR (`@ValidCpf`, `@ValidCnpj`, `@ValidEmail`).
-> - `BusinessException(errors)`: lançada pela Service com lista acumulada — advice da `gems-exception` serializa para `ApiResponseDTO`.
+> - `BusinessException(errors)`: lançada pela Service com lista acumulada — advice da `gems-exception` serializa para `ExceptionResponseDTO`.
 > - Duas camadas: Bean Validation (`@Valid` em DTOs = estrutural) e `validate()` na Service (= regras de domínio).
 > - **NUNCA** misture as camadas — Bean Validation não acessa o banco; regras de unicidade ficam na Service.
 
@@ -71,11 +75,11 @@ private void validate( {Entidade}DTO dto ) {
 
 ## 2. Constraints do gems-validation
 
-| Annotation | Valida |
-| :--- | :--- |
-| `@ValidCpf` | CPF (com dígito verificador) |
-| `@ValidCnpj` | CNPJ (com dígito verificador) |
-| `@ValidEmail` | Formato de e-mail (RFC 5322) |
+| Annotation    | Valida                        |
+| :------------ | :---------------------------- |
+| `@ValidCpf`   | CPF (com dígito verificador)  |
+| `@ValidCnpj`  | CNPJ (com dígito verificador) |
+| `@ValidEmail` | Formato de e-mail (RFC 5322)  |
 
 Todas implementam `ConstraintValidator` e funcionam com `@Valid` nos Controllers.
 
@@ -96,7 +100,11 @@ errors.add( "Campo B é inválido." );
 throw new BusinessException( errors );
 ```
 
-O `@RestControllerAdvice` da `gems-exception` intercepta a `BusinessException` e serializa para `ApiResponseDTO` com status 400 automaticamente — não trate na Service nem no Controller.
+O `@RestControllerAdvice` da `gems-exception` intercepta a `BusinessException` e serializa
+`occurrenceTime`, `errorType`, `message`, `path` e `method` com status 400 automaticamente. O construtor
+com lista une as mensagens por quebra de linha no campo `message`. Não trate na Service nem no
+Controller, salvo quando uma subclasse precisar preservar status/código contratados; nesse caso o
+handler específico deve espelhar esses cinco campos e acrescentar metadados, nunca renomear `message`.
 
 ---
 
@@ -115,6 +123,7 @@ O `@RestControllerAdvice` da `gems-exception` intercepta a `BusinessException` e
 ```
 
 Ative o Spring Security support da `gems-exception` se o projeto usa autenticação:
+
 ```yaml
 gems:
   exception:
@@ -126,9 +135,9 @@ gems:
 
 ## Anti-Patterns (NUNCA)
 
-| Proibido | Correto |
-| :--- | :--- |
-| Lançar `BusinessException` individualmente por campo na `validate()` | Acumular em `ArrayList<String>`, lançar UMA `BusinessException(errors)` |
-| Verificar unicidade com Bean Validation | Regras de banco (unicidade, existência) ficam na `validate()` da Service |
-| `@Valid` omitido no Controller para DTOs com constraints | `@Valid @RequestBody {Entidade}DTO dto` em **todo** endpoint mutante |
-| Misturar Bean Validation com validação de negócio no DTO | Bean Validation = estrutural; Service `validate()` = regras de domínio |
+| Proibido                                                             | Correto                                                                  |
+| :------------------------------------------------------------------- | :----------------------------------------------------------------------- |
+| Lançar `BusinessException` individualmente por campo na `validate()` | Acumular em `ArrayList<String>`, lançar UMA `BusinessException(errors)`  |
+| Verificar unicidade com Bean Validation                              | Regras de banco (unicidade, existência) ficam na `validate()` da Service |
+| `@Valid` omitido no Controller para DTOs com constraints             | `@Valid @RequestBody {Entidade}DTO dto` em **todo** endpoint mutante     |
+| Misturar Bean Validation com validação de negócio no DTO             | Bean Validation = estrutural; Service `validate()` = regras de domínio   |

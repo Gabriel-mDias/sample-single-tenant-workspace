@@ -3,6 +3,9 @@ stack: frontend-angular
 module: gems-sdk
 severity: mandatory
 see-also: [gems-components.md, feedback-alerts.md]
+origem: local
+precedencia: local-vence
+versao: 2.0.0
 ---
 
 # Padrões Visuais — Angular / gems-sdk
@@ -23,7 +26,7 @@ Configure uma única vez em `app.config.ts`:
 
 ```typescript
 // app.config.ts
-import { provideGemsTheme } from 'gems-sdk';
+import { provideGemsTheme } from '@gabriel-mdias/angular-gems-sdk';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -96,6 +99,12 @@ Cada uma das sete paletas de cor (`primary`, `secondary`, `tertiary`, `danger`, 
 > documentavam `--gems-gray-*`, `--gems-bg-page`, `--gems-bg-surface`, `--gems-bg-elevated`,
 > `--gems-text-primary` e `--gems-text-secondary`, que **nunca existiram**. Só há dois níveis de
 > texto (`main` e `muted`) e cinco de fundo — para bordas e divisórias use `--gems-bg-muted`.
+>
+> ⚠️ **A SDK Angular 2.0.0 já foi publicada, e esta lista ainda descreve a 1.1.0.** O projeto
+> declara `^1.1.0`; a subida é da rodada `009` (bloco E10). **Quem fizer a subida revisa esta
+> seção contra o `gems-global.css` da 2.0.0 na mesma alteração** — uma variável que deixe de
+> existir não falha: ela resolve para vazio, o navegador ignora a declaração e o elemento herda a
+> cor errada, sem nada no console. Registrado na rodada `008` (bloco M, item A-9 da `medicao-m01.md`).
 
 ---
 
@@ -110,9 +119,9 @@ Use exclusivamente as classes globais da SDK. Não crie estilos `button` ad-hoc.
 | `btn-novo` | Criar registro na listagem | `fa-plus` |
 | `btn-back` | Voltar para listagem (ícone só, sem texto) | `fa-arrow-left` |
 | `btn-danger` | Ação destrutiva (quando fora da tabela) | `fa-trash` |
-| `btn btn-info` | Ação de visualização (via `TableAction`) | `fa-eye` |
-| `btn btn-primary` | Ação de edição (via `TableAction`) | `fa-pen` |
-| `btn btn-danger` | Ação de exclusão (via `TableAction`) | `fa-trash` |
+| `btn btn-info` | Ação de visualização (via `GemsTableAction`) | `fa-eye` |
+| `btn btn-primary` | Ação de edição (via `GemsTableAction`) | `fa-pen` |
+| `btn btn-danger` | Ação de exclusão (via `GemsTableAction`) | `fa-trash` |
 
 **Ícone sempre à direita** em `btn-save`; **à esquerda** em `btn-cancel`.
 

@@ -3,6 +3,9 @@ stack: backend-java
 module: gems-jpa
 severity: mandatory
 see-also: [architecture.md, repositories.md]
+origem: local
+precedencia: local-vence
+versao: 2.0.0
 ---
 
 # Persistência & Banco de Dados — PostgreSQL + Liquibase
@@ -72,7 +75,7 @@ see-also: [architecture.md, repositories.md]
 
 ## 5. Convenções de Tabelas
 
-- Nomes em **MAIÚSCULO** (SNAKE_CASE): `PESSOA`, `ETAPA_SOLICITACAO`.
+- Nomes em **MAIÚSCULO** (SNAKE_CASE): `ORGANIZACAO`, `INSTITUICAO`.
 - Toda tabela inclui `DT_CRIACAO` e `DT_EXCLUSAO`.
 - Nenhuma tabela usa DELETE físico — soft delete apenas.
 

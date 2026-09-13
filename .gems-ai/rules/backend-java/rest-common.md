@@ -3,30 +3,40 @@ stack: backend-java
 module: gems-rest-common
 severity: mandatory
 see-also: [controllers.md, observability.md, validation.md]
+origem: local
+precedencia: local-vence
+versao: 2.0.0
 ---
 
 # REST Common — gems-rest-common
 
 > **TL;DR:**
-> - `gems-rest-common` fornece `ApiResponseDTO` (envelope padrão), `PageResponseDTO` (paginação) e filtro de Correlation-ID.
+>
+> - `gems-rest-common` fornece paginação e filtro de Correlation-ID; o envelope de erro vem de `gems-exception`.
 > - Correlation-ID: gerado no frontend (interceptor HTTP), propagado como header `X-Correlation-Id`, armazenado no MDC do backend.
-> - `ApiResponseDTO` é construído automaticamente pelo advice — **nunca** construa manualmente no Controller.
+> - `ExceptionResponseDTO` é construído automaticamente pelo advice — **nunca** construa erro manualmente no Controller.
 > - `Page<T>` é serializado automaticamente via Jackson — retorne `ResponseEntity<Page<T>>` no Controller.
 
-## 1. Envelope de Resposta — ApiResponseDTO
+## 1. Envelope de erro — ExceptionResponseDTO
 
-O módulo `gems-rest-common` fornece uma estrutura de envelope padrão para respostas de erro gerenciadas pela `@RestControllerAdvice` do `gems-exception`.
+O módulo `gems-exception` fornece a estrutura padrão das respostas gerenciadas por sua
+`@RestControllerAdvice`.
 
 ```json
 {
-  "timestamp": "2024-01-15T10:30:00",
-  "status": 400,
-  "correlationId": "abc-123-xyz",
-  "errors": ["O nome é obrigatório.", "O e-mail é inválido!"]
+  "occurrenceTime": "2024-01-15T10:30:00",
+  "errorType": "FALHA",
+  "message": "O nome é obrigatório.\nO e-mail é inválido!",
+  "path": "/api/recurso",
+  "method": "POST"
 }
 ```
 
-O envelope é gerado automaticamente pelo advice da `gems-exception` — você **não** constrói `ApiResponseDTO` manualmente nos Controllers. Apenas lance `BusinessException(errors)` na Service e o advice cuida do envelope.
+O envelope é gerado automaticamente pelo advice da `gems-exception` — você não o constrói manualmente
+nos Controllers. Apenas lance `BusinessException(errors)` na Service e o advice cuida da resposta.
+
+Handlers customizados necessários para outro status HTTP devem manter exatamente esse núcleo. Campos
+como `codigo` e detalhes de handshake são extensões permitidas; `mensagem` não substitui `message`.
 
 ---
 
@@ -53,13 +63,16 @@ Nos Controllers, retorne diretamente `ResponseEntity<Page<ResponseDTO>>` — a s
 O Correlation ID rastreia uma requisição ponta-a-ponta (frontend → backend → logs).
 
 ### Backend (gems-rest-common)
+
 O módulo registra um filtro que:
+
 1. Lê o header `X-Correlation-Id` da requisição.
 2. Se ausente, gera um UUID novo.
 3. Armazena no `MDC` do Log4j/Logback para aparecer em todos os logs daquela thread.
 4. Retorna o valor no header de resposta `X-Correlation-Id`.
 
 ### Configuração (application.yml)
+
 ```yaml
 gems:
   rest-common:
@@ -69,7 +82,9 @@ gems:
 ```
 
 ### Como usar em logs
+
 Com o MDC configurado, o `correlationId` aparece automaticamente em cada linha de log se o padrão do appender incluir `%X{correlationId}`:
+
 ```
 2024-01-15 10:30:00 [abc-123-xyz] INFO  Service - Iniciando insert de Entidade
 ```
@@ -81,6 +96,7 @@ Para a receita ponta-a-ponta de propagação front→back, veja `recipes/correla
 ## 4. Configuração do Módulo
 
 No `pom.xml` do módulo `{app}-core`:
+
 ```xml
 <dependency>
     <groupId>br.com.gems</groupId>
@@ -94,8 +110,8 @@ No BOM (`gems-bom`) a versão já está alinhada — não declare `<version>` ma
 
 ## Anti-Patterns (NUNCA)
 
-| Proibido | Correto |
-| :--- | :--- |
-| `return ResponseEntity.ok(new ApiResponseDTO<>(true, data, null))` no Controller | Retornar `data` diretamente — o advice envelopa automaticamente |
-| Gerar `X-Correlation-Id` no backend quando ausente sem tentar ler o header | O filtro lê o header; se ausente, gera um novo UUID |
-| `Page<T>` serializado manualmente para JSON | Retornar `ResponseEntity<Page<T>>` — Jackson + configuração do módulo faz a serialização |
+| Proibido                                                                         | Correto                                                                                  |
+| :------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------- |
+| `return ResponseEntity.ok(new ApiResponseDTO<>(true, data, null))` no Controller | Retornar `data` diretamente — o advice envelopa automaticamente                          |
+| Gerar `X-Correlation-Id` no backend quando ausente sem tentar ler o header       | O filtro lê o header; se ausente, gera um novo UUID                                      |
+| `Page<T>` serializado manualmente para JSON                                      | Retornar `ResponseEntity<Page<T>>` — Jackson + configuração do módulo faz a serialização |
