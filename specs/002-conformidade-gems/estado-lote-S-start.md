@@ -1,4 +1,4 @@
-﻿# Estado — Lote S-start, rodada 002
+# Estado — Lote S-start, rodada 002
 
 ## 1. Rollback deste lote
 
@@ -64,4 +64,3 @@ documental deste lote, `git diff --check`, terminou com exit 0.
 
 - **Executor:** Codex
 - **Token de retomada:** `thread_id=01a0a11d-548c-7ea3-860f-de92b2196c67` (confirmado no JSONL pelo orquestrador)
-

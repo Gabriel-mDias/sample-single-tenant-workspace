@@ -1,4 +1,4 @@
-﻿# Pacote de Execução — Rodada 002, lote S-start
+# Pacote de Execução — Rodada 002, lote S-start
 Admissão: contrato sim; caminhos sim; escrita disjunta sim; gate documental sim;
 economia de delegação mecânica não. Decisão: sem delegação para Terra.
 Sol conduz julgamento por decisão 8 da 010, retomando sessão T058.
@@ -122,4 +122,3 @@ Orquestrador executará verificar-lote.ps1 com pacote, estado e âncora.
 Arquivos; decisões; ambiguidades; divergências; fontes insuficientes.
 Gate com exit; §5 do estado com porcelain literal menos próprio estado.
 Pare: fase 2 só após usuário pedir para seguir.
-
