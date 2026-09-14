@@ -253,7 +253,7 @@ nem altera tabela.
   só a barra de progresso: quem renderiza o passo ativo é o orquestrador, com `@switch`.
 - **Mensagem de erro de campo usa `gems-field-error` da SDK (≥ 2.0.0)**, e **senha usa
   `gems-input-password`** com `enforcePolicy`, `showCriteria` e `matchControl` — não se recria
-  política de senha nem `passwordMismatch` no projeto. A SDK 2.1.0 fornece os componentes e a política aprovados para a rodada 002. Cópia localCópia local de componente que a SDK entrega é o
+  política de senha nem `passwordMismatch` no projeto. A SDK 2.1.0 fornece os componentes e a política aprovados para a rodada 002. Cópia local de componente que a SDK entrega é o
   defeito que a seção "Adoção de Módulo da SDK GEMS" existe para remover.
 - **Estrutura duplicada em duas features tem um dono só, e ele fica em `shared/`** — nunca dentro
   de uma delas: formulários, componentes, modelos, constantes e funções puras que atravessam

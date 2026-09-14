@@ -35,7 +35,12 @@
 		     GitHub Packages. Versões anteriores publicaram apenas parte deles; os jars que
 		     circulavam com rótulo antigo vinham de `mvn install` local. Não rebaixe. -->
 		<gems.version>2.0.0</gems.version>
-	</properties>
+
+        <gems.config.dir>${maven.multiModuleProjectDirectory}/config</gems.config.dir>
+        <spotless.check.phase>none</spotless.check.phase>
+        <checkstyle.fail>false</checkstyle.fail>
+        <gems.convencoes.relatorio>true</gems.convencoes.relatorio>
+</properties>
 	<dependencies>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -128,6 +133,94 @@
 
 	<build>
 		<plugins>
+<plugin>
+				<groupId>com.diffplug.spotless</groupId>
+				<artifactId>spotless-maven-plugin</artifactId>
+				<version>3.10.2</version>
+				<configuration>
+					<java>
+						<includes>
+							<include>src/main/java/**/*.java</include>
+							<include>src/test/java/**/*.java</include>
+						</includes>
+						<eclipse>
+							<file>${gems.config.dir}/spotless/eclipse-formatter.xml</file>
+						</eclipse>
+						<!-- O portador da exceção escrita (N-06) no formatador: um trecho marcado
+						     suspende o Spotless sem que ninguém precise desligá-lo no projeto todo. -->
+						<toggleOffOn/>
+					</java>
+				</configuration>
+				<executions>
+					<execution>
+						<id>spotless-check</id>
+						<!-- `none` sob `-Pconvencoes`, que volta ao modo medição. -->
+						<phase>${spotless.check.phase}</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<version>3.6.0</version>
+				<dependencies>
+					<dependency>
+						<groupId>com.puppycrawl.tools</groupId>
+						<artifactId>checkstyle</artifactId>
+						<version>14.1.0</version>
+					</dependency>
+				</dependencies>
+				<configuration>
+					<configLocation>${gems.config.dir}/checkstyle/checkstyle.xml</configLocation>
+					<failOnViolation>${checkstyle.fail}</failOnViolation>
+					<failsOnError>${checkstyle.fail}</failsOnError>
+					<violationSeverity>error</violationSeverity>
+					<consoleOutput>true</consoleOutput>
+				</configuration>
+				<executions>
+					<execution>
+						<id>checkstyle-main</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+						<configuration>
+							<includeTestSourceDirectory>false</includeTestSourceDirectory>
+							<propertyExpansion>
+								suppressionsFile=${gems.config.dir}/checkstyle/suppressions.xml
+								parenPadSeverity=error
+								starImportSeverity=error
+								methodNameSeverity=ignore
+								methodNameFormat=^[a-z][a-zA-Z0-9]*$
+							</propertyExpansion>
+						</configuration>
+					</execution>
+					<execution>
+						<id>checkstyle-test</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+						<configuration>
+							<sourceDirectories/>
+							<testSourceDirectories>
+								<testSourceDirectory>${project.basedir}/src/test/java</testSourceDirectory>
+							</testSourceDirectories>
+							<includeTestSourceDirectory>true</includeTestSourceDirectory>
+							<propertyExpansion>
+								suppressionsFile=${gems.config.dir}/checkstyle/suppressions.xml
+								parenPadSeverity=error
+								starImportSeverity=error
+								methodNameSeverity=ignore
+								methodNameFormat=^[a-z][a-zA-Z0-9]*$
+							</propertyExpansion>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -209,6 +302,7 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
 					<configuration>
+<systemPropertyVariables><gems.convencoes.relatorio>${gems.convencoes.relatorio}</gems.convencoes.relatorio></systemPropertyVariables>
 						<argLine>-javaagent:${org.mockito:mockito-core:jar} -Xshare:off</argLine>
 					</configuration>
 				</plugin>

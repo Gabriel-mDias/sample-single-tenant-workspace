@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suppressions PUBLIC
+	"-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN"
+	"https://checkstyle.org/dtds/suppressions_1_2.dtd">
+<!--
+  Baseline do Checkstyle — a catraca de R-07, não um depósito.
+
+  ELE SÓ ENCOLHE (INV-4). Entrada nova aqui é regressão, e o gate reprova. Desvio novo tem
+  exatamente dois destinos legítimos, e nenhum deles é este arquivo: ou é corrigido, ou vira
+  exceção escrita `GEMS-EXCEPTION(...)` no ponto do código, com motivo e prazo (INV-5).
+
+  A DIFERENÇA ENTRE ESTE ARQUIVO E UMA EXCEÇÃO ESCRITA, que é a regra mais importante do
+  `data-model.md` §3: baseline é dívida que a rodada não alcançou — sem justificativa individual e
+  sem prazo. Exceção é decisão humana, com motivo e data de validade que reprova o build quando
+  vence. Confundir os dois transforma o baseline no caminho pelo qual o desvio volta.
+
+  NASCE VAZIO DE PROPÓSITO. Quem o preenche é a T067, na fase 7, com o inventário de `medicao-n01.md`
+  na mão — congelar dívida antes de medi-la seria congelar uma suposição.
+-->
+<suppressions>
+</suppressions>
