@@ -3,6 +3,9 @@ stack: backend-java
 module: gems-jpa
 severity: mandatory
 see-also: [services.md, architecture.md, utils.md]
+origem: local
+precedencia: local-vence
+versao: 2.0.0
 ---
 
 # Repositories & HQL Queries — Java / Spring Boot
@@ -108,7 +111,7 @@ private List<{Entidade}> searchQuery( {Entidade}FilterParams filterParams, Pagea
 ```java
 hql.append( " FROM {Entidade} e " );
 hql.append( " JOIN e.relacionamento r " );
-hql.append( " JOIN r.pessoa p " );
+hql.append( " JOIN r.categoria c " );
 ```
 
 ---
@@ -157,8 +160,8 @@ if ( ObjectUtil.isNotNullAndNotEmpty( filterParams.getDataMin() ) ) {
 
 ```java
 hql.append( " FROM {Entidade} e " );
-hql.append( " JOIN e.parceiro c " );
-hql.append( " JOIN c.pessoa p " );
+hql.append( " JOIN e.organizacao o " );
+hql.append( " JOIN o.responsavel r " );
 hql.append( " JOIN e.categoria cg " );
 ```
 
@@ -173,7 +176,7 @@ hql.append( " JOIN e.categoria cg " );
 
 ```java
 @Override
-@EntityGraph( attributePaths = { "relacionamento", "relacionamento.pessoa", "relacionamento.endereco" } )
+@EntityGraph( attributePaths = { "relacionamento", "relacionamento.categoria" } )
 Optional<{Entidade}> findById( UUID id );
 ```
 

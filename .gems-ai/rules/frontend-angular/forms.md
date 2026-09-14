@@ -3,17 +3,27 @@ stack: frontend-angular
 module: gems-sdk, @angular/forms
 severity: mandatory
 see-also: [signals-standards.md, gems-components.md, feedback-alerts.md, stepper.md]
+origem: local
+precedencia: local-vence
+versao: 2.0.0
 ---
 
 # Formulários Simples — Angular / gems-sdk
 
 > **TL;DR:**
-> - `standalone: true`. `FormGroup` com `FormBuilder` no **construtor** — nunca template-driven.
+> - Componente standalone (padrão, não declarado). `FormGroup` com `FormBuilder`, **nunca** template-driven.
 > - `inject()` para dependências — **nunca** `constructor` com parâmetros.
 > - `ngOnInit`: detecta `id` na rota para modo edição (`isEdit.set(true)`).
-> - Template: header (`btn-back`) + `[formGroup]` + `gems-form-card` + `form-card-footer` (Cancelar/Salvar).
+> - Template: header (`btn-back`) + `[formGroup]` + `gems-form-card` + `gems-form-card-footer` (Cancelar/Salvar).
 > - `@if (isLoading())` para skeleton — **nunca** `*ngIf`.
-> - Inputs formatados: `gems-input-mask`, `gems-input-data`, `gems-input-documento` — **NUNCA** `<input type="text">` nu.
+> - **Todo campo usa componente da SDK.** `gems-input-text` para texto; `gems-input-mask`,
+>   `gems-input-data`, `gems-input-documento` para os formatados. **NUNCA** `<input>` nativo.
+
+> **Correção da rodada `008` (bloco M).** Esta regra mostrava `<input type="text" class="form-control">`
+> para campo comum, enquanto proibia input nativo para campo formatado — e o `AGENTS.md` do frontend
+> manda usar `gems-input-text` inclusive onde há máscara aplicada por diretiva (RG usa
+> `gems-input-text` + `appRgMask`; `maskType="rg"` é **proibido**). A contradição foi resolvida a
+> favor do componente da SDK: **nenhum `<input>` nativo em formulário de feature.**
 
 ## 1. Estrutura de Arquivos
 
@@ -33,22 +43,22 @@ import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { FormCardComponent, AlertService, NavigationService, InputMaskComponent } from 'gems-sdk';
+import { GemsFormCardComponent, GemsAlertService, GemsNavigationService, GemsInputMaskComponent } from '@gabriel-mdias/angular-gems-sdk';
 import { {Entidade}Store } from '../services/{entidade}.store';
 import { {Entidade}Model } from '../../../models/{entidade}.model';
 
 @Component({
   selector: 'app-{entidade}-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, FormCardComponent, InputMaskComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, GemsFormCardComponent, GemsInputMaskComponent],
   templateUrl: './{entidade}-form.component.html'
 })
 export class {Entidade}FormComponent implements OnInit {
 
   private store = inject({Entidade}Store);
   private route = inject(ActivatedRoute);
-  private alertService = inject(AlertService);
-  private navigationService = inject(NavigationService);
+  private alertService = inject(GemsAlertService);
+  private navigationService = inject(GemsNavigationService);
   private fb = inject(FormBuilder);
 
   // Signals de estado
@@ -142,15 +152,21 @@ export class {Entidade}FormComponent implements OnInit {
   } @else {
     <!-- FORMULÁRIO -->
     <form [formGroup]="{entidade}Form" (ngSubmit)="save()">
-      <gems-form-card title="Dados Gerais">
-        <p form-card-subtitle>Informações básicas de identificação.</p>
+      <gems-form-card
+        title="Dados Gerais"
+        subtitle="Informações básicas de identificação."
+        icon="fa-solid fa-file-lines">
 
         <div class="form-grid">
 
           <div class="form-group full-width">
-            <label for="campoObrigatorio" class="required fw-bold">Campo Obrigatório</label>
-            <input type="text" id="campoObrigatorio" class="form-control"
-                   formControlName="campoObrigatorio" placeholder="Digite...">
+            <label class="required fw-bold">Campo Obrigatório</label>
+            <gems-input-text
+              formControlName="campoObrigatorio"
+              [required]="true"
+              icon="fa-solid fa-pen"
+              placeholder="Digite...">
+            </gems-input-text>
           </div>
 
           <div class="form-group">
@@ -174,7 +190,7 @@ export class {Entidade}FormComponent implements OnInit {
 
         </div>
 
-        <div form-card-footer>
+        <div gems-form-card-footer>
           <button type="button" class="btn-cancel" routerLink="/{modulo}/list">
             Cancelar <i class="fa-solid fa-xmark"></i>
           </button>
@@ -206,20 +222,45 @@ export class {Entidade}FormComponent implements OnInit {
 - `<div class="form-grid">` como container.
 - `<div class="form-group">` = 50% da grid.
 - `<div class="form-group full-width">` = 100%.
-- `<label>` com `for` e classe `.fw-bold` em campos padrão.
+- `<label class="fw-bold">` em campos padrão.
 - `<label class="required fw-bold">` em campos obrigatórios (asterisco via CSS global).
 
+> O `for` do `<label>` fica de fora quando o campo é um componente da SDK: o `id` do `<input>`
+> interno é gerado por ele, e um `for` apontando para um `id` inexistente é pior que nenhum — quebra
+> o clique no rótulo sem nenhum aviso.
+
 ### Footer:
-- Dentro de `<div form-card-footer>`.
+- Dentro de `<div gems-form-card-footer>`.
 - `btn-cancel` com `routerLink` para listagem.
 - `btn-save` com `[disabled]` no form invalid.
 - Texto dinâmico via `@if (isEdit())`.
 
 ---
 
-## 5. Inputs Mascarados da SDK
+## 5. Componentes de Campo da SDK
 
-**NUNCA** use `<input type="text">` para campos com máscara — use os componentes da SDK:
+**Nenhum `<input>` nativo em formulário de feature** — nem para texto simples. Todo campo é um
+componente da SDK, que já traz rótulo, ícone, estado de erro e `ControlValueAccessor`:
+
+```html
+<!-- Texto simples — o caso mais comum -->
+<gems-input-text formControlName="nome" label="Nome" [required]="true"
+  icon="fa-solid fa-user" placeholder="Digite o nome">
+</gems-input-text>
+
+<!-- Texto longo -->
+<gems-textarea formControlName="observacao" label="Observação" [rows]="4">
+</gems-textarea>
+
+<!-- Seleção -->
+<gems-select formControlName="status" placeholder="Todos" [options]="statusOptions">
+</gems-select>
+
+<!-- Senha: componente compartilhado do projeto, nunca gems-input-password -->
+<app-password-input formControlName="senha" [messages]="passwordMessages"></app-password-input>
+```
+
+E, para campos formatados:
 
 ```html
 <!-- E-mail -->
@@ -262,8 +303,13 @@ export class {Entidade}FormComponent implements OnInit {
 
 | Proibido | Correto |
 | :--- | :--- |
-| `this.{entidade}Form = this.fb.group({...})` no `ngOnInit` | `FormGroup` construído no **construtor** |
-| `constructor(private fb: FormBuilder, private store: ...)` | `private fb = inject(FormBuilder)` + `private store = inject(...)` |
+| `this.{entidade}Form = this.fb.group({...})` no `ngOnInit` | No construtor, ou como inicializador de campo `protected readonly form = this.fb.group({...})` |
+| `constructor(private fb: FormBuilder, private store: ...)` | `private readonly fb = inject(FormBuilder)` + `private readonly store = inject(...)` |
 | `*ngIf="isLoading"` | `@if (isLoading())` — signals são funções |
-| `<input type="text" placeholder="000.000.000-00">` para CPF | `<gems-input-documento>` — nunca input nativo para campos formatados |
+| `<input type="text" class="form-control">` para texto simples | `<gems-input-text>` — nenhum input nativo em formulário de feature |
+| `<input type="text" placeholder="000.000.000-00">` para CPF | `<gems-input-documento>` |
 | `<input type="text" placeholder="(00) 00000-0000">` para telefone | `<gems-input-mask maskType="telefone">` |
+| `<input type="password">` ou `<gems-input-password>` | `<app-password-input>`, o componente compartilhado do projeto |
+| `maskType="rg"` | `<gems-input-text>` + `appRgMask` — o `maskType` de RG é proibido |
+| `<div form-card-footer>` | `<div gems-form-card-footer>` |
+| `<p form-card-subtitle>…</p>` | `subtitle="…"` como input do `gems-form-card` |

@@ -1,3 +1,9 @@
+---
+origem: local
+precedencia: local-vence
+versao: 2.0.0
+---
+
 # Recipe: Correlation ID Ponta-a-Ponta
 
 **Objetivo:** Propagar um ID de correlação único por requisição do Angular até os logs do Spring, passando pelo MDC, para rastreabilidade fim-a-fim.
@@ -114,7 +120,7 @@ Se precisar propagar via `@Observed`:
 ```java
 // {Entidade}Service.java
 @Observed(name = "{entidade}.insert", contextualName = "Criando {Entidade}")
-@Transactional(rollbackOn = Exception.class)
+@Transactional(rollbackFor = Exception.class)
 public {Entidade} insert({Entidade}DTO dto) {
     log.info("Iniciando criação de {Entidade}: {}", dto.getNome());
     // ...

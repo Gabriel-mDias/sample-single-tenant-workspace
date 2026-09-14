@@ -3,16 +3,19 @@ stack: backend-java
 module: gems-exception, gems-utils, gems-model-mapper
 severity: mandatory
 see-also: [repositories.md, validation.md, mapping.md, events.md]
+origem: local
+precedencia: local-vence
+versao: 2.0.0
 ---
 
 # Services — Java / Spring Boot
 
 > **TL;DR:**
-> - `@Service + @RequiredArgsConstructor`. Injeção: `ModelMapper` (1º), `{Entidade}Repository` (2º), auxiliares depois.
+> - `@Service + @RequiredArgsConstructor`. Injeção: **o mapper do domínio** (1º, quando existir), `{Entidade}Repository` (2º), auxiliares depois.
 > - Ordem: `findById(String)` > `findById(UUID)` > `findAll` > `search` > `delete` > `insert` > `save` > `validate` (private).
 > - Validação: **SEMPRE** `ObjectUtil.isNullOrEmpty` / `isNotNullAndNotEmpty`. **NUNCA** `!= null`, `.isEmpty()` ou `StringUtils`.
 > - Acumule erros em `ArrayList<String>` e lance UMA `BusinessException(errors)` no final.
-> - `@Transactional(rollbackOn = Exception.class)` em `insert`, `save` e `delete`.
+> - `@Transactional(rollbackFor = Exception.class)` em `insert`, `save` e `delete`.
 > - Métodos com >6 linhas de bloco coeso → extraia para método privado descritivo.
 > - Subfluxos complexos → Spring Events (`events.md`). **NUNCA** `@Async` dentro da transação principal.
 
@@ -23,14 +26,16 @@ see-also: [repositories.md, validation.md, mapping.md, events.md]
 @RequiredArgsConstructor
 public class {Entidade}Service {
 
-    private final ModelMapper mapper;
+    private final {Entidade}Mapper mapper;
     private final {Entidade}Repository repository;
     // Repositories auxiliares (se necessário)
     // Services auxiliares (se necessário)
 ```
 
 ### Regras:
-- `ModelMapper` como **primeiro** campo (gems-model-mapper).
+- **O mapper do domínio como primeiro campo** — a interface `@Mapper( config = GemsMappingConfig.class )`
+  de `mapping.md`. A âncora é **condicional**: service **sem** mapper do domínio não tem primeiro campo
+  prescrito, e a regra não inventa um. Projeto que usa `ModelMapper` põe o bean dele nessa posição.
 - Repository da própria entidade como **segundo** campo.
 - Sem `@Autowired` — apenas `@RequiredArgsConstructor` + `private final`.
 
@@ -91,7 +96,7 @@ public Page<{Entidade}DTO> search( {Entidade}FilterParams filterParams, Pageable
 ## 5. `delete`
 
 ```java
-@Transactional( rollbackOn = Exception.class )
+@Transactional( rollbackFor = Exception.class )
 public void delete( UUID id ) {
     if ( ObjectUtil.isNullOrEmpty( id ) ) {
         throw new BusinessException( "O id não foi informado!" );
@@ -108,7 +113,7 @@ public void delete( UUID id ) {
 ## 6. `insert` e `save`
 
 ```java
-@Transactional( rollbackOn = Exception.class )
+@Transactional( rollbackFor = Exception.class )
 public {Entidade}DTO insert( {Entidade}DTO dto ) {
     if ( ObjectUtil.isNullOrEmpty( dto ) ) {
         throw new BusinessException( "Os dados não foram informados!" );
@@ -119,7 +124,7 @@ public {Entidade}DTO insert( {Entidade}DTO dto ) {
     return mapper.map( entity, {Entidade}DTO.class );
 }
 
-@Transactional( rollbackOn = Exception.class )
+@Transactional( rollbackFor = Exception.class )
 public {Entidade}DTO save( UUID id, {Entidade}DTO dto ) {
     validate( dto );
     var entity = repository.findById( id )
@@ -171,7 +176,7 @@ private void validate( {Entidade}DTO dto ) {
 Em entidades com relacionamentos complexos, delegue persistência de sub-entidades para suas respectivas Services:
 
 ```java
-@Transactional( rollbackOn = Exception.class )
+@Transactional( rollbackFor = Exception.class )
 public {Entidade}DTO insert( {Entidade}DTO dto ) {
     validate( dto );
 
@@ -220,7 +225,14 @@ private void mapToEntityAndSave( HorarioDTO dto, EntidadeRelacionada entidadeRel
 - `var` para variáveis locais cujo tipo é óbvio.
 - Uma linha em branco entre blocos lógicos.
 - Sem Javadoc em métodos CRUD padrão.
-- `@Transactional( rollbackOn = Exception.class )` em **todas** as operações de escrita.
+- `@Transactional( rollbackFor = Exception.class )` em **todas** as operações de escrita, e a
+  anotação é a de **`org.springframework.transaction.annotation`**.
+
+  > **Corrigido em 2026-09-11 (rodada 008).** Esta regra prescrevia `rollbackOn`, que é o atributo da
+  > anotação de `jakarta.transaction`. Aqui a **regra estava errada, não o código**: os projetos da
+  > família usam a do Spring, e um gate sobre a letra antiga reprovaria 100% dos métodos
+  > transacionais existentes. O Princípio IV da constituição foi corrigido na mesma alteração — sem
+  > isso, ele revogaria esta correção no dia seguinte.
 - Para fluxos complexos pós-insert/save → Spring Events (veja `events.md`), nunca `@Async`.
 
 ---
@@ -231,6 +243,7 @@ private void mapToEntityAndSave( HorarioDTO dto, EntidadeRelacionada entidadeRel
 | :--- | :--- |
 | `dto.getNome() == null \|\| dto.getNome().isEmpty()` | `ObjectUtil.isNullOrEmpty(dto.getNome())` |
 | `throw new BusinessException("erro A"); // depois: throw new BusinessException("erro B")` | Acumular em `ArrayList<String>` + lançar UMA `BusinessException(errors)` |
-| `ModelMapper` como segundo ou último campo injetado | `ModelMapper` é **sempre** o primeiro campo na Service |
+| Mapper do domínio como segundo ou último campo injetado | havendo mapper, ele é **sempre** o primeiro campo na Service |
+| `@Transactional` de `jakarta.transaction` | o de `org.springframework.transaction.annotation`, com `rollbackFor` |
 | `@Async` dentro de método `@Transactional` | Spring Events com `@TransactionalEventListener(AFTER_COMMIT)` |
 | Bloco inline de 10+ linhas fazendo uma única coisa | Extrair para método `private` com nome descritivo |

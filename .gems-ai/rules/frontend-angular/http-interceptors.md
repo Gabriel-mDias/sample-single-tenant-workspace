@@ -1,135 +1,108 @@
 ---
 stack: frontend-angular
-module: gems-sdk, @angular/common/http
+module: gems-sdk (provideGemsHttp), @angular/common/http
 severity: mandatory
 see-also: [stores.md, auth.md]
+origem: local
+precedencia: local-vence
+versao: 2.0.0
 ---
 
-# HTTP Interceptors — Angular / gems-sdk
+# HTTP e Interceptors — Angular / gems-sdk
 
 > **TL;DR:**
-> - Dois interceptors obrigatórios: `loadingInterceptor` (da gems-sdk) e `correlationIdInterceptor` (local).
-> - `loadingInterceptor`: loading global automático — **nunca** criar um interceptor de loading próprio.
-> - `correlationIdInterceptor`: gera UUID v4 por requisição, define header `X-Correlation-Id`.
-> - Registrar via `withInterceptors([loadingInterceptor, correlationIdInterceptor])` em `app.config.ts`.
-> - `withFetch()` obrigatório em Angular 19+.
-> - **NUNCA** usar `HttpClient` diretamente em componentes — sempre via `GemsBaseStore`.
+> - `provideHttpClient(withFetch(), withInterceptorsFromDi())` + `provideGemsHttp(baseUrl)`.
+> - `withFetch()` é obrigatório. `provideGemsHttp` fixa a base da API num lugar só.
+> - Loading global, Bearer token e `X-Correlation-Id` vêm da SDK — **não** escreva os seus.
+> - Interceptor próprio, quando houver, é funcional (`HttpInterceptorFn`) — nunca classe.
+> - **NUNCA** `HttpClient` em componente: sempre via `GemsBaseStore`.
 
-## 1. Registro em app.config.ts
+> **Por que esta regra foi reescrita.** Ela prescrevia `withInterceptors([loadingInterceptor,
+> correlationIdInterceptor])` e mandava escrever o interceptor de correlação **no projeto**. A SDK
+> passou a registrar os seus interceptors por DI e a expor `provideGemsHttp`, então o projeto usa
+> `withInterceptorsFromDi()` e não tem — nem deve ter — um `correlationIdInterceptor` local.
+> Corrigida na rodada `008`, bloco M.
+
+---
+
+## 1. Registro em `app.config.ts`
 
 ```typescript
-// app.config.ts
-import {
-  provideHttpClient,
-  withInterceptors,
-  withFetch
-} from '@angular/common/http';
-import { loadingInterceptor } from 'gems-sdk';
-import { correlationIdInterceptor } from './core/interceptors/correlation-id.interceptor';
+import { provideHttpClient, withFetch, withInterceptorsFromDi } from '@angular/common/http';
+import { provideGemsHttp } from '@gabriel-mdias/angular-gems-sdk';
+import { environment } from '../environments/environment';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideHttpClient(
-      withFetch(),
-      withInterceptors([
-        loadingInterceptor,    // Interceptor da SDK — loading global automático
-        correlationIdInterceptor
-      ])
-    ),
+    provideHttpClient(withFetch(), withInterceptorsFromDi()),
+    provideGemsHttp(environment.apiBaseUrl),
     // ...
-  ]
+  ],
 };
 ```
 
-Ordem: `loadingInterceptor` **antes** de `correlationIdInterceptor`.
+| Peça | O que faz | Por que não é opcional |
+| :--- | :--- | :--- |
+| `withFetch()` | usa a Fetch API em vez de `XMLHttpRequest` | Angular 19+ assume Fetch; omitir cai no caminho legado, com comportamento diferente de cancelamento e streaming |
+| `withInterceptorsFromDi()` | registra os interceptors que a SDK provê por DI | sem isto o loading global, o Bearer e o correlation-id **não rodam**, e a falha é silenciosa: as requisições funcionam, só que sem token |
+| `provideGemsHttp(baseUrl)` | fixa a base da API para toda Store | a Store passa caminho relativo (`'api/organizacoes'`); a base muda por ambiente, num lugar só |
 
 ---
 
-## 2. loadingInterceptor (gems-sdk)
+## 2. O que a SDK já entrega, e você não escreve
 
-Fornecido pela SDK. **Não crie um interceptor de loading próprio.**
+| Comportamento | Quem faz | O que **não** fazer |
+| :--- | :--- | :--- |
+| Loading global enquanto há requisição em voo | interceptor da SDK | criar `LoadingService`, `ngx-spinner` ou contador próprio |
+| `Authorization: Bearer <token>` | integração `provideGemsKeycloak` | montar o header à mão a partir do storage |
+| `X-Correlation-Id` por requisição | interceptor da SDK | escrever um `correlationIdInterceptor` local |
 
-- Exibe o estado de carregamento global enquanto há requisições HTTP em voo.
-- Integra com o componente de loading global da SDK (quando registrado no `app.component.html`).
-- Contabiliza requisições com contador interno — fecha o loading somente quando todas completam.
-
-```html
-<!-- app.component.html — habilitar o loading global da SDK -->
-<gems-loading></gems-loading>
-<router-outlet></router-outlet>
-```
+O backend (`gems-rest-common`) lê o `X-Correlation-Id`, grava no MDC e o devolve na resposta — ver
+`rules/backend-java/rest-common.md` para o outro lado.
 
 ---
 
-## 3. correlationIdInterceptor
+## 3. Interceptor próprio
 
-Gera e propaga o `X-Correlation-Id` por requisição.
+Só quando o comportamento **não** existir na SDK. Funcional, nunca classe:
 
 ```typescript
-// src/app/core/interceptors/correlation-id.interceptor.ts
-import { HttpInterceptorFn } from '@angular/common/http';
-
-export const correlationIdInterceptor: HttpInterceptorFn = (req, next) => {
-  const correlationId = generateUuidV4();
-  const cloned = req.clone({
-    headers: req.headers.set('X-Correlation-Id', correlationId)
-  });
-  return next(cloned);
-};
-
-function generateUuidV4(): string {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    const r = (Math.random() * 16) | 0;
-    const v = c === 'x' ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
-}
-```
-
-- Geração client-side (sem dependência de `crypto.randomUUID()` para maior compatibilidade).
-- O backend (`gems-rest-common`) lê este header, grava no MDC e o inclui na resposta.
-- Ver `rules/backend-java/rest-common.md` para o lado do servidor.
-
----
-
-## 4. Tratamento de Erros HTTP Global (Opcional)
-
-Quando houver necessidade de interceptar erros 401/403 globalmente (redirecionar para login):
-
-```typescript
-// src/app/core/interceptors/auth-error.interceptor.ts
-import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
+// src/app/core/interceptors/{nome}.interceptor.ts
+import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { catchError, throwError } from 'rxjs';
 import { Router } from '@angular/router';
+import { catchError, throwError } from 'rxjs';
 
-export const authErrorInterceptor: HttpInterceptorFn = (req, next) => {
-  const router = inject(Router);
-
-  return next(req).pipe(
+export const {nome}Interceptor: HttpInterceptorFn = (req, next) =>
+  next(req).pipe(
     catchError((error: HttpErrorResponse) => {
-      if (error.status === 401) {
-        router.navigate(['/login']);
-      }
+      if (error.status === 401) inject(Router).navigate(['/acesso-negado']);
       return throwError(() => error);
-    })
+    }),
   );
-};
 ```
 
-Registrar após `correlationIdInterceptor` no array de `withInterceptors([])`.
+Registrado por DI, junto dos da SDK:
+
+```typescript
+{ provide: HTTP_INTERCEPTORS, useValue: {nome}Interceptor, multi: true }
+```
+
+Antes de escrever um, confirme que a SDK não cobre o caso — interceptor duplicado sobre o mesmo
+comportamento produz efeito dobrado (dois contadores de loading, dois headers), e o sintoma aparece
+longe da causa.
 
 ---
 
-## 5. Regras
+## 4. Regras
 
 | Regra | Detalhe |
 | :--- | :--- |
-| `loadingInterceptor` da SDK obrigatório | Não criar interceptor de loading customizado |
-| `X-Correlation-Id` gerado no cliente | UUID v4 por requisição; backend persiste no MDC |
-| Interceptors funcionais (`HttpInterceptorFn`) | Nunca classe com `@Injectable` + `intercept()` (padrão Angular <15) |
-| `withFetch()` obrigatório | Angular 19+ usa Fetch API por padrão; precisa estar explícito |
-| HttpClient nunca em componentes | Sempre via `GemsBaseStore.get/post/put/delete` |
+| `withFetch()` obrigatório | Explícito no `provideHttpClient` |
+| `withInterceptorsFromDi()` obrigatório | É como os interceptors da SDK entram |
+| `provideGemsHttp(baseUrl)` uma vez | A Store nunca repete o host |
+| Interceptor funcional | `HttpInterceptorFn` — nunca `implements HttpInterceptor` |
+| `HttpClient` nunca em componente | Sempre `GemsBaseStore.get/post/put/delete` |
 
 ---
 
@@ -137,8 +110,10 @@ Registrar após `correlationIdInterceptor` no array de `withInterceptors([])`.
 
 | Proibido | Correto |
 | :--- | :--- |
-| Criar interceptor de loading customizado | Usar `loadingInterceptor` já fornecido pela gems-sdk |
-| `class LoadingInterceptor implements HttpInterceptor` | `export const loadingInterceptor: HttpInterceptorFn = ...` (funcional) |
-| Omitir `withFetch()` no `provideHttpClient()` | `provideHttpClient(withFetch(), withInterceptors([...]))` obrigatório |
-| `sessionStorage.setItem('correlationId', uuid)` | UUID gerado por requisição no interceptor, sem persistência |
-| `HttpClient` injetado diretamente no componente | `GemsBaseStore.get/post/put/delete` — centraliza HTTP |
+| `withInterceptors([...])` com os interceptors da SDK listados à mão | `withInterceptorsFromDi()` |
+| Escrever um `correlationIdInterceptor` no projeto | A SDK já envia o `X-Correlation-Id` |
+| Criar interceptor ou serviço de loading próprio | O da SDK, por DI |
+| `class LoadingInterceptor implements HttpInterceptor` | `export const x: HttpInterceptorFn = ...` |
+| Omitir `withFetch()` | `provideHttpClient(withFetch(), withInterceptorsFromDi())` |
+| `HttpClient` injetado no componente | `GemsBaseStore` |
+| URL absoluta na Store (`https://api…/organizacoes`) | `super('api/organizacoes')` + `provideGemsHttp` |

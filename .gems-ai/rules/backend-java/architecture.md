@@ -1,8 +1,11 @@
 ---
 stack: backend-java
-module: gems-bom, gems-jpa, gems-model-mapper
+module: gems-bom, gems-jpa, gems-mapstruct
 severity: mandatory
 see-also: [controllers.md, services.md, repositories.md, persistence-db.md]
+origem: local
+precedencia: local-vence
+versao: 2.0.0
 ---
 
 # Backend Architecture — Java / Spring Boot
@@ -16,17 +19,21 @@ see-also: [controllers.md, services.md, repositories.md, persistence-db.md]
 
 ## 1. Organização de Módulos Maven
 
-O projeto segue estrutura **multi-módulos Maven**:
+No Meduc, a constituição prevalece sobre o template de dois módulos. O reator tem cinco módulos:
 
 ```
-{app}-api/
-├── {app}-model/     # Entidades JPA, DTOs (espelho, FilterParams, ResponseDTO), Enums
-└── {app}-core/      # Controllers, Services, Repositories, Events, Listeners, Config
+backend/
+├── meduc-model/      # Entidades, DTOs, filtros, responses e enums
+├── meduc-security/   # Resource server, CORS, handlers e @PublicEndpoint
+├── meduc-events/     # Somente POJOs de evento
+├── meduc-core/       # Controllers, services, repositories e listeners
+└── meduc-deploy/     # Executável, configuração e Liquibase
 ```
 
-- Pacote raiz: `br.com.gems.{app}`
-- Controllers, Services e Repositories ficam em `{app}-core`
-- Entidades e DTOs ficam em `{app}-model`
+- Pacote raiz: `br.com.gems.meduc`.
+- Dependências seguem `model/security → events/core → deploy`, sem ciclo.
+- Somente `meduc-deploy` contém ambiente, migrations e empacotamento.
+- Listener que chama regra de negócio fica em `meduc-core`, nunca em `meduc-events`.
 
 ---
 
@@ -125,16 +132,30 @@ public class {Entidade}ResponseDTO {
 
 ## 5. Módulos do Java-GEMS-SDK consumidos nessa camada
 
+Versão corrente da SDK Java: **`3.0.0`**, publicada no registry em 2026-09-11.
+
 | Módulo | Função |
 | :--- | :--- |
 | `gems-bom` | Alinha versões de todos os módulos via BOM |
-| `gems-model-mapper` | ModelMapper pré-configurado para mapeamento Entity↔DTO |
+| `gems-mapstruct` | `GemsMappingConfig` com `unmappedTargetPolicy = ERROR` — o mapeamento Entity↔DTO recomendado |
+| `gems-model-mapper` | ModelMapper pré-configurado. **Suportado, não recomendado para código novo** — ver `mapping.md` §6 |
 | `gems-jpa` | `BaseCustomJpaRepository` para HQL customizado |
 | `gems-jpa-multi-tenant` | Multi-tenancy schema-based (quando aplicável) |
+| `gems-auditing` | Trilha declarativa por `@Auditable` / `@SensitiveField` |
+| `gems-security-authorization` | Autorização por ação, com catálogo derivado de enum |
+| `gems-keycloak-admin` | Cliente administrativo do provedor de identidade |
+| `gems-exception` | Envelope uniforme de erro |
 | `gems-openapi` | Swagger UI auto-configurado (springdoc-openapi) |
 | `gems-observability` | `@Observed` / Micrometer via `ObservedAspect` |
 
 Para setup de consumo, veja `recipes/setup-backend-sdk.md`.
+
+**Mecanismo que um destes módulos entrega não é reimplementado no projeto.** Quando a implementação
+local já existe, a substituição é autorizada pela seção **Adoção de Módulo da SDK GEMS** da
+constituição e tem preço: módulo publicado no registry, versão declarada só no POM pai, alcance
+medido com `dependency:tree` antes e depois, a garantia do mecanismo antigo nomeada e provada por
+teste **neste** repositório, varredura que quebra o build onde a falha é silenciosa, e a classe local
+removida na mesma alteração — nunca as duas convivendo.
 
 ---
 

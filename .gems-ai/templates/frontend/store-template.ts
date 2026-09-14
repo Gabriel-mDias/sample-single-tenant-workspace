@@ -1,3 +1,4 @@
+// origem: local; precedencia: local-vence; versao: 2.0.0
 import { Injectable } from '@angular/core';
 import { GemsBaseStore, Pageable } from 'gems-sdk';
 import { Observable } from 'rxjs';

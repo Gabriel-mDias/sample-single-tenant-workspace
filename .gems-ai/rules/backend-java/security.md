@@ -3,6 +3,9 @@ stack: backend-java
 module: gems-exception, spring-security
 severity: mandatory
 see-also: [rest-common.md, controllers.md, openapi.md]
+origem: local
+precedencia: local-vence
+versao: 2.0.0
 ---
 
 # Segurança & Autenticação — Spring Security + gems-exception

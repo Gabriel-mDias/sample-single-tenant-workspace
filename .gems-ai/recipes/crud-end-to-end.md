@@ -1,10 +1,16 @@
+---
+origem: local
+precedencia: local-vence
+versao: 2.0.0
+---
+
 # Recipe: CRUD Ponta-a-Ponta
 
 **Objetivo:** Implementar um CRUD completo desde a entidade JPA até o formulário Angular, cobrindo todas as camadas da GEMS SDK.
 
 **Pré-requisitos:**
 - `gems-jpa` (BaseCustomJpaRepository, soft delete)
-- `gems-model-mapper` (ModelMapper)
+- `gems-mapstruct` (`GemsMappingConfig`, `unmappedTargetPolicy = ERROR`)
 - `gems-rest-common` (ApiResponseDTO, BaseController)
 - `gems-exception` (BusinessException)
 - `gems-sdk` Angular (GemsBaseStore, FormCardComponent, TableComponent)
@@ -23,7 +29,7 @@
 ## Resultado Esperado
 
 - Entidade JPA persistida com soft delete, prefixos GEMS nas colunas e UUID como PK.
-- Service com `ModelMapper` como primeiro campo, `@Transactional` nos métodos de escrita e `BusinessException` em falhas de negócio.
+- Service com o **mapper do domínio** como primeiro campo, `@Transactional` nos métodos de escrita e `BusinessException` em falhas de negócio.
 - Listagem Angular com `gems-table` paginada via `POST /search` e formulário com `gems-form-card` distinguindo criação de edição.
 
 ---
@@ -113,7 +119,7 @@ public interface {Entidade}Repository extends BaseCustomJpaRepository<{Entidade}
 @RequiredArgsConstructor
 public class {Entidade}Service {
 
-    private final ModelMapper modelMapper;
+    private final {Entidade}Mapper mapper;
     private final {Entidade}Repository repository;
 
     public {Entidade} findById(String id) {
@@ -129,22 +135,22 @@ public class {Entidade}Service {
         return repository.search(filter.getNome(), pageable);
     }
 
-    @Transactional(rollbackOn = Exception.class)
+    @Transactional(rollbackFor = Exception.class)
     public {Entidade} insert({Entidade}DTO dto) {
         validate(dto);
-        {Entidade} entidade = modelMapper.map(dto, {Entidade}.class);
+        {Entidade} entidade = mapper.toEntity(dto);
         return repository.save(entidade);
     }
 
-    @Transactional(rollbackOn = Exception.class)
+    @Transactional(rollbackFor = Exception.class)
     public {Entidade} save(String id, {Entidade}DTO dto) {
         validate(dto);
         {Entidade} entidade = findById(id);
-        modelMapper.map(dto, entidade);
+        mapper.atualizar(dto, entidade);
         return repository.save(entidade);
     }
 
-    @Transactional(rollbackOn = Exception.class)
+    @Transactional(rollbackFor = Exception.class)
     public void delete(String id) {
         {Entidade} entidade = findById(id);
         repository.delete(entidade);   // Soft delete via @SQLDelete
@@ -170,11 +176,12 @@ public class {Entidade}Service {
 public class {Entidade}Controller extends BaseController {
 
     private final {Entidade}Service service;
+    private final {Entidade}Mapper mapper;
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponseDTO<{Entidade}DTO>> findById(@PathVariable String id) {
         {Entidade} entidade = service.findById(id);
-        return ResponseEntity.ok(ApiResponseDTO.of(modelMapper.map(entidade, {Entidade}DTO.class)));
+        return ResponseEntity.ok(ApiResponseDTO.of(mapper.toResponse(entidade)));
     }
 
     @PostMapping("/search")
@@ -189,7 +196,7 @@ public class {Entidade}Controller extends BaseController {
         setBodyToExceptionLog(dto);
         {Entidade} entidade = service.insert(dto);
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ApiResponseDTO.of(modelMapper.map(entidade, {Entidade}DTO.class)));
+            .body(ApiResponseDTO.of(mapper.toResponse(entidade)));
     }
 
     @PutMapping("/{id}")
@@ -197,7 +204,7 @@ public class {Entidade}Controller extends BaseController {
             @PathVariable String id, @Valid @RequestBody {Entidade}DTO dto) {
         setBodyToExceptionLog(dto);
         {Entidade} entidade = service.save(id, dto);
-        return ResponseEntity.ok(ApiResponseDTO.of(modelMapper.map(entidade, {Entidade}DTO.class)));
+        return ResponseEntity.ok(ApiResponseDTO.of(mapper.toResponse(entidade)));
     }
 
     @DeleteMapping("/{id}")

@@ -1,3 +1,9 @@
+---
+origem: local
+precedencia: local-vence
+versao: 2.0.0
+---
+
 # Recipe: Domain Event Ponta-a-Ponta
 
 **Objetivo:** Publicar e consumir eventos de domínio com Spring Events, escolhendo entre execução na mesma transação (`@EventListener`) ou após commit (`@TransactionalEventListener`).
@@ -51,10 +57,10 @@ public class {Entidade}Service {
     private final {Entidade}Repository repository;
     private final ApplicationEventPublisher applicationEventPublisher;
 
-    @Transactional(rollbackOn = Exception.class)
+    @Transactional(rollbackFor = Exception.class)
     public {Entidade} insert({Entidade}DTO dto) {
         validate(dto);
-        {Entidade} entidade = modelMapper.map(dto, {Entidade}.class);
+        {Entidade} entidade = mapper.toEntity(dto);
         repository.save(entidade);
         applicationEventPublisher.publishEvent(new {Entidade}CriadoEvent(entidade.getId()));
         return entidade;

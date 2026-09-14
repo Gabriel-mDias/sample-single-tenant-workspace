@@ -1,3 +1,4 @@
+// origem: local; precedencia: local-vence; versao: 2.0.0
 package br.com.gems.{app}.{modulo}.repository;
 
 import br.com.gems.jpa.repository.BaseCustomJpaRepository;

@@ -1,34 +1,43 @@
 ---
 stack: frontend-angular
-module: gems-sdk
+module: gems-sdk (GemsWizardComponent, GemsBaseStepComponent)
 severity: mandatory
 see-also: [signals-standards.md, stores.md, gems-components.md, feedback-alerts.md]
+origem: local
+precedencia: local-vence
+versao: 2.0.0
 ---
 
 # Stepper / Wizard — Angular / gems-sdk
 
 > **TL;DR:**
-> - Arquitetura: Orquestrador + `StateService` (`signal()`) + `Config` (`steps[]`) + Steps isolados.
-> - `StateService`: `signal()` para `currentStep`/`isReadOnly`. Métodos: `updateState`, `setStep`, `setReadOnly`, `clearState`. **Nunca** `BehaviorSubject`.
-> - Orquestrador: `firstValueFrom()` em `ngOnInit` para dados existentes. Detecta `view/:id` → `isReadOnly`.
-> - Steps: leem do `stateService.snapshot`, escrevem via `updateState()` — **nunca** chamam a Store diretamente.
-> - Step-Resumo: chama o backend, chama `clearState()` após sucesso.
-> - Rotas: `form`, `form/:id`, `view/:id` carregam o **mesmo** componente orquestrador.
+> - O stepper visual é o `<gems-wizard>` da SDK. **Nunca** monte barra de progresso, círculos ou trilha à mão.
+> - Todo step estende `GemsBaseStepComponent<T>` e implementa `createForm`/`loadFromSession`/`saveToSession`/`goNext`/`goBack`.
+> - `StateService` local à feature, **provido pelo orquestrador** (`providers: [...]`), não em `'root'`.
+> - Estado com `signal()` + `computed()`. **Nunca** `BehaviorSubject`.
+> - Steps leem e escrevem no `StateService` — **nunca** chamam a Store.
+> - O orquestrador é o único que chama a Store, e limpa o estado no `ngOnDestroy`.
+
+> **Por que esta regra foi reescrita.** Ela prescrevia montar o stepper à mão: `stepper-container`,
+> `stepper-progress-bar-fill`, `step-circle` e `progressPercentage` calculado no componente. A SDK
+> entrega `GemsWizardComponent` e `GemsBaseStepComponent`, que cobrem tudo isso, e o `AGENTS.md` do
+> frontend manda reutilizar a composição consolidada (`gems-wizard`). Seguir a versão anterior
+> significaria reescrever à mão o que a SDK já faz. Corrigida na rodada `008`, bloco M.
+
+---
 
 ## 1. Estrutura de Arquivos
 
 ```
 features/{modulo}/form/
-├── {modulo}-form.component.ts        # Orquestrador
+├── {modulo}-form.component.ts          # Orquestrador
 ├── {modulo}-form.component.html
-├── {modulo}-state.service.ts          # State Service
-├── {modulo}.config.ts                 # Configuração dos steps
+├── {modulo}-form-state.service.ts      # Estado do wizard (signals)
+├── {modulo}-form.config.ts             # Steps + constantes de índice
 └── steps/
-    ├── step-dados/
-    │   ├── step-dados.component.ts
-    │   └── step-dados.component.html
-    ├── step-detalhes/
-    │   └── ...
+    ├── step-{nome}/
+    │   ├── step-{nome}.component.ts
+    │   └── step-{nome}.component.html
     └── step-resumo/
         ├── step-resumo.component.ts
         └── step-resumo.component.html
@@ -38,64 +47,87 @@ features/{modulo}/form/
 
 ## 2. Config dos Steps
 
+Os steps são `GemsWizardStep[]` — `label` e `icon` (Font Awesome Solid). Os índices saem como
+constantes nomeadas, para que nem o orquestrador nem os steps usem número mágico:
+
 ```typescript
-// {modulo}.config.ts
-export const {MODULO}_FORM_STEPS = [
-  { label: 'Dados Básicos', id: 1 },
-  { label: 'Detalhes',      id: 2 },
-  { label: 'Resumo',        id: 3 }
+// {modulo}-form.config.ts
+import { GemsWizardStep } from '@gabriel-mdias/angular-gems-sdk';
+
+export const {MODULO}_FORM_STEPS: GemsWizardStep[] = [
+  { label: '{Primeiro}', icon: 'fa-solid fa-building' },
+  { label: '{Segundo}',  icon: 'fa-solid fa-user-tie' },
+  { label: 'Resumo',     icon: 'fa-solid fa-clipboard-check' },
 ];
+
+export const STEP_{PRIMEIRO} = 1;
+export const STEP_{SEGUNDO} = 2;
+export const STEP_RESUMO = 3;
 ```
 
 ---
 
 ## 3. State Service
 
-```typescript
-import { Injectable, signal, computed } from '@angular/core';
+Estado do wizard, com `signal()` para escrita e `computed()` para leitura. **Provido pelo
+orquestrador**, não em `'root'`: o estado morre com a tela, e duas abas do mesmo formulário não
+compartilham rascunho.
 
-export interface {Entidade}State {
-  id?: string;
-  campo1?: string;
-  campo2?: string;
-  currentStep: number;
-  isReadOnly: boolean;
+```typescript
+import { Injectable, computed, signal } from '@angular/core';
+
+export type {Entidade}FormMode = 'create' | 'edit';
+
+function emptyState(): {Entidade}Create {
+  return { campo1: '', campo2: '', filho: { campoA: '' } };
 }
 
-const INITIAL_STATE: {Entidade}State = {
-  currentStep: 1,
-  isReadOnly: false
-};
+@Injectable()                    // sem providedIn: 'root'
+export class {Entidade}FormStateService {
 
-@Injectable({ providedIn: 'root' })
-export class {Entidade}StateService {
+  private readonly value = signal<{Entidade}Create>(emptyState());
 
-  private _state = signal<{Entidade}State>(INITIAL_STATE);
+  readonly snapshot = computed(() => this.value());
+  readonly mode = signal<{Entidade}FormMode>('create');
+  readonly currentStep = signal(1);
+  readonly isEdit = computed(() => this.mode() === 'edit');
 
-  // Leitura via computed (readonly)
-  state = this._state.asReadonly();
-  currentStep = computed(() => this._state().currentStep);
-  isReadOnly = computed(() => this._state().isReadOnly);
-
-  get snapshot(): {Entidade}State {
-    return this._state();
+  update{Entidade}(change: Partial<Omit<{Entidade}Create, 'filho'>>): void {
+    this.value.update((current) => ({ ...current, ...change }));
   }
 
-  updateState(partial: Partial<{Entidade}State>): void {
-    this._state.update(s => ({ ...s, ...partial }));
+  updateFilho(change: Partial<FilhoInput>): void {
+    this.value.update((current) => ({ ...current, filho: { ...current.filho, ...change } }));
   }
 
-  setStep(step: number): void {
-    this.updateState({ currentStep: step });
+  loadFrom(detail: {Entidade}Detail): void {
+    this.update{Entidade}({ campo1: detail.campo1, campo2: detail.campo2 ?? '' });
   }
 
-  setReadOnly(isReadOnly: boolean): void {
-    this.updateState({ isReadOnly });
+  goToStep(step: number): void {
+    this.currentStep.set(step);
   }
 
-  clearState(): void {
-    this._state.set(INITIAL_STATE);
+  clear(): void {
+    this.value.set(emptyState());
+    this.currentStep.set(1);
   }
+}
+```
+
+### Campo opcional vazio vai como `undefined`, nunca como `''`
+
+O payload de envio é montado por método dedicado, e **campo opcional em branco sai como
+`undefined`**. Mandar `''` é o defeito mais caro deste arquivo: para o backend `''` não é nulo, e a
+validação de formato reprova quem deixou em branco um campo que a tela declara opcional.
+
+```typescript
+toCreatePayload(): {Entidade}Create {
+  const current = structuredClone(this.value());
+  return {
+    ...current,
+    campoOpcional: current.campoOpcional || undefined,
+  };
 }
 ```
 
@@ -103,95 +135,60 @@ export class {Entidade}StateService {
 
 ## 4. Componente Orquestrador
 
+Ele é o **único** que conhece a Store. Detecta `id` na rota, carrega, e limpa o estado ao sair.
+
 ```typescript
-import { Component, OnInit, signal, computed, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule, ActivatedRoute } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
-import { AlertService, NavigationService } from 'gems-sdk';
-import { {Entidade}StateService } from './{modulo}-state.service';
-import { {MODULO}_FORM_STEPS } from './{modulo}.config';
-import { Step{Nome1}Component } from './steps/step-{nome1}/step-{nome1}.component';
+import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { GemsAlertService, GemsWizardComponent } from '@gabriel-mdias/angular-gems-sdk';
+import { {Entidade}Store } from '../services/{entidade}.store';
+import { {Entidade}FormStateService } from './{modulo}-form-state.service';
+import { {MODULO}_FORM_STEPS, STEP_{PRIMEIRO}, STEP_{SEGUNDO} } from './{modulo}-form.config';
+import { Step{Primeiro}Component } from './steps/step-{primeiro}/step-{primeiro}.component';
 import { StepResumoComponent } from './steps/step-resumo/step-resumo.component';
 
 @Component({
   selector: 'app-{entidade}-form',
-  standalone: true,
-  imports: [CommonModule, RouterModule, Step{Nome1}Component, StepResumoComponent],
-  templateUrl: './{entidade}-form.component.html'
+  imports: [GemsWizardComponent, Step{Primeiro}Component, StepResumoComponent],
+  providers: [{Entidade}FormStateService],        // escopo da tela, não global
+  templateUrl: './{entidade}-form.component.html',
+  styleUrl: './{entidade}-form.component.css',
 })
-export class {Entidade}FormComponent implements OnInit {
+export class {Entidade}FormComponent implements OnInit, OnDestroy {
 
-  private stateService = inject({Entidade}StateService);
-  private store = inject({Entidade}Store);
-  private alertService = inject(AlertService);
-  private nav = inject(NavigationService);
-  private route = inject(ActivatedRoute);
+  private readonly store = inject({Entidade}Store);
+  private readonly route = inject(ActivatedRoute);
+  private readonly alertService = inject(GemsAlertService);
+  protected readonly state = inject({Entidade}FormStateService);
 
-  steps = {MODULO}_FORM_STEPS;
-  isLoading = signal(false);
+  protected readonly steps = {MODULO}_FORM_STEPS;
+  protected readonly step{Primeiro} = STEP_{PRIMEIRO};
+  protected readonly isLoading = signal(false);
+  protected readonly isPageLoading = signal(false);
+  private readonly id = signal<string | null>(null);
 
-  // Signals derivados do StateService
-  currentStep = this.stateService.currentStep;
-  isReadOnly = this.stateService.isReadOnly;
-
-  progressPercentage = computed(() =>
-    ((this.currentStep() - 1) / (this.steps.length - 1)) * 100
+  protected readonly title = computed(() =>
+    this.state.isEdit() ? 'Editar {entidade}' : 'Nova {entidade}',
   );
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
-    const isViewRoute = this.route.snapshot.routeConfig?.path?.includes('view');
-
-    this.stateService.setReadOnly(isViewRoute ?? false);
-
-    if (id) {
-      this.loadExisting(id);
-    } else {
-      this.stateService.clearState();
-    }
+    this.id.set(id);
+    this.state.mode.set(id ? 'edit' : 'create');
+    if (id) this.load(id);
   }
 
-  async loadExisting(id: string): Promise<void> {
-    this.isLoading.set(true);
-    try {
-      const data = await firstValueFrom(this.store.getById(id));
-      this.stateService.updateState({
-        id: data.id,
-        campo1: data.campo1
-        // ...mapear campos do modelo para o estado
-      });
-
-      if (this.isReadOnly()) {
-        this.stateService.setStep(this.steps.length);  // Vai direto para o resumo
-      }
-      this.isLoading.set(false);
-    } catch (err: any) {
-      this.alertService.errorFromApi(err);
-      this.nav.navigate(['/{modulo}/list']);
-      this.isLoading.set(false);
-    }
+  ngOnDestroy(): void {
+    this.state.clear();
   }
 
-  async cancelar(): Promise<void> {
-    const confirm = await this.alertService.confirm('Cancelar', 'Os dados não salvos serão perdidos.');
-    if (confirm.isConfirmed) {
-      this.stateService.clearState();
-      this.nav.navigate(['/{modulo}/list']);
-    }
+  protected onStepChange(step: number): void {
+    this.state.goToStep(step);
   }
 
-  goBack(): void {
-    if (this.isReadOnly()) {
-      this.nav.navigate(['/{modulo}/list']);
-      return;
-    }
-    if (this.currentStep() > 1) {
-      this.stateService.setStep(this.currentStep() - 1);
-    } else {
-      this.cancelar();
-    }
-  }
+  protected save(): void { /* chama store.create/update, trata erro com errorFromApi */ }
+
+  private load(id: string): void { /* chama store.detail(id), state.loadFrom(detail) */ }
 }
 ```
 
@@ -199,194 +196,205 @@ export class {Entidade}FormComponent implements OnInit {
 
 ## 5. Template do Orquestrador
 
+O `<gems-wizard>` recebe os steps e o passo corrente, e devolve `stepChange`. O conteúdo do passo
+sai de um `@switch` sobre as **constantes**, nunca sobre literais numéricos:
+
 ```html
 <div class="form-container animate__animated animate__fadeIn">
 
-  <!-- HEADER -->
   <div class="header">
-    <div style="display: flex; align-items: center; gap: 1rem;">
-      <button class="btn-back" (click)="goBack()">
-        <i class="fa-solid fa-arrow-left"></i>
-      </button>
-      <div class="header-titles">
-        <h2>{Título do Módulo}</h2>
-        <p class="subtitle">Siga os passos para preencher os dados.</p>
-      </div>
+    <button type="button" class="btn-back" aria-label="Voltar para a lista" (click)="exit()">
+      <i class="fa-solid fa-arrow-left"></i>
+    </button>
+    <div class="header-titles">
+      <h2>{{ title() }}</h2>
+      <p class="subtitle">{{ description() }}</p>
     </div>
-    @if (!isReadOnly()) {
-      <button class="btn btn-danger" (click)="cancelar()">
-        <i class="fa-solid fa-xmark"></i> Cancelar
-      </button>
-    }
+    <button type="button" class="btn-danger" (click)="exit()">
+      <i class="fa-solid fa-xmark"></i>
+      Cancelar
+    </button>
   </div>
 
-  <!-- STEPPER VISUAL (oculto em modo view) -->
-  @if (!isReadOnly()) {
-    <div class="stepper-container mb-4">
-      <div class="stepper-wrapper">
-        <div class="stepper-progress-bar-bg"></div>
-        <div class="stepper-progress-bar-fill" [style.width.%]="progressPercentage()"></div>
-
-        @for (step of steps; track step.id) {
-          <div class="stepper-item"
-               [class.active]="currentStep() === step.id"
-               [class.completed]="currentStep() > step.id">
-            <div class="step-circle">
-              @if (currentStep() > step.id) {
-                <i class="fa-solid fa-check"></i>
-              } @else {
-                <span>{{ step.id }}</span>
-              }
-            </div>
-            <div class="step-label">{{ step.label }}</div>
-          </div>
-        }
-      </div>
-    </div>
+  @if (!state.isEdit()) {
+    <gems-wizard
+      [steps]="steps"
+      [currentStep]="state.currentStep()"
+      (stepChange)="onStepChange($event)"
+    ></gems-wizard>
   }
 
-  <!-- STEP CONTENT -->
-  @if (isLoading()) {
-    <div class="loading-state">
-      <i class="fa-solid fa-circle-notch fa-spin"></i> Carregando...
+  @if (isPageLoading()) {
+    <div class="form-loading" role="status" aria-live="polite">
+      <i class="fa-solid fa-circle-notch fa-spin"></i>
+      <span>Carregando {entidade}…</span>
     </div>
   } @else {
-    <div class="step-content">
-      @if (currentStep() === 1) { <app-step-{nome1} /> }
-      @if (currentStep() === 2) { <app-step-{nome2} /> }
-      @if (currentStep() === 3) { <app-step-resumo /> }
-    </div>
+    @switch (state.currentStep()) {
+      @case (step{Primeiro}) { <app-step-{primeiro} /> }
+      @case (step{Segundo})  { <app-step-{segundo} /> }
+      @default               { <app-step-resumo [isLoading]="isLoading()" (confirm)="save()" /> }
+    }
   }
 
 </div>
 ```
 
+**Em modo edição o wizard não aparece.** Editar não é percorrer passos: a tela mostra direto o step
+de dados, com `editMode` ligado, e o botão salva em vez de avançar.
+
 ---
 
-## 6. Componente de Step Individual
+## 6. Step Individual — `GemsBaseStepComponent`
+
+Todo step de formulário **estende `GemsBaseStepComponent<T>`**, onde `T` é o payload daquele passo.
+A classe base cuida do ciclo (criar o form, hidratar da sessão, persistir ao sair); o step só
+preenche os cinco ganchos:
 
 ```typescript
+import { Component, inject, input, output } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  GemsBaseStepComponent,
+  GemsFormCardComponent,
+  GemsInputTextComponent,
+} from '@gabriel-mdias/angular-gems-sdk';
+import { {Entidade}FormStateService } from '../../{modulo}-form-state.service';
+import { STEP_{PRIMEIRO}, STEP_{SEGUNDO} } from '../../{modulo}-form.config';
+
+interface {Primeiro}StepPayload {
+  campo1: string;
+  campo2: string;
+}
+
 @Component({
-  selector: 'app-step-{nome}',
-  standalone: true,
-  imports: [CommonModule, FormsModule, FormCardComponent, InputMaskComponent],
-  templateUrl: './step-{nome}.component.html'
+  selector: 'app-step-{primeiro}',
+  imports: [ReactiveFormsModule, GemsFormCardComponent, GemsInputTextComponent],
+  templateUrl: './step-{primeiro}.component.html',
+  styleUrl: './step-{primeiro}.component.css',
 })
-export class Step{Nome}Component implements OnInit {
+export class Step{Primeiro}Component extends GemsBaseStepComponent<{Primeiro}StepPayload> {
 
-  private stateService = inject({Entidade}StateService);
-  private alertService = inject(AlertService);
+  private readonly fb = inject(FormBuilder);
+  protected readonly state = inject({Entidade}FormStateService);
 
-  // Lê estado atual
-  state = this.stateService.state;
-  isReadOnly = this.stateService.isReadOnly;
+  readonly editMode = input(false);
+  readonly isLoading = input(false);
+  readonly saveEdit = output<void>();
 
-  // Dados locais do step
-  campo1 = signal('');
-  campo2 = signal('');
+  override formGroup!: FormGroup;
+  override stepIndex = STEP_{PRIMEIRO};
 
-  ngOnInit(): void {
-    const s = this.stateService.snapshot;
-    this.campo1.set(s.campo1 ?? '');
+  override createForm(): void {
+    this.formGroup = this.fb.group({
+      campo1: ['', [Validators.required, Validators.maxLength(255)]],
+      campo2: [''],
+    });
   }
 
-  next(): void {
-    if (!this.campo1()) {
-      this.alertService.warning('Atenção', 'Preencha todos os campos obrigatórios.');
+  override loadFromSession(): void {
+    const current = this.state.snapshot();
+    this.formGroup.patchValue({ campo1: current.campo1, campo2: current.campo2 ?? '' });
+  }
+
+  override saveToSession(payload: {Primeiro}StepPayload): void {
+    this.state.update{Entidade}(payload);
+  }
+
+  override goNext(): void {
+    this.state.goToStep(STEP_{SEGUNDO});
+  }
+
+  override goBack(): void {
+    this.state.goToStep(STEP_{PRIMEIRO} - 1);
+  }
+
+  protected continue(): void {
+    if (this.formGroup.invalid) {
+      this.formGroup.markAllAsTouched();
       return;
     }
-    this.stateService.updateState({ campo1: this.campo1() });
-    this.stateService.setStep(N + 1);
-  }
-
-  goBack(): void {
-    this.stateService.setStep(N - 1);
+    this.saveToSession(this.formGroup.getRawValue() as {Primeiro}StepPayload);
+    if (this.editMode()) this.saveEdit.emit();
+    else this.goNext();
   }
 }
 ```
 
-```html
-<gems-form-card title="{Título do Step}">
-  <p form-card-subtitle>{Descrição do que o usuário faz neste passo}.</p>
+### Os cinco ganchos, e o que cada um deve e não deve fazer
 
-  <div class="form-grid">
-    <!-- Campos do step com [(ngModel)] ou formControlName -->
-  </div>
+| Gancho | Faz | Nunca faz |
+| :--- | :--- | :--- |
+| `createForm()` | monta o `FormGroup` com os validadores do passo | chama a Store; lê a rota |
+| `loadFromSession()` | hidrata o form a partir do `StateService` | chama a Store |
+| `saveToSession(payload)` | grava o payload no `StateService` | chama a Store; navega |
+| `goNext()` | `state.goToStep(PROXIMO)` | envia ao backend |
+| `goBack()` | `state.goToStep(ANTERIOR)`, ou sai da tela no primeiro passo | descarta dados em silêncio |
 
-  <div form-card-footer class="footer-step">
-    <button type="button" class="btn-cancel" (click)="goBack()"
-            [style.visibility]="isPrimeiro ? 'hidden' : 'visible'">
-      <i class="fa-solid fa-arrow-left"></i> Voltar
-    </button>
-    <button type="button" class="btn-save" (click)="next()">
-      Avançar <i class="fa-solid fa-arrow-right"></i>
-    </button>
-  </div>
-</gems-form-card>
+Campo que não pode mudar em edição se desabilita no `createForm`, não se esconde no template:
+
+```typescript
+if (this.state.isEdit()) this.formGroup.get('alias')?.disable();
 ```
 
 ---
 
 ## 7. Step de Resumo
 
-```html
-<div class="animate__animated animate__fadeIn">
-  <gems-form-card [title]="isReadOnly() ? 'Detalhes do Cadastro' : 'Resumo do Cadastro'">
-    @if (!isReadOnly()) {
-      <p form-card-subtitle>Verifique as informações antes de confirmar.</p>
-    }
-
-    <div class="resumo-sections">
-      <gems-summary-card title="Seção 1" icon="fa-solid fa-user">
-        <div details class="resumo-details-grid">
-          <div class="detail-item">
-            <span class="detail-label">CAMPO:</span>
-            <span class="detail-value">{{ state().campo1 || '-' }}</span>
-          </div>
-        </div>
-      </gems-summary-card>
-    </div>
-
-    <div form-card-footer class="footer-step">
-      <button type="button" class="btn-cancel" (click)="goBack()">
-        <i class="fa-solid" [class.fa-arrow-left]="!isReadOnly()" [class.fa-list]="isReadOnly()"></i>
-        {{ isReadOnly() ? 'Voltar para Listagem' : 'Voltar' }}
-      </button>
-      @if (!isReadOnly()) {
-        <button type="button" class="btn-save" (click)="save()" [disabled]="isLoading()">
-          @if (isLoading()) {
-            <i class="fa-solid fa-circle-notch fa-spin"></i> Processando...
-          } @else {
-            Confirmar <i class="fa-solid fa-check"></i>
-          }
-        </button>
-      }
-    </div>
-  </gems-form-card>
-</div>
-```
-
-### CSS obrigatório no componente de resumo:
-```css
-.resumo-sections { display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 1.5rem; }
-.resumo-details-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; }
-.detail-item { display: flex; flex-direction: column; gap: 0.25rem; }
-.detail-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--gems-gray-600, #6c757d); }
-.detail-value { font-size: 0.95rem; font-weight: 500; }
-```
-
----
-
-## 8. Rotas do Módulo Stepper
+É o único step que **não** estende `GemsBaseStepComponent`: ele não tem formulário. Lê o snapshot,
+exibe em `gems-summary-card`, e **emite** — quem envia ao backend é o orquestrador.
 
 ```typescript
-export const routes: Routes = [
-  { path: 'list',    loadComponent: () => import('./list/{modulo}-list.component').then(c => c.{Entidade}ListComponent) },
-  { path: 'form',    loadComponent: () => import('./form/{modulo}-form.component').then(c => c.{Entidade}FormComponent) },
-  { path: 'form/:id',loadComponent: () => import('./form/{modulo}-form.component').then(c => c.{Entidade}FormComponent) },
-  { path: 'view/:id',loadComponent: () => import('./form/{modulo}-form.component').then(c => c.{Entidade}FormComponent) },
-  { path: '',         redirectTo: 'list', pathMatch: 'full' }
-];
+@Component({
+  selector: 'app-step-resumo-{entidade}',
+  imports: [GemsFormCardComponent, GemsSummaryCardComponent],
+  templateUrl: './step-resumo.component.html',
+  styleUrl: './step-resumo.component.css',
+})
+export class StepResumoComponent {
+  protected readonly state = inject({Entidade}FormStateService);
+  readonly isLoading = input(false);
+  readonly confirm = output<void>();
+  protected readonly summary = this.state.snapshot;
+
+  protected back(): void {
+    this.state.goToStep(STEP_{SEGUNDO});
+  }
+}
+```
+
+```html
+<gems-form-card title="Resumo" subtitle="Revise os dados antes de confirmar." icon="fa-solid fa-clipboard-check">
+  <div class="summary-cards">
+    <gems-summary-card title="{Seção}" icon="fa-solid fa-building" [expanded]="true">
+      <span summary>{{ summary().campo1 || 'Sem {campo} informado' }}</span>
+      <div details class="summary-grid">
+        <div class="summary-item">
+          <span class="summary-label">Campo</span>
+          <span>{{ summary().campo1 || '—' }}</span>
+        </div>
+      </div>
+    </gems-summary-card>
+  </div>
+
+  <div gems-form-card-footer class="step-actions">
+    <button type="button" class="btn-secondary" (click)="back()">
+      <i class="fa-solid fa-arrow-left"></i>
+      Voltar
+    </button>
+    <button type="button" class="btn-save" [disabled]="isLoading()" (click)="confirm.emit()">
+      @if (isLoading()) {
+        Processando <i class="fa-solid fa-circle-notch fa-spin"></i>
+      } @else {
+        Confirmar <i class="fa-solid fa-check"></i>
+      }
+    </button>
+  </div>
+</gems-form-card>
+```
+
+Os slots do `gems-summary-card` são `summary` (preview recolhido) e `details` (conteúdo expandido);
+o rodapé do `gems-form-card` é `gems-form-card-footer`.
 
 ---
 
@@ -394,9 +402,11 @@ export const routes: Routes = [
 
 | Proibido | Correto |
 | :--- | :--- |
-| `BehaviorSubject` no `StateService` | `signal()` + `asReadonly()` para estado reativo |
-| Step individual chamando `store.getById()` | Orquestrador carrega via `firstValueFrom()` — steps leem do `StateService` |
-| `this.stateService._state = { ... }` (mutação direta) | `this.stateService.updateState({ campo })` |
-| Não chamar `clearState()` após salvar no step-resumo | `stateService.clearState()` **obrigatório** após sucesso |
-| Rotas `form-create` e `form-edit` separadas | Mesma rota `form` e `form/:id` → mesmo componente detecta `id` no `ngOnInit` |
-```
+| Montar `stepper-container` / barra de progresso / círculos à mão | `<gems-wizard [steps] [currentStep] (stepChange)>` |
+| Step com `FormGroup` próprio sem estender a base | `extends GemsBaseStepComponent<T>` com os cinco ganchos |
+| `BehaviorSubject` no `StateService` | `signal()` para escrita, `computed()` para leitura |
+| `@Injectable({ providedIn: 'root' })` no `StateService` do wizard | `@Injectable()` + `providers: [...]` no orquestrador |
+| Step chamando `store.getById()` ou `store.create()` | Só o orquestrador fala com a Store |
+| `@case (2)` com literal no template | `@case (stepGestor)` — constante nomeada do `.config.ts` |
+| Campo opcional vazio enviado como `''` | `campo \|\| undefined` no `toCreatePayload()` |
+| Não limpar o estado ao sair da tela | `ngOnDestroy(): void { this.state.clear(); }` |

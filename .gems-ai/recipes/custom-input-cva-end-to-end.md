@@ -1,3 +1,9 @@
+---
+origem: local
+precedencia: local-vence
+versao: 2.0.0
+---
+
 # Recipe: Input Customizado via ControlValueAccessor
 
 **Objetivo:** Criar um input customizado compatível com `formControlName` e `[(ngModel)]` usando `ControlValueAccessor`, integrado com a SDK.
@@ -20,6 +26,9 @@ Crie quando:
 - Você quer encapsular um grupo de campos como um único controle de formulário.
 
 **Antes de criar**, verificar: `gems-input-mask`, `gems-input-data`, `gems-input-documento`, `gems-input-checkbox` já cobrem a maioria dos casos.
+
+No Meduc, senha já está coberta por `shared/forms/password-input/app-password-input`. Reutilize esse
+componente e seu contrato documentado; esta receita não autoriza criar outra implementação por feature.
 
 ---
 

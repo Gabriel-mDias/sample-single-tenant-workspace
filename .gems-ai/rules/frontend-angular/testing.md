@@ -1,212 +1,179 @@
 ---
 stack: frontend-angular
-module: jasmine, karma
+module: vitest, @angular/core/testing
 severity: mandatory
-see-also: [stores.md, forms.md, lists.md]
+see-also: [stores.md, forms.md, lists.md, auth.md]
+origem: local
+precedencia: local-vence
+versao: 2.0.0
 ---
 
 # Testes — Angular / gems-sdk
 
 > **TL;DR:**
-> - Framework: Jasmine + Karma (padrão Angular). Alternativa: Jest (substituir `karma.conf.js`).
-> - Componentes: `TestBed` com `NO_ERRORS_SCHEMA` — isola do template (gems-table, gems-form-card etc.).
-> - Mock: `jasmine.createSpyObj<T>()` tipado. **Nunca** `HttpClientTestingModule` em testes de componentes.
+> - Framework: **Vitest**. `describe`/`it`/`expect`/`vi` são **importados** de `'vitest'`, nunca globais.
+> - **Nunca** Jasmine, Karma ou Jest — nem `jasmine.createSpyObj`, nem `and.returnValue`, nem `toBeFalse()`.
+> - Dublê: `vi.fn()` e objeto literal `Partial<T>` em `useValue`. Não existe `createSpyObj` em Vitest.
+> - Componentes: `TestBed` com o próprio componente em `imports` — ele é standalone.
 > - Padrão AAA: **Arrange** (setup) → **Act** (invocar) → **Assert** (verificar).
 > - Nomenclatura: `deveFazerAlgo_quandoCondicao` (camelCase, português, sem "it should").
-> - Signals: `fixture.detectChanges()` após setup dispara `ngOnInit` e propagação de signals.
+> - `HttpClientTestingModule` **não** se usa em teste de componente — só em teste de Store.
+
+> **Por que esta regra foi reescrita.** Ela prescrevia Jasmine + Karma. A rodada `006` trocou a
+> plataforma de teste do Angular por **Vitest** (bloco S7), e o `AGENTS.md` do frontend proíbe
+> explicitamente Jasmine, Karma e Jest. A regra literal não compilava: `jasmine` não existe no
+> projeto. Corrigida na rodada `008`, bloco M.
+
+---
 
 ## 1. Estrutura de Arquivo
+
+O `.spec.ts` mora **ao lado** do arquivo que ele testa — nunca numa pasta `test/` paralela.
 
 ```
 features/{modulo}/
 ├── list/
 │   ├── {modulo}-list.component.ts
 │   └── {modulo}-list.component.spec.ts   ← mesmo diretório
-└── form/
-    ├── {modulo}-form.component.ts
-    └── {modulo}-form.component.spec.ts
+├── form/
+│   ├── {modulo}-form.component.ts
+│   └── {modulo}-form.component.spec.ts
+└── services/
+    ├── {modulo}.store.ts
+    └── {modulo}.store.spec.ts
 ```
 
 ---
 
-## 2. Teste de Componente de Listagem
+## 2. Imports Obrigatórios
+
+Vitest **não** injeta globais neste projeto. Todo `describe`, `it`, `expect`, `vi`, `beforeEach` e
+`afterEach` é importado explicitamente:
 
 ```typescript
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { of, throwError } from 'rxjs';
-import { {Entidade}ListComponent } from './{entidade}-list.component';
-import { {Entidade}Store } from '../services/{entidade}.store';
-import { AlertService, NavigationService } from 'gems-sdk';
-
-describe('{Entidade}ListComponent', () => {
-  let fixture: ComponentFixture<{Entidade}ListComponent>;
-  let component: {Entidade}ListComponent;
-  let storeSpy: jasmine.SpyObj<{Entidade}Store>;
-  let alertSpy: jasmine.SpyObj<AlertService>;
-  let navSpy: jasmine.SpyObj<NavigationService>;
-
-  const mockEntidades = [
-    { id: '1', nome: 'Registro Teste' }
-  ];
-
-  beforeEach(async () => {
-    storeSpy = jasmine.createSpyObj('{Entidade}Store', ['search', 'delete{Entidade}']);
-    alertSpy = jasmine.createSpyObj('AlertService', ['success', 'errorFromApi', 'confirm']);
-    navSpy   = jasmine.createSpyObj('NavigationService', ['navigate']);
-
-    storeSpy.search.and.returnValue(of({ content: mockEntidades, totalElements: 1 }));
-
-    await TestBed.configureTestingModule({
-      imports: [{Entidade}ListComponent],
-      providers: [
-        { provide: {Entidade}Store, useValue: storeSpy },
-        { provide: AlertService,      useValue: alertSpy },
-        { provide: NavigationService, useValue: navSpy }
-      ],
-      schemas: [NO_ERRORS_SCHEMA]
-    }).compileComponents();
-
-    fixture   = TestBed.createComponent({Entidade}ListComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
-
-  it('deveCarregarEntidades_quandoInicializar', () => {
-    expect(storeSpy.search).toHaveBeenCalledTimes(1);
-    expect(component.entidades()).toEqual(mockEntidades);
-    expect(component.totalRecords()).toBe(1);
-  });
-
-  it('deveExibirLoading_quandoPesquisar', () => {
-    storeSpy.search.and.returnValue(of({ content: [], totalElements: 0 }));
-    component.search();
-    expect(component.isLoading()).toBeFalse();
-  });
-
-  it('deveChamarErrorFromApi_quandoSearchFalhar', () => {
-    storeSpy.search.and.returnValue(throwError(() => ({ status: 500 })));
-    component.loadEntidades();
-    expect(alertSpy.errorFromApi).toHaveBeenCalled();
-  });
-
-  it('deveNavegar_quandoEditarRegistro', () => {
-    component.handleAction({ action: 'edit', row: { id: '1' } });
-    expect(navSpy.navigate).toHaveBeenCalledWith(['/{modulo}/form', '1']);
-  });
-
-  it('deveExcluirERecarregar_quandoConfirmar', async () => {
-    alertSpy.confirm.and.resolveTo({ isConfirmed: true });
-    storeSpy.delete{Entidade}.and.returnValue(of(undefined));
-    storeSpy.search.and.returnValue(of({ content: [], totalElements: 0 }));
-
-    await component.remove('1');
-
-    expect(storeSpy.delete{Entidade}).toHaveBeenCalledWith('1');
-    expect(alertSpy.success).toHaveBeenCalled();
-  });
-
-  it('naoDeveExcluir_quandoCancelarConfirmacao', async () => {
-    alertSpy.confirm.and.resolveTo({ isConfirmed: false });
-
-    await component.remove('1');
-
-    expect(storeSpy.delete{Entidade}).not.toHaveBeenCalled();
-  });
-});
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { TestBed } from '@angular/core/testing';
 ```
+
+Esquecer o import de `'vitest'` é o erro mais comum na migração de um exemplo escrito para Jasmine:
+o arquivo passa no editor (os tipos globais do Jasmine ainda vêm do Angular) e falha na execução.
 
 ---
 
-## 3. Teste de Componente de Formulário
+## 3. Dublês — `vi.fn()` e `Partial<T>`
+
+Vitest não tem `createSpyObj`. O dublê é um **objeto literal tipado como `Partial<T>`**, com
+`vi.fn()` nos métodos que o teste observa:
 
 ```typescript
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { ReactiveFormsModule } from '@angular/forms';
-import { of, throwError } from 'rxjs';
-import { {Entidade}FormComponent } from './{entidade}-form.component';
-import { {Entidade}Store } from '../services/{entidade}.store';
-import { AlertService, NavigationService } from 'gems-sdk';
+// CORRETO — Vitest
+const isAuthorized = vi.fn(() => true);
+const auth: Partial<AuthService> = { isLoggedIn: () => true, isAuthorized };
 
-describe('{Entidade}FormComponent', () => {
-  let fixture: ComponentFixture<{Entidade}FormComponent>;
-  let component: {Entidade}FormComponent;
-  let storeSpy: jasmine.SpyObj<{Entidade}Store>;
-  let alertSpy: jasmine.SpyObj<AlertService>;
-
-  const setupWithId = (id: string | null) => {
-    return TestBed.configureTestingModule({
-      imports: [{Entidade}FormComponent, ReactiveFormsModule],
-      providers: [
-        { provide: {Entidade}Store, useValue: storeSpy },
-        { provide: AlertService,      useValue: alertSpy },
-        { provide: NavigationService, useValue: jasmine.createSpyObj('NavigationService', ['navigate']) },
-        {
-          provide: ActivatedRoute,
-          useValue: { snapshot: { paramMap: { get: () => id } } }
-        }
-      ],
-      schemas: [NO_ERRORS_SCHEMA]
-    }).compileComponents();
-  };
-
-  beforeEach(async () => {
-    storeSpy  = jasmine.createSpyObj('{Entidade}Store', ['getById', 'create', 'update']);
-    alertSpy  = jasmine.createSpyObj('AlertService', ['success', 'warning', 'errorFromApi']);
-  });
-
-  describe('Modo criação (sem ID)', () => {
-    beforeEach(async () => {
-      await setupWithId(null);
-      fixture   = TestBed.createComponent({Entidade}FormComponent);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
-    });
-
-    it('deveInicializarModoInsercao', () => {
-      expect(component.isEdit()).toBeFalse();
-    });
-
-    it('deveChamarCreate_quandoSalvar', () => {
-      storeSpy.create.and.returnValue(of({ id: '1' } as any));
-      component.{entidade}Form.patchValue({ campoObrigatorio: 'Valor' });
-      component.save();
-      expect(storeSpy.create).toHaveBeenCalled();
-    });
-  });
-
-  describe('Modo edição (com ID)', () => {
-    beforeEach(async () => {
-      storeSpy.getById.and.returnValue(of({ id: '1', campoObrigatorio: 'Existente' } as any));
-      await setupWithId('1');
-      fixture   = TestBed.createComponent({Entidade}FormComponent);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
-    });
-
-    it('deveInicializarModoEdicaoECarregarDados', () => {
-      expect(component.isEdit()).toBeTrue();
-      expect(storeSpy.getById).toHaveBeenCalledWith('1');
-    });
-
-    it('deveChamarUpdate_quandoSalvar', () => {
-      storeSpy.update.and.returnValue(of({ id: '1' } as any));
-      component.save();
-      expect(storeSpy.update).toHaveBeenCalled();
-    });
-  });
+TestBed.configureTestingModule({
+  providers: [{ provide: AuthService, useValue: auth }],
 });
+
+expect(isAuthorized).toHaveBeenCalledWith(requirement);
 ```
+
+Para um método que devolve `Observable`, devolva o `Observable` direto — não existe `and.returnValue`:
+
+```typescript
+import { of, throwError } from 'rxjs';
+
+const store: Partial<OrganizacaoStore> = {
+  search: vi.fn(() => of({ content: [], totalElements: 0 } as Page<OrganizacaoSummary>)),
+};
+
+// Caminho de erro, no mesmo teste ou em outro:
+store.search = vi.fn(() => throwError(() => ({ status: 500 })));
+```
+
+### Equivalência com Jasmine, para quem traz exemplo de fora
+
+| Jasmine (proibido) | Vitest (use este) |
+| :--- | :--- |
+| `jasmine.createSpyObj('X', ['a','b'])` | `{ a: vi.fn(), b: vi.fn() } as Partial<X>` |
+| `spy.and.returnValue(of(x))` | `vi.fn(() => of(x))` |
+| `spy.and.resolveTo(x)` | `vi.fn(async () => x)` |
+| `expect(v).toBeFalse()` / `toBeTrue()` | `expect(v).toBe(false)` / `toBe(true)` |
+| `expect(spy).toHaveBeenCalledTimes(1)` | igual — esta existe nos dois |
+| `jasmine.SpyObj<T>` como tipo | `Partial<T>`, ou `ReturnType<typeof vi.fn>` no método |
 
 ---
 
-## 4. Teste de Store
+## 4. Teste de Componente
+
+O componente é standalone: ele entra em `imports`, não em `declarations`. As dependências entram
+como `useValue`, e o roteador como `provideRouter([])`.
 
 ```typescript
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { provideRouter } from '@angular/router';
+import { of } from 'rxjs';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { GemsAlertService } from '@gabriel-mdias/angular-gems-sdk';
+import { {Entidade}ListComponent } from './{entidade}-list.component';
+import { {Entidade}Store } from '../services/{entidade}.store';
+
+function criar(store: Partial<{Entidade}Store>, alert: Partial<GemsAlertService> = {}) {
+  TestBed.configureTestingModule({
+    imports: [{Entidade}ListComponent],
+    providers: [
+      provideRouter([]),
+      { provide: {Entidade}Store, useValue: store },
+      { provide: GemsAlertService, useValue: { errorFromApi: vi.fn(), success: vi.fn(), ...alert } },
+    ],
+  });
+  const fixture = TestBed.createComponent({Entidade}ListComponent);
+  fixture.detectChanges();   // dispara ngOnInit e propaga os signals
+  return fixture;
+}
+
+describe('{Entidade}ListComponent', () => {
+  afterEach(() => TestBed.resetTestingModule());
+
+  it('deveCarregarRegistros_quandoInicializar', () => {
+    const search = vi.fn(() => of({ content: [{ id: '1' }], totalElements: 1 }));
+
+    const fixture = criar({ search });
+
+    expect(search).toHaveBeenCalledTimes(1);
+    expect(fixture.componentInstance.totalRecords()).toBe(1);
+  });
+
+  it('deveAvisarOUsuario_quandoABuscaFalhar', () => {
+    const errorFromApi = vi.fn();
+    const search = vi.fn(() => throwError(() => ({ status: 500 })));
+
+    criar({ search }, { errorFromApi });
+
+    expect(errorFromApi).toHaveBeenCalled();
+  });
+});
+```
+
+### Membro `protected` no teste
+
+O padrão do projeto declara o estado do componente como `protected readonly`. Para lê-lo no teste
+sem afrouxar o componente, faça o cast no ponto de leitura — não troque o modificador:
+
+```typescript
+expect((app as unknown as { appName: string }).appName).toBe('Meduc');
+```
+
+---
+
+## 5. Teste de Store
+
+É o **único** lugar onde `HttpClientTestingModule` (ou `provideHttpClientTesting`) entra:
+
+```typescript
+import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { {Entidade}Store } from './{entidade}.store';
 
 describe('{Entidade}Store', () => {
@@ -215,50 +182,74 @@ describe('{Entidade}Store', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      providers: [{Entidade}Store]
+      providers: [provideHttpClient(), provideHttpClientTesting(), {Entidade}Store],
     });
     store = TestBed.inject({Entidade}Store);
-    http  = TestBed.inject(HttpTestingController);
+    http = TestBed.inject(HttpTestingController);
   });
 
   afterEach(() => http.verify());
 
-  it('deveBuscarPorId', () => {
-    const mockData = { id: '1', nome: 'Teste' };
-    store.getById('1').subscribe(res => expect(res).toEqual(mockData as any));
-    http.expectOne('api/{recurso}/1').flush(mockData);
-  });
+  it('deveBuscarPorId_quandoChamarDetail', () => {
+    const esperado = { id: '1', nome: 'Teste' };
 
-  it('devePesquisar', () => {
-    const mockRes = { content: [], totalElements: 0 };
-    store.search({}, { page: 0, size: 10, sort: [] }).subscribe(res => expect(res).toEqual(mockRes));
-    http.expectOne(req => req.url.includes('/search') && req.method === 'POST').flush(mockRes);
+    store.detail('1').subscribe((res) => expect(res).toEqual(esperado as never));
+
+    http.expectOne((req) => req.url.endsWith('/1')).flush(esperado);
   });
 });
 ```
 
 ---
 
-## 5. Padrões
+## 6. Teste de Função Pura
 
-### Nomenclatura obrigatória:
+Construtor de menu, parser de claim, conversor de ordenação: função pura se testa **sem** `TestBed`,
+sem Keycloak e sem HTTP. É o teste mais barato e o mais estável — prefira extrair a lógica para uma
+função pura sempre que ela não depender do ciclo de vida do Angular.
+
+```typescript
+import { describe, expect, it } from 'vitest';
+import { parseTableSort } from './table-sort';
+
+describe('parseTableSort', () => {
+  it('deveLerOFormatoDoSpringData_quandoSortPresente', () => {
+    expect(parseTableSort(['nome,desc'], { field: 'id', direction: 'asc' })).toEqual({
+      field: 'nome',
+      direction: 'desc',
+    });
+  });
+});
+```
+
+---
+
+## 7. Padrões
+
+### Nomenclatura obrigatória
+
 ```
 deveRetornarLista_quandoSearchComSucesso()
-deveLancarErro_quandoServicoIndisponivel()
+deveNegarAcesso_quandoAcaoAusenteNoToken()
 naoDevePersistir_quandoDadosInvalidos()
 deveNavegar_quandoSalvarComSucesso()
 ```
 
-### Regras:
+camelCase, em português, sem "it should" e sem frase corrente. É a mesma convenção que o backend
+adotou (`deveX_quandoY`), para que uma prova se leia igual dos dois lados da pilha.
+
+### Regras
+
 | Regra | Detalhe |
 | :--- | :--- |
-| `NO_ERRORS_SCHEMA` em testes de componentes | Ignora gems-table, gems-form-card etc. — testa comportamento, não template |
-| Mocks via `jasmine.createSpyObj` | Tipados com `jasmine.SpyObj<T>` |
-| Nunca `HttpClientTestingModule` em testes de componentes | Só em testes de Store |
-| `fixture.detectChanges()` após setup | Dispara `ngOnInit` e propagação de signals |
-| `await fixture.whenStable()` | Para operações assíncronas (Promises + signals) |
-| AAA obrigatório | Arrange → Act → Assert — sem misturar |
+| `describe`/`it`/`expect`/`vi` importados de `'vitest'` | Este projeto não usa globais de teste |
+| Componente standalone vai em `imports` | Nunca `declarations`; nunca `NgModule` de teste |
+| `fixture.detectChanges()` após o setup | Dispara `ngOnInit` e a propagação dos signals |
+| `await fixture.whenStable()` | Para o que depende de Promise (ex.: `alertService.confirm`) |
+| `TestBed.resetTestingModule()` no `afterEach` | Quando o arquivo monta o TestBed mais de uma vez |
+| Nunca `HttpClientTestingModule` em teste de componente | Componente recebe dublê da Store |
+| Signal se lê com `()` e se escreve com `.set()` | `component.isLoading()` / `component.isLoading.set(true)` |
+| AAA obrigatório | Arrange → Act → Assert, sem misturar |
 
 ---
 
@@ -266,8 +257,10 @@ deveNavegar_quandoSalvarComSucesso()
 
 | Proibido | Correto |
 | :--- | :--- |
-| `new {Entidade}Store()` no teste | `jasmine.createSpyObj<{Entidade}Store>('{Entidade}Store', ['search', 'create', ...])` |
-| `HttpClientTestingModule` em testes de componentes | Apenas em testes de Store; componentes usam spy da Store |
-| Esquecer `fixture.detectChanges()` após setup | Obrigatório para disparar `ngOnInit` e bindings de signals |
-| `component.isLoading = true` (mutação direta) | `component.isLoading.set(true)` — signals são atualizados via `.set()` |
-| Nome de teste: `it('testa busca', ...)` | `it('deveRetornarLista_quandoSearchComSucesso', ...)` — padrão de nomenclatura obrigatório |
+| `import 'jasmine'`, `jasmine.createSpyObj`, `karma.conf.js` | Vitest: `vi.fn()` + `Partial<T>` em `useValue` |
+| `expect(v).toBeFalse()` | `expect(v).toBe(false)` — matcher de Jasmine não existe em Vitest |
+| `spy.and.returnValue(of(x))` | `vi.fn(() => of(x))` |
+| `describe`/`it` sem import, contando com global | `import { describe, it } from 'vitest'` |
+| `HttpClientTestingModule` em teste de componente | Apenas em teste de Store |
+| `component.isLoading = true` (mutação direta) | `component.isLoading.set(true)` |
+| Nome de teste: `it('testa busca', ...)` | `it('deveRetornarLista_quandoSearchComSucesso', ...)` |

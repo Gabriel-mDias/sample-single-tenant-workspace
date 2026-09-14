@@ -3,6 +3,9 @@ stack: backend-java
 module: spring-context
 severity: recommended
 see-also: [services.md, observability.md]
+origem: local
+precedencia: local-vence
+versao: 2.0.0
 ---
 
 # Spring Application Events — Desacoplamento de Subfluxos
@@ -53,7 +56,7 @@ public class {Entidade}Service {
     private final {Entidade}Repository repository;
     private final ApplicationEventPublisher eventPublisher;
 
-    @Transactional( rollbackOn = Exception.class )
+    @Transactional( rollbackFor = Exception.class )
     public {Entidade}DTO insert( {Entidade}DTO dto ) {
         validate( dto );
         var entity = repository.save( mapper.map( dto, {Entidade}.class ) );

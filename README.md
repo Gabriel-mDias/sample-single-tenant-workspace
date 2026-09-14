@@ -174,4 +174,5 @@ confunde com token errado:
 | `backend/AGENTS.md` · `frontend/AGENTS.md` | Convenções da camada, incluindo as armadilhas já pagas |
 | `environments/AGENTS.md` · `environments/vps/` | Ambiente, publicação e os runbooks de operação |
 | `specs/AGENTS.md` | Como o ciclo SDD funciona aqui |
+| `.gems-ai/` · `.gems-ai/MIGRACAO-2.0.0.md` | As regras de escrita (2.0.0) e o que o código daqui ainda **não** cumpre delas, medido |
 | `business/` | O produto em linguagem de negócio, para o cliente |

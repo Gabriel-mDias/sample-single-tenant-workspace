@@ -3,6 +3,9 @@ stack: backend-java
 module: gems-aws, gems-aws-web
 severity: mandatory
 see-also: [services.md, validation.md]
+origem: local
+precedencia: local-vence
+versao: 2.0.0
 ---
 
 # Storage & Upload S3 — gems-aws / gems-aws-web

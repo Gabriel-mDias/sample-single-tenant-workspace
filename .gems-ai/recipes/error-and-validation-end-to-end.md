@@ -1,14 +1,22 @@
+---
+origem: local
+precedencia: local-vence
+versao: 2.0.0
+---
+
 # Recipe: Erros e Validação Ponta-a-Ponta
 
 **Objetivo:** Implementar o ciclo completo de validação e tratamento de erros, desde a `BusinessException` no backend até a exibição via `AlertService.errorFromApi()` e `gems-field-error` no frontend.
 
 **Pré-requisitos:**
+
 - `gems-exception` (BusinessException, ExceptionAdvice)
 - `gems-validation` (constraints BR)
-- `gems-rest-common` (ApiResponseDTO)
+- `gems-rest-common` (paginação e Correlation-ID)
 - `gems-sdk` Angular (AlertService)
 
 **Rules relacionadas:**
+
 - [validation.md](../rules/backend-java/validation.md)
 - [services.md](../rules/backend-java/services.md)
 - [rest-common.md](../rules/backend-java/rest-common.md)
@@ -41,18 +49,23 @@ public class {Entidade}DTO {
 ```java
 // Controller — @Valid aciona Bean Validation
 @PostMapping
-public ResponseEntity<ApiResponseDTO<{Entidade}DTO>> insert(@Valid @RequestBody {Entidade}DTO dto) {
+public ResponseEntity<{Entidade}DTO> insert(@Valid @RequestBody {Entidade}DTO dto) {
     setBodyToExceptionLog(dto);
     return ResponseEntity.status(HttpStatus.CREATED)
-        .body(ApiResponseDTO.of(modelMapper.map(service.insert(dto), {Entidade}DTO.class)));
+        .body(mapper.toResponse(service.insert(dto)));
 }
 ```
 
-O `ExceptionAdvice` do `gems-exception` intercepta `MethodArgumentNotValidException` e retorna:
+O advice do `gems-exception` intercepta falhas reconhecidas e retorna o envelope uniforme abaixo.
+Confira a versão usada pelo projeto antes de assumir suporte específico a Bean Validation:
+
 ```json
 {
-  "success": false,
-  "errors": ["Nome é obrigatório.", "E-mail inválido."]
+  "occurrenceTime": "2026-09-09T23:33:22.933",
+  "errorType": "FALHA",
+  "message": "Nome é obrigatório.\nE-mail inválido.",
+  "path": "/api/recurso",
+  "method": "POST"
 }
 ```
 
@@ -77,23 +90,26 @@ private void validate({Entidade}DTO dto) {
 ```
 
 `BusinessException` pode receber:
+
 - `new BusinessException("Mensagem única.")` — string
 - `new BusinessException(errors)` — lista de strings
 
-## Camada 3: Formato da Resposta de Erro (ApiResponseDTO)
+## Camada 3: Formato da Resposta de Erro
 
-O `gems-rest-common` + `gems-exception` garantem que **todos** os erros (Bean Validation, BusinessException, 401, 403, 404, 500) retornam no mesmo formato:
+O `gems-exception` serializa `BusinessException` no núcleo uniforme:
 
 ```json
 {
-  "success": false,
-  "data": null,
-  "errors": [
-    "Nome é obrigatório.",
-    "E-mail já cadastrado para outro registro."
-  ]
+  "occurrenceTime": "2026-09-09T23:33:22.933",
+  "errorType": "FALHA",
+  "message": "Nome é obrigatório.\nE-mail já cadastrado para outro registro.",
+  "path": "/api/recurso",
+  "method": "POST"
 }
 ```
+
+Exceções de domínio especializadas devem estender `BusinessException`. Se precisarem preservar outro
+status, código ou detalhes, o handler específico mantém os cinco campos acima e só acrescenta extensões.
 
 ## Camada 4: Frontend — AlertService.errorFromApi()
 
@@ -101,17 +117,18 @@ O `gems-rest-common` + `gems-exception` garantem que **todos** os erros (Bean Va
 // Em qualquer subscribe de chamada HTTP:
 this.store.create(dto).subscribe({
   next: (res) => {
-    this.alertService.success('Sucesso', 'Criado com sucesso.');
-    this.nav.navigate(['/{modulo}/list']);
+    this.alertService.success("Sucesso", "Criado com sucesso.");
+    this.nav.navigate(["/{modulo}/list"]);
   },
   error: (err) => {
-    this.alertService.errorFromApi(err);   // Parse automático do ApiResponseDTO
+    this.alertService.errorFromApi(err); // Parse automático de errorType/message
     this.isLoading.set(false);
-  }
+  },
 });
 ```
 
-`errorFromApi` exibe automaticamente todas as strings do array `errors` — uma por linha em um modal SweetAlert2.
+`errorFromApi` usa `errorType` como título e `message` como texto no SweetAlert2. O construtor de
+`BusinessException` com lista já une os itens por quebra de linha.
 
 ## Camada 5: gems-field-error (Erros por Campo)
 
@@ -121,11 +138,14 @@ Para associar erros a campos específicos do formulário:
 <!-- No template do formulário -->
 <div class="form-group">
   <label class="required fw-bold" for="email">E-mail</label>
-  <input type="email" id="email" class="form-control"
-         formControlName="email"
-         [class.is-invalid]="form.get('email')?.invalid && form.get('email')?.touched">
-  <gems-field-error [control]="form.get('email')">
-  </gems-field-error>
+  <input
+    type="email"
+    id="email"
+    class="form-control"
+    formControlName="email"
+    [class.is-invalid]="form.get('email')?.invalid && form.get('email')?.touched"
+  />
+  <gems-field-error [control]="form.get('email')"> </gems-field-error>
 </div>
 ```
 

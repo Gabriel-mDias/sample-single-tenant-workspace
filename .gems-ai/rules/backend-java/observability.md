@@ -3,6 +3,9 @@ stack: backend-java
 module: gems-observability, gems-rest-common
 severity: recommended
 see-also: [rest-common.md, services.md]
+origem: local
+precedencia: local-vence
+versao: 2.0.0
 ---
 
 # Observabilidade — gems-observability
@@ -37,7 +40,7 @@ Anote métodos que devem ser rastreados (Micrometer cria spans e métricas autom
 public class {Entidade}Service {
 
     @Observed( name = "{entidade}.insert", contextualName = "Criação de {Entidade}" )
-    @Transactional( rollbackOn = Exception.class )
+    @Transactional( rollbackFor = Exception.class )
     public {Entidade}DTO insert( {Entidade}DTO dto ) {
         // Micrometer rastreia latência, sucesso e erros deste método
         validate( dto );

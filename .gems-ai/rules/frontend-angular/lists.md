@@ -1,14 +1,17 @@
 ---
 stack: frontend-angular
-module: gems-sdk (TableComponent, FormCardComponent)
+module: gems-sdk (GemsTableComponent, GemsFormCardComponent)
 severity: mandatory
 see-also: [signals-standards.md, stores.md, gems-components.md, feedback-alerts.md]
+origem: local
+precedencia: local-vence
+versao: 2.0.0
 ---
 
 # Listagens & Pesquisa Paginada — Angular / gems-sdk
 
 > **TL;DR:**
-> - `standalone: true`. Imports: `TableComponent` + `FormCardComponent` da gems-sdk + `FormsModule`.
+> - `standalone: true`. Imports: `GemsTableComponent` + `GemsFormCardComponent` da gems-sdk + `FormsModule`.
 > - Signals de estado: `entidades = signal([])`, `isLoading = signal(false)`, `totalRecords = signal(0)`.
 > - Ordem dos métodos: `ngOnInit` > `search()` > `clearFilters()` > `loadEntidades()` > `onPageChange()` > `handleAction()` > `remove()`.
 > - Template: header (`h2` + `btn-novo`) > `gems-form-card` (filtros) > `@if (isLoading())` > `gems-table`.
@@ -31,24 +34,24 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import {
-  TableComponent, TableColumn, TableAction,
-  FormCardComponent, Pageable,
-  AlertService, NavigationService
-} from 'gems-sdk';
+  GemsTableComponent, GemsTableColumn, GemsTableAction,
+  GemsFormCardComponent, GemsPageable,
+  GemsAlertService, GemsNavigationService
+} from '@gabriel-mdias/angular-gems-sdk';
 import { {Entidade}Store } from '../services/{entidade}.store';
 import { {Entidade}FilterModel } from '../../../models/{entidade}-filter.model';
 
 @Component({
   selector: 'app-{entidade}-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, TableComponent, FormCardComponent],
+  imports: [CommonModule, RouterModule, FormsModule, GemsTableComponent, GemsFormCardComponent],
   templateUrl: './{entidade}-list.component.html'
 })
 export class {Entidade}ListComponent implements OnInit {
 
   private store = inject({Entidade}Store);
-  private alertService = inject(AlertService);
-  private navigationService = inject(NavigationService);
+  private alertService = inject(GemsAlertService);
+  private navigationService = inject(GemsNavigationService);
 ```
 
 ---
@@ -63,7 +66,7 @@ export class {Entidade}ListComponent implements OnInit {
 
   // 2. Filtro e paginação
   filter: {Entidade}FilterModel = {};
-  pageable: Pageable = { page: 0, size: 10, sort: [] };
+  pageable: GemsPageable = { page: 0, size: 10, sort: [] };
 
   // 3. Getters de sort
   get currentSortField(): string | undefined {
@@ -74,21 +77,21 @@ export class {Entidade}ListComponent implements OnInit {
   }
 
   // 4. Colunas da tabela
-  columns: TableColumn[] = [
+  columns: GemsTableColumn[] = [
     { field: 'campo1', header: 'Label 1', sortable: true },
     { field: 'campo2', header: 'Label 2', sortable: true },
     { field: 'actions', header: '', type: 'actions', sortable: false }
   ];
 
   // 5. Ações da tabela
-  actions: TableAction[] = [
+  actions: GemsTableAction[] = [
     { actionName: 'view', icon: 'fa-solid fa-eye', tooltip: 'Visualizar', colorClass: 'btn-info' },
     { actionName: 'edit', icon: 'fa-solid fa-pen', tooltip: 'Editar', colorClass: 'btn-primary' },
     { actionName: 'delete', icon: 'fa-solid fa-trash', tooltip: 'Excluir', colorClass: 'btn-danger' }
   ];
 ```
 
-### 3.1 Tipos especiais de TableColumn:
+### 3.1 Tipos especiais de GemsTableColumn:
 ```typescript
 { field: 'numeroDocumento', header: 'Documento', type: 'document', docTypeField: 'tipoDocumento' }
 { field: 'valorFormatado',  header: 'Valor',      sortable: true,   sortParam: 'valor' }
@@ -128,7 +131,7 @@ export class {Entidade}ListComponent implements OnInit {
     });
   }
 
-  onPageChange(newPageable: Pageable): void {
+  onPageChange(newPageable: GemsPageable): void {
     this.pageable = newPageable;
     this.loadEntidades();
   }
@@ -176,15 +179,17 @@ export class {Entidade}ListComponent implements OnInit {
   </div>
 
   <!-- FILTROS -->
-  <gems-form-card title="Filtros de Pesquisa" (keyup.enter)="search()">
-    <p form-card-subtitle>Utilize os campos para refinar a lista.</p>
+  <gems-form-card
+    title="Filtros de Pesquisa"
+    subtitle="Utilize os campos para refinar a lista."
+    icon="fa-solid fa-filter">
     <div class="form-grid">
       <div class="form-group">
         <label>Campo</label>
         <input type="text" class="form-control" [(ngModel)]="filter.textoLivre" placeholder="Digite...">
       </div>
     </div>
-    <div form-card-footer>
+    <div gems-form-card-footer>
       <button type="button" class="btn-cancel" (click)="clearFilters()">
         Limpar <i class="fa-solid fa-eraser"></i>
       </button>

@@ -2,195 +2,180 @@
 stack: frontend-angular
 module: gems-sdk (GemsBaseStore)
 severity: mandatory
-see-also: [signals-standards.md, lists.md, forms.md]
+see-also: [signals-standards.md, lists.md, forms.md, http-interceptors.md]
+origem: local
+precedencia: local-vence
+versao: 2.0.0
 ---
 
 # Stores (HTTP Client Layer) — Angular / gems-sdk
 
 > **TL;DR:**
-> - Toda Store estende `GemsBaseStore` (gems-sdk) — **NUNCA** `HttpClient` diretamente nos componentes.
-> - `@Injectable({ providedIn: 'root' })` obrigatório. Arquivo: `features/{modulo}/services/{modulo}.store.ts`.
-> - `super('api/{recurso-kebab-case}')` no construtor — **sem** barra inicial.
-> - Ordem: `getAll()` > `getById()` > `search()` > `create()` > `update()` > `delete{Entidade}()`.
-> - `search()` retorna `Observable<{ content: T[]; totalElements: number }>`.
-> - IDs sempre `string` — nunca `UUID` ou `number` no frontend.
-> - Tipagem explícita com generics em todos os métodos.
+> - Toda Store estende `GemsBaseStore` de `@gabriel-mdias/angular-gems-sdk` — **nunca** `HttpClient` no componente.
+> - `@Injectable({ providedIn: 'root' })`. Arquivo: `features/{modulo}/services/{modulo}.store.ts`.
+> - `super('api/{recurso-kebab-case}')` — **sem** barra inicial, **sem** host (quem dá a base é `provideGemsHttp`).
+> - Ordem: `getAll` > `getById` > `search` > `create` > `update` > `delete{Entidade}` > ações de negócio.
+> - `search()` devolve `Observable<Page<T>>` — a página do Spring Data inteira, não um par reduzido.
+> - IDs sempre `string`. Generics explícitos em todo método. **Nunca** `object` ou `any` no lugar do tipo.
+> - Uma linha em branco entre métodos.
+
+> **Por que esta regra foi reescrita.** Os exemplos importavam de `'gems-sdk'` símbolos sem o prefixo
+> `Gems` (`Pageable`, `BaseStore`) — nomes que não existem: o pacote é
+> `@gabriel-mdias/angular-gems-sdk` e os símbolos são `GemsBaseStore`, `GemsPageable`. E `search()`
+> era descrito devolvendo `{ content, totalElements }`, o que descarta `totalPages`, `number` e
+> `size`, que a `gems-table` consome. Corrigida na rodada `008`, bloco M.
+
+---
 
 ## 1. Declaração da Store
 
 ```typescript
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
+import { GemsBaseStore, GemsPageable } from '@gabriel-mdias/angular-gems-sdk';
 import { Observable } from 'rxjs';
-import { GemsBaseStore, Pageable } from 'gems-sdk';
-import { {Entidade}Model } from '../../../models/{entidade}.model';
-import { {Entidade}FilterModel } from '../../../models/{entidade}-filter.model';
-import { {Entidade}ResponseModel } from '../../../models/{entidade}-response.model';
+import { {Entidade}, {Entidade}Detail, {Entidade}Filter, Page } from '../models/{modulo}.model';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class {Entidade}Store extends GemsBaseStore {
 
   constructor() {
-    super('api/{recurso-kebab-case}');   // Path base — sem barra inicial
+    super('api/{recurso-kebab-case}');   // sem barra inicial, sem host
   }
 ```
 
-### Regras de declaração:
-- **Estende** `GemsBaseStore` (não `BaseStore` — nome corrigido no SDK).
-- `@Injectable({ providedIn: 'root' })` sempre.
-- `constructor()` chama `super('api/{recurso}')` sem barra inicial.
-- Arquivo em `features/{modulo}/services/{modulo}.store.ts`.
+- **Estende** `GemsBaseStore`. Não existe `BaseStore`.
+- `@Injectable({ providedIn: 'root' })` sempre — a Store não guarda estado de tela.
+- O host vem de `provideGemsHttp(environment.apiBaseUrl)`; a Store só conhece o caminho.
 
 ---
 
-## 2. Ordem Fixa dos Métodos
+## 2. `Page<T>` — a forma que o backend devolve
 
-1. `getAll()` — quando necessário
-2. `getById(id)` / `findById(id)`
+O backend pagina com Spring Data. A página inteira atravessa:
+
+```typescript
+export interface Page<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+}
+```
+
+Reduzi-la a `{ content, totalElements }` na Store obriga o componente a recalcular o que já veio
+pronto, e desalinha a `gems-table` da resposta real assim que a paginação deixa de ser trivial.
+
+---
+
+## 3. Ordem Fixa dos Métodos
+
+1. `getAll()` — quando existir listagem sem filtro
+2. `getById(id)`
 3. `search(filter, pageable)`
 4. `create(dto)`
 5. `update(id, dto)`
 6. `delete{Entidade}(id)`
-7. Métodos de ação específica de negócio (quando aplicável)
+7. Ações de negócio (na ordem em que o fluxo as usa)
+
+A ordem é a mesma do service do backend (`findById > search > delete > insert > save`) invertida para
+a leitura de cliente: primeiro o que lê, depois o que escreve, por último o que é específico do
+domínio. Um arquivo previsível se revisa mais rápido do que um arquivo ordenado por acaso.
 
 ---
 
-## 3. Padrão de Cada Método
-
-### getAll
-```typescript
-getAll(): Observable<{Entidade}Model[]> {
-  return this.get<{Entidade}Model[]>('');
-}
-```
-
-### getById
-```typescript
-getById(id: string): Observable<{Entidade}Model> {
-  return this.get<{Entidade}Model>(`/${id}`);
-}
-```
-
-### search — retorna sempre `{ content, totalElements }`
-```typescript
-search(filter: {Entidade}FilterModel, pageable: Pageable): Observable<{ content: {Entidade}ResponseModel[]; totalElements: number }> {
-  return this.post<{ content: {Entidade}ResponseModel[]; totalElements: number }, {Entidade}FilterModel>(
-    '/search',
-    filter,
-    { pageable }
-  );
-}
-```
-
-### create
-```typescript
-create(dto: {Entidade}Model): Observable<{Entidade}Model> {
-  return this.post<{Entidade}Model, {Entidade}Model>('', dto);
-}
-```
-
-### update
-```typescript
-update(id: string, dto: {Entidade}Model): Observable<{Entidade}Model> {
-  return this.put<{Entidade}Model, {Entidade}Model>(`/${id}`, dto);
-}
-```
-
-### delete
-```typescript
-delete{Entidade}(id: string): Observable<void> {
-  return this.delete<void>(`/${id}`);
-}
-```
-
----
-
-## 4. Métodos de Ação de Negócio
-
-Para operações além do CRUD:
+## 4. Padrão de Cada Método
 
 ```typescript
-suspenderAcesso(id: string): Observable<void> {
-  return this.put<void, void>(`/suspensao/${id}`, undefined as any);
-}
-
-ativarAcesso(id: string): Observable<void> {
-  return this.put<void, void>(`/ativacao/${id}`, undefined as any);
-}
-
-importarLote(arquivo: FormData): Observable<{ importados: number }> {
-  return this.post<{ importados: number }, FormData>('/importar', arquivo);
-}
-```
-
-- PUT sem body: `undefined as any` como segundo argumento.
-- Nomes em camelCase refletindo a ação de negócio.
-- Path em kebab-case: `/suspensao`, `/ativacao`.
-
----
-
-## 5. Tipagem
-
-- **Sempre** tipar com generics: `this.get<TipoRetorno>()`, `this.post<TipoRetorno, TipoBody>()`.
-- IDs são sempre `string` no frontend.
-- Evite `any` — use interfaces tipadas ou `unknown`.
-- `search()` retorna **sempre** `Observable<{ content: T[]; totalElements: number }>`.
-
----
-
-## 6. Template Completo
-
-```typescript
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { GemsBaseStore, Pageable } from 'gems-sdk';
-import { {Entidade}Model } from '../../../models/{entidade}.model';
-import { {Entidade}FilterModel } from '../../../models/{entidade}-filter.model';
-
-@Injectable({
-  providedIn: 'root'
-})
-export class {Entidade}Store extends GemsBaseStore {
-
-  constructor() {
-    super('api/{recurso}');
+  getById(id: string): Observable<{Entidade}Detail> {
+    return this.get<{Entidade}Detail>(id);
   }
 
-  getAll(): Observable<{Entidade}Model[]> {
-    return this.get<{Entidade}Model[]>('');
+  search(filter: {Entidade}Filter, pageable: GemsPageable): Observable<Page<{Entidade}>> {
+    return this.post<Page<{Entidade}>, {Entidade}Filter>(this.pageablePath('search', pageable), filter);
   }
 
-  getById(id: string): Observable<{Entidade}Model> {
-    return this.get<{Entidade}Model>(`/${id}`);
+  create(body: {Entidade}Create): Observable<{Entidade}Detail> {
+    return this.post<{Entidade}Detail, {Entidade}Create>('', body);
   }
 
-  search(filter: {Entidade}FilterModel, pageable: Pageable): Observable<{ content: {Entidade}Model[]; totalElements: number }> {
-    return this.post<{ content: {Entidade}Model[]; totalElements: number }, {Entidade}FilterModel>('/search', filter, { pageable });
-  }
-
-  create(dto: {Entidade}Model): Observable<{Entidade}Model> {
-    return this.post<{Entidade}Model, {Entidade}Model>('', dto);
-  }
-
-  update(id: string, dto: {Entidade}Model): Observable<{Entidade}Model> {
-    return this.put<{Entidade}Model, {Entidade}Model>(`/${id}`, dto);
+  update(id: string, body: {Entidade}Update): Observable<{Entidade}Detail> {
+    return this.put<{Entidade}Detail, {Entidade}Update>(id, body);
   }
 
   delete{Entidade}(id: string): Observable<void> {
-    return this.delete<void>(`/${id}`);
+    return this.delete<void>(id);
   }
-}
 ```
+
+**Uma linha em branco entre métodos.** Métodos colados escondem onde um termina e o outro começa, e
+é justamente na borda que o revisor procura o erro.
 
 ---
 
-## 7. Formatação
+## 5. Ações de Negócio
 
-- Aspas simples `'` para strings.
-- Template literals `` ` `` para paths com variáveis.
-- `;` em toda declaração.
-- Uma linha em branco entre cada método.
+Para o que vai além do CRUD, o nome é o da ação em camelCase e o caminho é kebab-case:
+
+```typescript
+  retentar(id: string, body: RetentativaInput): Observable<{Entidade}Detail> {
+    return this.post<{Entidade}Detail, RetentativaInput>(`${id}/retentativa`, body);
+  }
+
+  gestores(id: string, filter: GestorFilter, pageable: GemsPageable): Observable<Page<Gestor>> {
+    return this.post<Page<Gestor>, GestorFilter>(
+      this.pageablePath(`${id}/gestores/search`, pageable),
+      filter,
+    );
+  }
+
+  removerGestor(id: string, userId: string): Observable<void> {
+    return this.delete<void>(`${id}/gestores/${userId}`);
+  }
+```
+
+Cada transição de fluxo é **um endpoint de ação** — situação nunca entra pelo corpo da requisição.
+É a mesma regra do lado do backend.
+
+---
+
+## 6. Paginação na URL
+
+A paginação do Spring Data vai em query string. Um helper **privado** monta o caminho, para que
+nenhum método repita a serialização:
+
+```typescript
+  private pageablePath(path: string, pageable: GemsPageable): string {
+    const params = new URLSearchParams({
+      page: String(pageable.page ?? 0),
+      size: String(pageable.size ?? 10),
+    });
+    pageable.sort?.forEach((sort) => params.append('sort', sort));
+    return `${path}?${params.toString()}`;
+  }
+```
+
+`sort` é `string[]` no formato `campo,direcao` — múltiplos critérios viram múltiplos parâmetros
+`sort`, que é o que o Spring Data espera.
+
+---
+
+## 7. Tipagem
+
+- Generics **sempre**: `this.get<T>()`, `this.post<TReturn, TBody>()`.
+- IDs são `string` no frontend; a conversão é do backend.
+- **`object` não é tipo.** `filter: object` e `body: object` passam pelo compilador sem proteger
+  nada: qualquer campo entra, nenhum erro de digitação aparece. Declare a interface — mesmo que ela
+  tenha três campos opcionais, ela é o que impede `{ nmoe: 'x' }` de virar filtro silenciosamente
+  ignorado pelo backend.
+- Evite `any`; quando o tipo for genuinamente desconhecido, `unknown`.
+
+---
+
+## 8. Formatação
+
+- Aspas simples; template literals para caminho com variável.
+- Uma linha em branco entre métodos; helper privado por último.
 - Imports: Angular → gems-sdk → rxjs → models locais.
 
 ---
@@ -199,8 +184,11 @@ export class {Entidade}Store extends GemsBaseStore {
 
 | Proibido | Correto |
 | :--- | :--- |
-| `HttpClient` injetado diretamente no componente ou Store | `GemsBaseStore.get/post/put/delete` — nunca `HttpClient` diretamente |
-| `super('/api/recurso')` (com barra inicial) | `super('api/recurso')` — sem barra inicial |
-| `extends BaseStore` (nome antigo) | `extends GemsBaseStore` |
-| `id: number` no tipo de retorno | `id: string` — IDs sempre `string` no frontend |
-| Método sem tipagem de generics: `this.post(...)` | `this.post<TReturn, TBody>(path, body)` — sempre tipado |
+| `import { BaseStore, Pageable } from 'gems-sdk'` | `import { GemsBaseStore, GemsPageable } from '@gabriel-mdias/angular-gems-sdk'` |
+| `HttpClient` injetado no componente ou na Store | `GemsBaseStore.get/post/put/delete` |
+| `super('/api/recurso')` (barra inicial) ou URL absoluta | `super('api/recurso')` + `provideGemsHttp` |
+| `search(filter: object, ...)` | `search(filter: {Entidade}Filter, ...)` — interface declarada |
+| `Observable<{ content: T[]; totalElements: number }>` | `Observable<Page<T>>` — a página inteira |
+| `id: number` no tipo | `id: string` |
+| `this.post(...)` sem generics | `this.post<TReturn, TBody>(path, body)` |
+| Métodos colados, sem linha em branco | Uma linha em branco entre cada método |

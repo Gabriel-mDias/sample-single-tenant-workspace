@@ -3,36 +3,51 @@ stack: frontend-angular
 module: @angular/core
 severity: mandatory
 see-also: [forms.md, lists.md, stores.md, stepper.md]
+origem: local
+precedencia: local-vence
+versao: 2.0.0
 ---
 
-# Signals & Modern Angular — Angular 20+
+# Signals & Modern Angular — Angular 22
 
 > **TL;DR:**
-> - Angular 20+: `standalone: true` obrigatório. **NUNCA** `NgModules`.
+> - Componente é standalone **por padrão** no Angular 19+. Não declare `standalone: true`. **NUNCA** `NgModules`.
 > - Signals: use `input()`, `output()`, `model()`, `signal()`, `computed()` — **NUNCA** `@Input`/`@Output` decorators.
 > - Injeção: `inject()` no corpo da classe — **NUNCA** `constructor` com parâmetros.
+> - Estado de componente é `protected readonly` + `signal()`; dependência é `private readonly`.
 > - Controle de fluxo: `@if` / `@for` / `@switch` — **NUNCA** `*ngIf` / `*ngFor` / `*ngSwitch`.
-> - Two-way binding: `[(ngModel)]` ou `model()` signal.
-> - Lazy loading: `loadComponent()` em todas as rotas.
+> - Lazy loading: `loadComponent()` / `loadChildren()` em todas as rotas.
 
-## 1. Standalone Components (Obrigatório)
+> **Correção da rodada `008` (bloco M).** Esta regra dizia "Angular 20+: `standalone: true`
+> obrigatório" e importava símbolos sem o prefixo `Gems` de um pacote `'gems-sdk'` que não existe.
+> O projeto está em **Angular 22**, onde standalone é o padrão e a flag é redundante, e o pacote é
+> `@gabriel-mdias/angular-gems-sdk`.
+
+## 1. Standalone (Padrão, não declarado)
 
 ```typescript
+import { Component } from '@angular/core';
+import { ReactiveFormsModule } from '@angular/forms';
+import { GemsFormCardComponent, GemsInputTextComponent } from '@gabriel-mdias/angular-gems-sdk';
+
 @Component({
   selector: 'app-{entidade}-form',
-  standalone: true,     // Sempre
-  imports: [            // Importa diretamente o que usa
+  imports: [                       // importa diretamente o que usa
     ReactiveFormsModule,
-    RouterModule,
-    FormCardComponent,
-    InputMaskComponent
+    GemsFormCardComponent,
+    GemsInputTextComponent,
   ],
-  templateUrl: './{entidade}-form.component.html'
+  templateUrl: './{entidade}-form.component.html',
+  styleUrl: './{entidade}-form.component.css',
 })
-export class {Entidade}FormComponent { }
+export class {Entidade}FormComponent {}
 ```
 
 **Nunca** use `NgModule`. Cada componente é auto-suficiente via `imports`.
+
+**Não escreva `standalone: true`.** Desde o Angular 19 é o padrão, e o schematic oficial não o gera.
+Declará-lo é ruído que envelhece: quem lê passa a procurar o componente "não standalone" que não
+existe.
 
 ---
 
@@ -99,20 +114,33 @@ export class ToggleComponent {
 
 ```typescript
 export class {Entidade}ListComponent {
-  // CORRETO — inject() no corpo da classe
-  private store = inject({Entidade}Store);
-  private alertService = inject(AlertService);
-  private navigationService = inject(NavigationService);
-  private route = inject(ActivatedRoute);
-  private fb = inject(FormBuilder);
+  // Dependências: private readonly, na ordem em que a classe as usa
+  private readonly fb = inject(FormBuilder);
+  private readonly store = inject({Entidade}Store);
+  private readonly route = inject(ActivatedRoute);
+  private readonly alertService = inject(GemsAlertService);
 
-  // Signals de estado
-  entidades = signal<{Entidade}Model[]>([]);
-  isLoading = signal(false);
+  // Estado exposto ao template: protected readonly
+  protected readonly entidades = signal<{Entidade}[]>([]);
+  protected readonly isLoading = signal(false);
+
+  // Estado interno, que o template não lê: private readonly
+  private readonly hasFilters = signal(false);
 }
 ```
 
 **Nunca** use `constructor(private store: {Entidade}Store)` — use `inject()`.
+
+### Visibilidade não é detalhe
+
+| Modificador | Para quê | Por quê |
+| :--- | :--- | :--- |
+| `private readonly` | dependências injetadas e estado que só a classe usa | o template não deve alcançar a Store nem o `Router` |
+| `protected readonly` | estado e métodos que o template lê ou chama | `public` abre a superfície para qualquer um; `private` quebra o template |
+
+`readonly` em toda parte: o que muda é o **valor dentro do signal** (`.set()`, `.update()`), nunca a
+referência. Uma reatribuição do próprio campo desconecta todos os leitores já registrados, e o
+sintoma é uma tela que simplesmente para de atualizar.
 
 ---
 
@@ -201,7 +229,10 @@ Sempre `loadComponent` com lazy loading — nunca imports estáticos de componen
 
 | Proibido | Correto |
 | :--- | :--- |
-| `NgModule` | `standalone: true` em todo componente |
+| `NgModule` | componente standalone com `imports: [...]` |
+| `standalone: true` escrito no decorator | omitir — é o padrão desde o Angular 19 |
+| `import { TableComponent } from 'gems-sdk'` | `import { GemsTableComponent } from '@gabriel-mdias/angular-gems-sdk'` |
+| Campo de estado `public` e sem `readonly` | `protected readonly x = signal(...)` |
 | `@Input() valor: T` | `valor = input<T>()` |
 | `@Output() evento = new EventEmitter<T>()` | `evento = output<T>()` |
 | `constructor(private svc: Svc)` | `private svc = inject(Svc)` |
@@ -221,5 +252,7 @@ Sempre `loadComponent` com lazy loading — nunca imports estáticos de componen
 | `*ngIf="cond"` | `@if (cond) { }` |
 | `*ngFor="let i of lista"` | `@for (i of lista; track i.id) { }` |
 | `*ngSwitch` / `*ngSwitchCase` | `@switch` / `@case` |
-| `NgModule` | `standalone: true` |
+| `NgModule` | componente standalone com `imports: [...]` |
+| `standalone: true` no decorator | omitir — padrão desde o Angular 19 |
 | `BehaviorSubject + async pipe` | Prefer `signal()` + `computed()` para estado local |
+| Símbolo da SDK sem o prefixo `Gems` | `GemsTableComponent`, `GemsAlertService`, `GemsPageable`… |
