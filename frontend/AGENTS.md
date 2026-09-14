@@ -24,3 +24,7 @@ Leia apenas as regras GEMS da tela afetada e use `features/parceiro` como refer�
 npm test
 npm run build
 ```
+
+Transição aprovada na constituição 2.0.0: a rodada 002 migrará para SDK 2.1.0, gems-field-error e gems-input-password, somente shared/, isAuthorized e rotas list/form/form/:id/view/:id. As armadilhas acima descrevem a base 1.1.0 e serão removidas junto com o código correspondente.
+
+Regras GEMS vencem código consolidado; referência não autoriza desvio. Consulte a constituição 2.0.0 e a seção Adoção de Módulo da SDK GEMS.

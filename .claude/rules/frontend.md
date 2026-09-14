@@ -7,3 +7,5 @@ paths:
 
 Siga `frontend/AGENTS.md`. Use Angular standalone, signals, Vitest e `features/parceiro` como
 referência. Não importe entre features.
+
+A constituição 2.0.0 e frontend/AGENTS.md definem autoridade: regras GEMS vencem código consolidado e a adoção de módulos SDK exige prova de equivalência.

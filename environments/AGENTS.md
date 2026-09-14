@@ -19,3 +19,5 @@
 > **O ensaio de restore é gate, não documentação.** O Princípio IX exige backup *verificado*: um
 > mecanismo de backup entregue sem um restore executado atende metade da cláusula. Quem alterar
 > backup herda essa pendência e a declara aqui.
+
+Regras GEMS vencem código consolidado; referência não autoriza desvio. Consulte a constituição 2.0.0 e a seção Adoção de Módulo da SDK GEMS.

@@ -10,3 +10,4 @@ alwaysApply: true
 - Delegação zero é válida; não crie agente para tarefa pequena ou serial.
 - Nunca execute `docker compose down -v`.
 - Gates finais: backend `mvnw.cmd clean install`; frontend `npm test` e `npm run build`.
+Regras GEMS vencem código consolidado (constituição 2.0.0); templates de referência não autorizam desvio.

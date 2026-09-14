@@ -22,7 +22,7 @@
 - Schema muda somente por Liquibase em `app-deploy`; `ddl-auto: validate`.
 - Ordem de service: `findById > search > delete > insert > save > validate`.
 - Validação acumula mensagens em `BusinessException`; mutações usam
-  `@Transactional(rollbackOn = Exception.class)`.
+  `@Transactional(rollbackFor = Exception.class)` do Spring`.
 - Agregados são persistidos/excluídos explicitamente: agregado-primeiro no insert, dono-primeiro no
   delete.
 
@@ -40,3 +40,8 @@
 - Espelhe o domínio `parceiro` e leia apenas as regras GEMS da camada tocada.
 - Iteração: `.\mvnw.cmd -pl <modulo> -am test`.
 - Fechamento: `.\mvnw.cmd clean install` uma vez.
+
+Transição aprovada na constituição 2.0.0: SDK transversal substitui implementações locais com prova de equivalência. A anotação Jakarta, handlers, auditoria e autorização locais ainda existem e serão conformados na rodada 002.
+Todo controller estende BaseController, inclusive GET; não estender exige motivo no Javadoc.
+
+Regras GEMS vencem código consolidado; referência não autoriza desvio. Consulte a constituição 2.0.0 e a seção Adoção de Módulo da SDK GEMS.
