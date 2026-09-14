@@ -56,12 +56,12 @@ Registre no relatório **o que foi mutado e o que falhou**. Mutação não regis
 
 ```bash
 cd environments/local && docker compose up -d        # postgres, keycloak, realm, localstack
-cd backend  && ./mvnw clean install -DskipTests && ./mvnw -pl app-deploy spring-boot:run
+cd backend  && ./mvnw clean install -DskipTests && ./mvnw -pl meduc-deploy spring-boot:run
 cd frontend && npm start
 ```
 
 Rode a API e a SPA **em background**. O Keycloak leva ~80s no primeiro boot — espere
-`Listening on: http://0.0.0.0:8080` em `docker compose logs -f app-keycloak`; pollar antes disso dá
+`Listening on: http://0.0.0.0:8080` em `docker compose logs -f meduc-keycloak`; pollar antes disso dá
 falso negativo.
 
 ⚠️ `docker compose down -v` é **proibido**: o volume é compartilhado com o `keycloak-db`, e as senhas

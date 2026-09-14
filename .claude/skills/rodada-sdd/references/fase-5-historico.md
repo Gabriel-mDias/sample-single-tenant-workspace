@@ -5,7 +5,10 @@ de negócio na pasta `business/`, e em linguagem de agente nos arquivos de conte
 
 **Termina quando:** o §D do checklist de fechamento está integralmente marcado.
 
-Esta é a **última etapa da rodada**. Ela só começa com a homologação registrada.
+Esta é a **última etapa da rodada**. Ela só começa com a homologação registrada — o bloco
+`✅ HOMOLOGADA` com data na seção **"Critérios de aprovação"** do roteiro (localizada pelo título; é a
+§12 no template, §13 na `005`). Ao fim desta fase, o mesmo bloco mais o `business/` atualizado é o que
+faz a `/rodada-sdd` ler a rodada como **encerrada** — sem os dois, ela volta a ser lida como fase 5.
 
 ---
 

@@ -1,2 +1,15 @@
 # Guardrail: arquivos AGENTS.md devem permanecer menores que este teto.
 project_doc_max_bytes = 16384
+
+# Sandbox liberado PELA DURAÇÃO DA RODADA 010 (decisão 5 do roteiro, forma aprovada no portão de
+# 2026-09-14; I-01, R-10). Sem isto o Codex não roda `.\mvnw.cmd clean install` neste projeto no
+# Windows (o sandbox não enxerga `.m2`), e "conduzir sozinho" inclui o portão.
+#
+# Consequência: o Codex passa a ter rede e disco reais. A proteção deixa de ser técnica e passa a
+# ser processual — pacote de execução com listas READ/EDIT/CREATE/TEST fechadas, rollback exato
+# (skill `delegacao-de-modelos`), segredos só em `.env` fora do Git (Princípio IX).
+#
+# É temporário: a tarefa T070 do fechamento da 010 remove esta linha e este comentário volta a ser
+# só o guardrail acima. Rodada futura que precise do gate pelo Codex religa aqui e desliga ao fim
+# — o roadmap `importar-definicoes-gems` do sample descreve os dois passos.
+sandbox_mode = "danger-full-access"

@@ -32,7 +32,7 @@ precisa bater com a fonte. Apure **contra o código**, nunca contra outro docume
 | :--- | :--- |
 | Testes de backend, hoje | `.\mvnw.cmd test` e leia o total por módulo |
 | Testes de frontend, hoje | `npm test` e leia arquivos e casos |
-| Ações em `AcaoSistema` | conte no enum de `app-security` |
+| Ações em `AcaoSistema` | conte no enum de `meduc-security` |
 | Constantes em `acoes.ts` | conte no arquivo do frontend |
 | Controllers e anotações `@PreAuthorize` | a varredura `CoberturaPreAuthorizeTest` já conta |
 | Rotas guardadas | `routes-coverage.spec.ts` |

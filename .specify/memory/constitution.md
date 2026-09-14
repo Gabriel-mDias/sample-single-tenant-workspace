@@ -379,7 +379,7 @@ passa pelo Princípio VIII.
    SDK, não a adoção dela aqui.
 2. **Prova por mutação** (Princípio VII) sobre toda rede que passa a depender do módulo: quebrar o
    alvo real, confirmar o vermelho, restaurar por edição inversa.
-3. **Gate onde a falha é silenciosa.** Garantia cuja violação não gera erro — 
+3. **Gate onde a falha é silenciosa.** Garantia cuja violação não gera erro —
    paridade de catálogo, cobertura de anotação — MUST continuar tendo varredura que **quebra o
    build**, e a varredura é código deste projeto se o módulo não a traz.
 4. **Gate do Princípio VII verde**, com o reator inteiro, e aplicação subindo com `ddl-auto: validate`.

@@ -5,7 +5,7 @@
 | Lote | Onde roda | Por quê |
 | :--- | :--- | :--- |
 | **Backend** | `git worktree` próprio | Maven compartilha o `~/.m2`; o worktree custa segundos mesmo em repositório grande, e o rollback vira atômico |
-| **Frontend** | branch de trabalho atual | um worktree novo pagaria `npm install --legacy-peer-deps` inteiro **antes** de o portão `npm test` poder rodar |
+| **Frontend** | branch de trabalho atual | um worktree novo pagaria `npm ci` inteiro **antes** de o portão `npm test` poder rodar |
 
 ⚠️ **Alguns CLIs só enxergam workspace sob uma raiz confiável declarada na própria configuração.** É o
 caso do `agy`, cuja lista de `trustedWorkspaces` vive em `~/.gemini/antigravity-cli/settings.json`.

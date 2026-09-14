@@ -53,6 +53,9 @@ Copie e preencha ao fim de **cada** rodada. Reusável em todas.
 - [ ] Homologação do product owner registrada no roteiro, **com data**
 - [ ] `scripts/verificar-contexto-agentes.ps1` verde; adaptadores raiz e regras por camada atualizados
 - [ ] Divergências entre documentação e código reportadas — e corrigidas, se pequenas e óbvias
+- [ ] `.specify/feature.json` aponta para a rodada **seguinte**, ou foi deixado explicitamente sem
+      rodada ativa (`{"feature_directory": null}`) — o `/speckit-specify` o escreve mas não o limpa,
+      e um ponteiro velho faz a `/rodada-sdd` desempatar para a rodada errada
 
 ---
 
@@ -71,6 +74,10 @@ impede que ela seja lida como opinião.
 | **Defeito silencioso custa mais que defeito barulhento** | Erro que aparece no primeiro minuto de uso real e em nenhum teste é a assinatura de uma suíte que testa o que é fácil testar |
 | **Uma mutação pode passar porque o TESTE é fraco, não porque a rede é boa** | Ao quebrar o alvo, escolha o caminho que **só o alvo explica** — senão o teste responde certo com a regra invertida |
 | **Função de data é fronteira entre a HQL e o banco, e só o teste de integração a alcança** | Funções de data têm semântica própria em cada banco, e uma tipagem genérica pode recusar operações que compilam. Nenhuma das duas falhas aparece em compilação |
+| **Arquivo gerado precisa sair do alcance do formatador** | Na 007, o `prettier --check` do CI e o gerador do catálogo de ações tinham opiniões diferentes sobre o mesmo arquivo, e nenhum dos dois sabia do outro. Formatar para agradar a um reprovaria o outro: o formato de um artefato derivado pertence a quem o gera |
+| **Regra que ninguém seguiu do zero não está provada** | Na 008, dois blocos corrigiram o *conteúdo* das regras e o gate nasceu verde sobre o código existente. A prova SC-011 — um executor lendo **só** as regras, sem espelho — reprovou em 29 linhas, todas de regra: os exemplos escreviam `@Anotacao( ... )` e o formatador não; a regra prescrevia um método que a SDK não tem. Quem lê a regra conhecendo o código não vê isso; só vê quem escreve sem conhecê-lo |
+| **Veracidade que cobre metade da pilha deixa a outra metade pior que antes** | Na 008, o bloco J inverteu a hierarquia para as 49 regras e o bloco K tornou verdadeiras só as 19 de backend. As 12 de frontend ficaram com **autoridade invertida apontando para regra falsa** — Jasmine, `angular-oauth2-oidc`, autorização por role — e conformar contra elas quebraria as 49 provas. Inverter a hierarquia e tornar a regra verdadeira são uma operação só, por camada |
+| **Sob regra-vence-código, apagar código sem apagar a regra fabrica uma regra falsa com autoridade** | Na 009, o E-05 apagou dois componentes locais que `README.md`, duas regras, uma receita e um script ainda prescreviam — e a tarefa só nomeava os consumidores. O E-10 achou a receita `setup-frontend-sdk.md` prescrevendo `angular-oauth2-oidc`, que a `auth.md` da 008 já tinha desmentido. Uma remoção sob a hierarquia 2.4.0 termina com `git grep` do nome apagado em `.gems-ai/`, `README.md` e scripts, na mesma alteração |
 
 ---
 

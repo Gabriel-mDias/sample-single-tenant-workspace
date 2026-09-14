@@ -5,13 +5,18 @@ description: Execute o ciclo Spec-driven do projeto para novas funcionalidades, 
 
 # Spec-driven do projeto
 
+> Para **conduzir uma rodada** — descobrir em que fase ela está, executar só essa fase e parar no
+> portão humano — use `$rodada-sdd`. Esta skill descreve o ciclo spec-kit que a fase 2/3 daquela
+> percorre; ela não sabe em que fase a rodada está.
+
 ## Preparar o contexto
 
 1. Ler `AGENTS.md`, `specs/AGENTS.md` e os artefatos da feature. Ler `CODEX.md` e a constituição por
    inteiro somente quando a mudança tocar comportamento, arquitetura, ambiente ou governança.
 2. Localizar a RF de origem em `utils/documentação do projeto/especificacoes_spec_driven/`.
 3. Consultar o levantamento prévio apenas para contexto de negócio e terminologia.
-4. Inspecionar a feature semelhante e o domínio `parceiro` para restrições reais de implementação.
+4. Inspecionar a feature semelhante e o domínio de referência, quando houver, para restrições reais
+   de implementação.
 5. Classificar o trabalho e aplicar documentação proporcional:
    - Nova feature: executar o ciclo completo.
    - Mudança de comportamento aprovado: atualizar a partir do primeiro artefato impactado e propagar
@@ -56,9 +61,9 @@ estado real durante o planejamento.
   - `contracts/`: REST e módulo frontend, quando aplicáveis.
   - `quickstart.md`: cenários executáveis de validação ponta a ponta.
 - Distribuir arquivos entre os cinco módulos Maven conforme a constituição.
-- Manter configuração, migrations, resources e empacotamento somente em `app-deploy`.
+- Manter configuração, migrations, resources e empacotamento somente em `meduc-deploy`.
 - Consultar regras e recipes GEMS apenas para as camadas presentes no plano; aplicar os overrides do
-  `CODEX.md` e preferir `parceiro` quando houver divergência consolidada.
+  `CODEX.md` e preferir o domínio de referência quando houver divergência consolidada.
 
 ### 4. Tasks
 
@@ -84,6 +89,10 @@ estado real durante o planejamento.
 - Não marcar item aberto mecanicamente. Resolver, aceitar explicitamente ou registrar por que não se
   aplica.
 - Não alterar arquivos durante uma execução solicitada como análise read-only.
+- Depois do `speckit-analyze` e antes da assinatura do roteiro, avaliar os critérios da skill
+  `opus-review`. Quando elegível, obter autorização específica do usuário antes de uma única revisão
+  Opus de planejamento; registrar também quando não acionada, indisponível ou falha. O parecer é
+  consultivo e cada achado precisa de adjudicação Codex fundamentada.
 
 ### 6. Implement
 
@@ -107,6 +116,9 @@ estado real durante o planejamento.
   - `frontend/npx prettier --write .`.
   - aplicação subindo com `ddl-auto: validate` quando houver impacto de contexto ou banco.
 - Executar os cenários relevantes de `quickstart.md` e registrar evidências.
+- Depois dos gates completos e antes da homologação, repetir a avaliação de elegibilidade da skill
+  `opus-review` para o checkpoint de implementação. A chamada continua opcional, exige nova
+  autorização e não bloqueia automaticamente a rodada quando indisponível ou falha.
 - Informar testes não executados e verificações manuais pendentes.
 
 ## Resolver conflitos de fontes
@@ -118,7 +130,10 @@ estado real durante o planejamento.
   silenciosamente.
 - Fazer o código consolidado vencer apenas as especificações preliminares de `utils/`, registrando a
   diferença na spec convertida.
-- Fazer `parceiro` vencer templates/recipes GEMS nas divergências já consolidadas.
+- Fazer as regras de `.gems-ai/rules/` vencerem o código consolidado (constituição 2.4.0): numa
+  divergência de escrita, é o código que se corrige, e não a regra que cede. O domínio de referência
+  serve de forma, não de autoridade. Desvio que fica de pé leva
+  `GEMS-EXCEPTION(<regra>#<seção>): <motivo>; expira AAAA-MM-DD` na linha de cima.
 - Distinguir descrição histórica de `plan.md`/`research.md` do estado atual em `tasks.md`, código e
   testes.
 
