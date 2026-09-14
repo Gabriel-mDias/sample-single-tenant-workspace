@@ -5,7 +5,7 @@ severity: mandatory
 see-also: [signals-standards.md, gems-components.md, feedback-alerts.md, stepper.md]
 origem: local
 precedencia: local-vence
-versao: 2.0.0
+versao: 2.1.0
 ---
 
 # Formulários Simples — Angular / gems-sdk
@@ -256,8 +256,9 @@ componente da SDK, que já traz rótulo, ícone, estado de erro e `ControlValueA
 <gems-select formControlName="status" placeholder="Todos" [options]="statusOptions">
 </gems-select>
 
-<!-- Senha: componente compartilhado do projeto, nunca gems-input-password -->
-<app-password-input formControlName="senha" [messages]="passwordMessages"></app-password-input>
+<!-- Senha: gems-input-password da SDK (>= 2.0.0); a confirmação leva [matchControl] -->
+<gems-input-password formControlName="senha" [required]="true"></gems-input-password>
+<gems-field-error [control]="form.get('senha')" [messages]="passwordMessages"></gems-field-error>
 ```
 
 E, para campos formatados:
@@ -309,7 +310,7 @@ E, para campos formatados:
 | `<input type="text" class="form-control">` para texto simples | `<gems-input-text>` — nenhum input nativo em formulário de feature |
 | `<input type="text" placeholder="000.000.000-00">` para CPF | `<gems-input-documento>` |
 | `<input type="text" placeholder="(00) 00000-0000">` para telefone | `<gems-input-mask maskType="telefone">` |
-| `<input type="password">` ou `<gems-input-password>` | `<app-password-input>`, o componente compartilhado do projeto |
+| `<input type="password">` ou cópia local de senha | `<gems-input-password>` da SDK ≥ 2.0.0 — política, critérios e `matchControl` vêm dele |
 | `maskType="rg"` | `<gems-input-text>` + `appRgMask` — o `maskType` de RG é proibido |
 | `<div form-card-footer>` | `<div gems-form-card-footer>` |
 | `<p form-card-subtitle>…</p>` | `subtitle="…"` como input do `gems-form-card` |

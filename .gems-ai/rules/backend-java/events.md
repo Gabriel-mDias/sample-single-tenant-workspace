@@ -5,7 +5,7 @@ severity: recommended
 see-also: [services.md, observability.md]
 origem: local
 precedencia: local-vence
-versao: 2.0.0
+versao: 2.1.0
 ---
 
 # Spring Application Events — Desacoplamento de Subfluxos
@@ -33,7 +33,7 @@ Emita um evento quando o sucesso de um fluxo primário deve disparar ações em 
 ### Passo 1 — Classe do Evento (POJO imutável)
 
 ```java
-package br.com.gems.{app}.core.event;
+package br.com.gems.{app}.{dominio}.event;          // módulo {app}-events
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -56,15 +56,15 @@ public class {Entidade}Service {
     private final {Entidade}Repository repository;
     private final ApplicationEventPublisher eventPublisher;
 
-    @Transactional( rollbackFor = Exception.class )
+    @Transactional(rollbackFor = Exception.class)
     public {Entidade}DTO insert( {Entidade}DTO dto ) {
         validate( dto );
-        var entity = repository.save( mapper.map( dto, {Entidade}.class ) );
+        var entity = repository.save( mapper.toEntity( dto ) );
 
         // Emissão após save, ainda dentro da transação
         eventPublisher.publishEvent( new {Entidade}CriadaEvent( entity.getId() ) );
 
-        return mapper.map( entity, {Entidade}DTO.class );
+        return mapper.toDTO( entity );
     }
 }
 ```
@@ -72,7 +72,7 @@ public class {Entidade}Service {
 ### Passo 3 — Listener (componente isolado)
 
 ```java
-package br.com.gems.{app}.core.event.listener;
+package br.com.gems.{app}.{dominio}.listener;       // módulo {app}-core
 
 import org.springframework.context.event.EventListener;
 import org.springframework.transaction.event.TransactionPhase;
@@ -94,7 +94,7 @@ public class {Entidade}CriadaListener {
 
     // Cenário 2: Pós-commit — roda APENAS SE a transação original commitar com sucesso.
     // Use para e-mails, APIs externas, notificações (ações não desfazíveis).
-    @TransactionalEventListener( phase = TransactionPhase.AFTER_COMMIT )
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void processarAposCommit( {Entidade}CriadaEvent event ) {
         outroDominioService.enviarNotificacao( event.get{Entidade}Id() );
     }

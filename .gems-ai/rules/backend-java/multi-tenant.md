@@ -5,13 +5,14 @@ severity: mandatory
 see-also: [security.md, persistence-db.md]
 origem: local
 precedencia: local-vence
-versao: 2.0.0
+versao: 2.1.0
 ---
 
-> **FUNDAÇÃO APROVADA, MECANISMO AINDA NÃO IMPLEMENTADO.** O Meduc é multitenant por organização.
+> **MECANISMO IMPLEMENTADO** (rodada 007, C-04). O Meduc é multitenant por organização.
 > `administracao` e `security` são globais; negócio e sua auditoria vivem em `tenant_<alias>`.
-> RF002 fornecerá a organização comprovada e RF003 adaptará contexto, provider e migrations. Até
-> essas rodadas, é proibido introduzir fallback para `public` ou uma solução parcial.
+> Resolução, provider e trilha vêm do `gems-jpa-multi-tenant` e do `gems-auditing`; o identificador
+> que o Hibernate recebe é o **alias**, nunca o nome do schema. Continua proibido introduzir fallback
+> para `public` ou uma solução paralela — o estado real está em `backend/AGENTS.md`.
 
 # Multi-Tenancy — gems-jpa-multi-tenant
 

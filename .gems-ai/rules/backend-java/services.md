@@ -5,7 +5,7 @@ severity: mandatory
 see-also: [repositories.md, validation.md, mapping.md, events.md]
 origem: local
 precedencia: local-vence
-versao: 2.0.0
+versao: 2.1.0
 ---
 
 # Services — Java / Spring Boot
@@ -33,7 +33,7 @@ public class {Entidade}Service {
 ```
 
 ### Regras:
-- **O mapper do domínio como primeiro campo** — a interface `@Mapper( config = GemsMappingConfig.class )`
+- **O mapper do domínio como primeiro campo** — a interface `@Mapper(config = GemsMappingConfig.class)`
   de `mapping.md`. A âncora é **condicional**: service **sem** mapper do domínio não tem primeiro campo
   prescrito, e a regra não inventa um. Projeto que usa `ModelMapper` põe o bean dele nessa posição.
 - Repository da própria entidade como **segundo** campo.
@@ -60,7 +60,7 @@ public class {Entidade}Service {
 ```java
 // Overload de conveniência
 public {Entidade}DTO findById( String id ) {
-    return this.findById( id == null ? null : UUID.fromString( id ) );
+    return this.findById( ObjectUtil.isNullOrEmpty( id ) ? null : UUID.fromString( id ) );
 }
 
 // Método principal
@@ -69,7 +69,7 @@ public {Entidade}DTO findById( UUID id ) {
         throw new BusinessException( "O id não foi informado!" );
     }
     return repository.findById( id )
-            .map( entity -> mapper.map( entity, {Entidade}DTO.class ) )
+            .map( mapper::toDTO )
             .orElseThrow( () -> new BusinessException( "{Entidade} não encontrado(a)!" ) );
 }
 ```
@@ -87,7 +87,7 @@ public Page<{Entidade}ResponseDTO> search( {Entidade}FilterParams filterParams, 
 // Retornando Entity mapeada (módulos simples)
 public Page<{Entidade}DTO> search( {Entidade}FilterParams filterParams, Pageable pageable ) {
     return repository.search( filterParams, pageable )
-            .map( entity -> mapper.map( entity, {Entidade}DTO.class ) );
+            .map( mapper::toDTO );
 }
 ```
 
@@ -96,7 +96,7 @@ public Page<{Entidade}DTO> search( {Entidade}FilterParams filterParams, Pageable
 ## 5. `delete`
 
 ```java
-@Transactional( rollbackFor = Exception.class )
+@Transactional(rollbackFor = Exception.class)
 public void delete( UUID id ) {
     if ( ObjectUtil.isNullOrEmpty( id ) ) {
         throw new BusinessException( "O id não foi informado!" );
@@ -113,25 +113,24 @@ public void delete( UUID id ) {
 ## 6. `insert` e `save`
 
 ```java
-@Transactional( rollbackFor = Exception.class )
+@Transactional(rollbackFor = Exception.class)
 public {Entidade}DTO insert( {Entidade}DTO dto ) {
     if ( ObjectUtil.isNullOrEmpty( dto ) ) {
         throw new BusinessException( "Os dados não foram informados!" );
     }
     validate( dto );
     dto.setDataCriacao( LocalDateTime.now() );
-    var entity = repository.save( mapper.map( dto, {Entidade}.class ) );
-    return mapper.map( entity, {Entidade}DTO.class );
+    var entity = repository.save( mapper.toEntity( dto ) );
+    return mapper.toDTO( entity );
 }
 
-@Transactional( rollbackFor = Exception.class )
+@Transactional(rollbackFor = Exception.class)
 public {Entidade}DTO save( UUID id, {Entidade}DTO dto ) {
     validate( dto );
     var entity = repository.findById( id )
             .orElseThrow( () -> new BusinessException( "{Entidade} não encontrado(a)!" ) );
-    mapper.map( dto, entity );
-    entity.setId( id );
-    return mapper.map( repository.save( entity ), {Entidade}DTO.class );
+    mapper.atualizar( dto, entity );  // @MappingTarget: id, dataCriacao e dataExclusao ficam como estão
+    return mapper.toDTO( repository.save( entity ) );
 }
 ```
 
@@ -156,7 +155,7 @@ private void validate( {Entidade}DTO dto ) {
         errors.add( "O e-mail informado é inválido!" );
     }
 
-    if ( !errors.isEmpty() ) {
+    if ( ObjectUtil.isNotNullAndNotEmpty( errors ) ) {
         throw new BusinessException( errors );
     }
 }
@@ -176,7 +175,7 @@ private void validate( {Entidade}DTO dto ) {
 Em entidades com relacionamentos complexos, delegue persistência de sub-entidades para suas respectivas Services:
 
 ```java
-@Transactional( rollbackFor = Exception.class )
+@Transactional(rollbackFor = Exception.class)
 public {Entidade}DTO insert( {Entidade}DTO dto ) {
     validate( dto );
 
@@ -186,14 +185,14 @@ public {Entidade}DTO insert( {Entidade}DTO dto ) {
         dto.getSubEntidade().setId( saved.getId() );
     }
 
-    var entity = mapper.map( dto, {Entidade}.class );
+    var entity = mapper.toEntity( dto );
 
     // Referência JPA sem carregar a entidade inteira (evita N+1)
-    if ( dto.getRelacionadoId() != null ) {
+    if ( ObjectUtil.isNotNullAndNotEmpty( dto.getRelacionadoId() ) ) {
         entity.setRelacionado( relacionadoRepository.getReferenceById( dto.getRelacionadoId() ) );
     }
 
-    return mapper.map( repository.save( entity ), {Entidade}DTO.class );
+    return mapper.toDTO( repository.save( entity ) );
 }
 ```
 
@@ -225,7 +224,7 @@ private void mapToEntityAndSave( HorarioDTO dto, EntidadeRelacionada entidadeRel
 - `var` para variáveis locais cujo tipo é óbvio.
 - Uma linha em branco entre blocos lógicos.
 - Sem Javadoc em métodos CRUD padrão.
-- `@Transactional( rollbackFor = Exception.class )` em **todas** as operações de escrita, e a
+- `@Transactional(rollbackFor = Exception.class)` em **todas** as operações de escrita, e a
   anotação é a de **`org.springframework.transaction.annotation`**.
 
   > **Corrigido em 2026-09-11 (rodada 008).** Esta regra prescrevia `rollbackOn`, que é o atributo da

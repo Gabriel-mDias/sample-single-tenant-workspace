@@ -5,7 +5,7 @@ severity: mandatory
 see-also: [visual-standards.md, feedback-alerts.md, forms.md, lists.md]
 origem: local
 precedencia: local-vence
-versao: 2.0.0
+versao: 2.1.0
 ---
 
 # Catálogo de Componentes — Angular GEMS SDK
@@ -212,17 +212,43 @@ Todos implementam `ControlValueAccessor` — compatíveis com `formControlName` 
 </gems-input-checkbox>
 ```
 
-### app-password-input (override local Meduc)
+### gems-input-password
 
-Para senha no Meduc, use o componente compartilhado
-`frontend/src/app/shared/forms/password-input/password-input.component.ts`. O `gems-input-password`
-não cobre a política detalhada, critérios pendentes e comparação reativa exigidos pelo produto.
-Consulte o README do componente para API, erros estruturados, acessibilidade e exemplos principal/
-confirmação. O acionador de visibilidade deve permanecer sobreposto dentro da extremidade direita e o
-placeholder deve usar tipografia regular e atenuada, em continuidade com GEMS e com o tema Keycloak.
-Não recrie input de senha dentro de uma feature.
+Desde a SDK 2.0.0 o componente traz a política de senha (tamanho, letras, caractere especial, espaços
+e identidade), os critérios pendentes em tempo real e a comparação reativa com o campo original — a
+cópia local que o Meduc mantinha (`shared/forms/password-input`) saiu na rodada 009. Não recrie input
+de senha, política ou `passwordMismatch` dentro de uma feature. Os erros publicados são
+`passwordPolicy`, `passwordEqualsIdentity` e `passwordMismatch`.
+
+```html
+<!-- Campo principal: política ligada; login e e-mail entram na regra de identidade -->
+<gems-input-password
+  id="gestor-senha"
+  formControlName="senha"
+  label="Senha"
+  [required]="true"
+  [username]="form.get('login')?.value"
+  [email]="form.get('email')?.value ?? ''"
+></gems-input-password>
+<gems-field-error [control]="form.get('senha')" [messages]="passwordMessages"></gems-field-error>
+
+<!-- Confirmação: política desligada, sem critérios, comparação reativa com a senha -->
+<gems-input-password
+  id="gestor-confirmacao-senha"
+  formControlName="confirmacaoSenha"
+  label="Confirmação"
+  [required]="true"
+  [enforcePolicy]="false"
+  [showCriteria]="false"
+  [matchControl]="form.get('senha')"
+></gems-input-password>
+```
 
 ### gems-field-error
+
+Exibe a primeira mensagem de erro do controle quando ele está inválido e tocado ou sujo. Desde a
+SDK 2.0.0 ele reage aos eventos do `AbstractControl` — a cópia local `app-field-error` que contornava
+o `computed` da 1.1.0 saiu na rodada 009 e não deve voltar.
 
 ```html
 <!-- Exibe erros de BusinessException abaixo de um campo -->

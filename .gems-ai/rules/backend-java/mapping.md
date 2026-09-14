@@ -5,17 +5,17 @@ severity: mandatory
 see-also: [services.md, architecture.md, repositories.md]
 origem: local
 precedencia: local-vence
-versao: 2.0.0
+versao: 2.1.0
 ---
 
 # Mapeamento Entity ↔ DTO — gems-mapstruct
 
 > **TL;DR:**
-> - Interface anotada com `@Mapper( config = GemsMappingConfig.class )`, injetada na Service.
+> - Interface anotada com `@Mapper(config = GemsMappingConfig.class)`, injetada na Service.
 > - `GemsMappingConfig` traz `unmappedTargetPolicy = ERROR`: **alvo sem origem não compila**.
 > - O mapper do domínio é o **primeiro campo** injetado na Service.
-> - Renomeação se declara com `@Mapping( target = ..., source = ... )`, uma por campo.
-> - `@Mapping( ignore = true )` é último recurso, e carrega a razão escrita ao lado.
+> - Renomeação se declara com `@Mapping(target = ..., source = ...)`, uma por campo.
+> - `@Mapping(ignore = true)` é último recurso, e carrega a razão escrita ao lado.
 > - `ModelMapper` continua **suportado** — ver §6. O que muda é o recomendado, não o permitido.
 
 ---
@@ -35,10 +35,20 @@ calar o compilador.
 ## 2. Declaração da Interface
 
 ```java
-@Mapper( config = GemsMappingConfig.class )
+@Mapper(config = GemsMappingConfig.class)
 public interface {Entidade}Mapper {
 
+    {Entidade}DTO toDTO( {Entidade}Entity entity );
+
+    {Entidade}Entity toEntity( {Entidade}DTO dto );
+
     {Entidade}ResponseDTO toResponse( {Entidade}Entity entity );
+
+    // Atualização em lugar: identidade e auditoria pertencem ao registro persistido.
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "dataCriacao", ignore = true)
+    @Mapping(target = "dataExclusao", ignore = true)
+    void atualizar( {Entidade}DTO dto, @MappingTarget {Entidade}Entity entity );
 }
 ```
 
@@ -46,7 +56,9 @@ public interface {Entidade}Mapper {
 - `config = GemsMappingConfig.class` **sempre** — é ele que traz `unmappedTargetPolicy = ERROR` e o
   `componentModel` do Spring. Sem ele, o mapper volta a ser silencioso.
 - A interface vive em `{dominio}/mapper/`, junto do resto do domínio.
-- Um método por par (entidade, DTO). Nome no padrão `to{Alvo}`.
+- Um método por par (entidade, DTO). Nome no padrão `to{Alvo}`; a atualização em lugar usa
+  `@MappingTarget` e chama-se `atualizar`. A Service chama esses métodos tipados — nunca
+  `mapper.map( origem, Alvo.class )`, que é a API do `ModelMapper`.
 - **Não** escreva a implementação: ela é gerada em tempo de compilação.
 
 ---
@@ -78,10 +90,10 @@ Quando origem e destino não têm o mesmo nome, cada par se declara:
  * declaradas — e é por causa delas que o mapeamento se paga: o construtor manual aceitava qualquer
  * ordem de {@code String}, e trocar login por e-mail compilava sem reclamar.
  */
-@Mapping( target = "userId", source = "id" )
-@Mapping( target = "nomeCompleto", source = "name" )
-@Mapping( target = "login", source = "username" )
-@Mapping( target = "habilitado", source = "enabled" )
+@Mapping(target = "userId", source = "id")
+@Mapping(target = "nomeCompleto", source = "name")
+@Mapping(target = "login", source = "username")
+@Mapping(target = "habilitado", source = "enabled")
 GestorResponseDTO toGestor( IdentityGateway.User user );
 ```
 
@@ -125,7 +137,7 @@ ModelMapper()` — e ocupa a posição de primeiro campo que o mapper do domíni
 | Proibido | Correto |
 | :--- | :--- |
 | `@Mapper` sem `config = GemsMappingConfig.class` | com o config — sem ele não há `unmappedTargetPolicy = ERROR` |
-| `@Mapping( ignore = true )` para calar o compilador | declarar a origem, ou escrever a razão do `ignore` ao lado |
+| `@Mapping(ignore = true)` para calar o compilador | declarar a origem, ou escrever a razão do `ignore` ao lado |
 | Escrever a classe de implementação do mapper | ela é gerada; escrever à mão desfaz a verificação |
 | Construtor de DTO montado à mão na Service | método no mapper do domínio |
 | Repetir o `componentModel` em cada `@Mapper` | ele vem do `GemsMappingConfig` |

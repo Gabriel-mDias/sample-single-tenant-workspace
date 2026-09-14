@@ -5,7 +5,7 @@ severity: mandatory
 see-also: [controllers.md, services.md, repositories.md, persistence-db.md]
 origem: local
 precedencia: local-vence
-versao: 2.0.0
+versao: 2.1.0
 ---
 
 # Backend Architecture — Java / Spring Boot
@@ -48,27 +48,27 @@ backend/
 @Setter
 @ToString
 @Entity
-@Table( name = "NOME_TABELA" )
-@SQLDelete( sql = "UPDATE NOME_TABELA SET DT_EXCLUSAO = NOW() WHERE ID_ENTIDADE = ?" )
-@SQLRestriction( "DT_EXCLUSAO IS NULL" )
+@Table(name = "NOME_TABELA")
+@SQLDelete(sql = "UPDATE NOME_TABELA SET DT_EXCLUSAO = NOW() WHERE ID_ENTIDADE = ?")
+@SQLRestriction("DT_EXCLUSAO IS NULL")
 public class {Entidade} {
 
     @Id
-    @GeneratedValue( strategy = GenerationType.UUID )
-    @Column( name = "ID_ENTIDADE" )
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "ID_ENTIDADE")
     private UUID id;
 
-    @Column( name = "DS_CAMPO", nullable = false )
+    @Column(name = "DS_CAMPO", nullable = false)
     private String campo;
 
     // Propriedade virtual calculada pelo banco (não persistida, evita N+1 em junções simples)
-    @Formula( " CONCAT(DS_PRIMEIRO_NOME, ' ', DS_SOBRENOME) " )
+    @Formula(" CONCAT(DS_PRIMEIRO_NOME, ' ', DS_SOBRENOME) ")
     private String nomeCompleto;
 
-    @Column( name = "DT_CRIACAO" )
+    @Column(name = "DT_CRIACAO")
     private LocalDateTime dataCriacao;
 
-    @Column( name = "DT_EXCLUSAO" )
+    @Column(name = "DT_EXCLUSAO")
     private LocalDateTime dataExclusao;
 }
 ```
@@ -83,10 +83,10 @@ public class {Entidade} {
 
 ## 3. DTOs (três tipos obrigatórios)
 
-### DTO Espelho (tráfego de dados — módulo model)
+### DTO Espelho (tráfego de dados — módulo model, pacote `model.dto.{dominio}`)
 Reflete a entidade, usado para transport entre camadas. Anotações `@Data @Builder @AllArgsConstructor @NoArgsConstructor`.
 
-### FilterParams (busca — módulo core)
+### FilterParams (busca — módulo model, pacote `model.params.{dominio}`)
 DTO de filtro: **campos primitivos/String APENAS**, nunca objetos aninhados. Campos de range usam sufixo `Min`/`Max`.
 
 ```java
@@ -104,7 +104,7 @@ public class {Entidade}FilterParams {
 }
 ```
 
-### ResponseDTO (flat para grid — módulo core)
+### ResponseDTO (flat para grid — módulo model, pacote `model.response.{dominio}`)
 Resultado plano do `search`, com campos de JOINs achatados. Construído via constructor expression no HQL.
 
 ```java
@@ -126,7 +126,7 @@ public class {Entidade}ResponseDTO {
 ## 4. Importações e Nomes Qualificados
 
 - **SEMPRE** declare `import` no topo do arquivo e use apenas o nome simples da classe.
-- **Única exceção:** constructor expression em HQL — `SELECT new br.com.gems.{app}.core.dto.{ResponseDTO}(...)` — onde o Hibernate exige o caminho qualificado completo.
+- **Única exceção:** constructor expression em HQL — `SELECT new br.com.gems.{app}.model.response.{dominio}.{ResponseDTO}(...)` — onde o Hibernate exige o caminho qualificado completo.
 
 ---
 

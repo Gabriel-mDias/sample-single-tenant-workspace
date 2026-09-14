@@ -1,6 +1,6 @@
-# Migração `.gems-ai` 1.0.0 → 2.0.0 — o que chegou, e o que **não** entrou
+# Migração `.gems-ai` 1.0.0 → 2.4.0 — o que chegou, e o que **não** entrou
 
-**Data:** 2026-09-13. **Origem:** rodada `008-padronizacao-de-escrita` do Meduc
+**Data:** 2026-09-14. **Origem:** rodada `008-padronizacao-de-escrita` do Meduc
 (`specs/008-padronizacao-de-escrita/`), que mediu as regras contra código de produção, corrigiu as que
 mentiam e inverteu a hierarquia entre regra e código. Este repositório recebe o **pacote de regras**;
 conformar o código dele é **rodada deste repositório**, e este documento existe para que ela comece
@@ -13,8 +13,26 @@ sabendo o tamanho.
 
 ## 1. O que chegou
 
-Os **50 arquivos** de `.gems-ai/` foram substituídos pela árvore do Meduc, byte a byte, e o `.version`
-subiu de `1.0.0` para `2.0.0`. A árvore daqui era idêntica ao `Initial commit` do Meduc — nenhuma
+Atualização da rodada 010: origem Meduc `2.4.0`, 50/50 arquivos com SHA-256 idêntico,
+incluindo `.version` e o arquivo oculto de integração. O contrato estimava 48; a árvore
+real tem 52 arquivos antes de excluir `conformance-baseline.json` e
+`conformance-exceptions.json`. Este documento local não integra a comparação.
+
+| Versão | Evolução recebida | Desvio do sample a conformar |
+| :--- | :--- | :--- |
+| 2.1.0 | exemplos/templates com formatação compatível e `getDetalhes()` | imports estrela e nomes de teste medidos abaixo |
+| 2.2.0 | token local de cor declarado somente em `styles.css` | 70 hex medidos no levantamento; usar prefixo `--app-*` neste projeto |
+| 2.3.0 | componentes de campo e senha da SDK; navegação e organização | cópia local de field-error, `commons/`, 7 componentes com Router |
+| 2.4.0 | autorização por ação e proibição de cor nomeada ou funcional em componente | catálogo local a migrar; `white`/`rgba` serão medidos pelos gates |
+
+As versões do SDK aprovadas para a conformação são Java **3.1.0** e Angular
+**2.1.0**, ambas publicadas. A flag de peer dependencies sai junto com SDK e
+`overrides`, nunca antes. A constituição **2.0.0** e os gates serão instalados
+nos passos seguintes de S-def; as observações de ausência abaixo registram a base.
+Os números definitivos serão registrados em `specs/002-conformidade-gems/medicao-gates.md`.
+
+Os **50 arquivos de origem** (52 incluindo os dois JSON locais, excluídos da cópia) de `.gems-ai/` foram substituídos pela árvore do Meduc, byte a byte, e o `.version`
+subiu de `1.0.0` para `2.4.0`. A árvore daqui era idêntica ao `Initial commit` do Meduc — nenhuma
 edição local foi perdida, porque não havia nenhuma.
 
 Cada arquivo carrega agora o cabeçalho de procedência (`origem: local`, `precedencia: local-vence`,
@@ -113,7 +131,7 @@ A cópia foi literal, e algumas regras carregam o contexto de onde foram corrigi
 
 | Onde | O que diz | O que fazer aqui |
 | :--- | :--- | :--- |
-| `rules/backend-java/architecture.md` §"No Meduc" | reator de **cinco** módulos (`meduc-model`, `-security`, `-events`, `-core`, `-deploy`) e pacote raiz `br.com.gems.meduc` | este molde tem o template de **dois** módulos; a regra continua valendo no que é invariante (só o executável tem ambiente e migrations; listener com regra de negócio fica no core) |
+| `rules/backend-java/architecture.md` §"No Meduc" | reator de **cinco** módulos (`meduc-model`, `-security`, `-events`, `-core`, `-deploy`) e pacote raiz `br.com.gems.meduc` | este molde tem **cinco** módulos `app-*`; a regra continua valendo no que é invariante (só o executável tem ambiente e migrations; listener com regra de negócio fica no core) |
 | `rules/backend-java/multi-tenant.md` | descreve o Meduc multitenant por organização, com schema `tenant_<alias>` | este molde é **single-tenant**: a regra é referência para quem estender, não obrigação |
 | `rules/frontend-angular/gems-components.md` §"app-password-input (override local Meduc)" e `recipes/custom-input-cva-end-to-end.md` | apontam para `shared/forms/password-input` do Meduc | o componente não existe aqui; use `gems-input-password` da SDK `2.0.0` com `enforcePolicy`, `showCriteria` e `matchControl` |
 | `rules/frontend-angular/testing.md` | os exemplos usam `OrganizacaoStore` e `appName === 'Meduc'` | exemplos, não prescrição — troque pelo domínio de referência daqui |
@@ -145,7 +163,7 @@ verdadeiras depois, código por último — conformar contra regra que ainda men
 ## 3. Ordem sugerida para a rodada
 
 1. Emenda constitucional (§2.6) — decisão do product owner.
-2. `gems.version` `3.0.0` e SDK Angular `2.0.0` (§2.3), com o reator verde **antes** de tocar código.
+2. `gems.version` `3.1.0` e SDK Angular `2.1.0` (§2.3), com o reator verde **antes** de tocar código.
 3. Localizar as passagens do §2.4 — são edições de regra, e a regra agora tem procedência.
 4. Medir com os gates desligados, formatar, ligar os gates com baseline (§2.5).
 5. `@Transactional` (§2.2) e `ModelMapper` → MapStruct (§2.1), um domínio por lote, cada lote com

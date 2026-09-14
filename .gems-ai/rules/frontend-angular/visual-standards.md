@@ -5,16 +5,17 @@ severity: mandatory
 see-also: [gems-components.md, feedback-alerts.md]
 origem: local
 precedencia: local-vence
-versao: 2.0.0
+versao: 2.2.0
 ---
 
 # Padrões Visuais — Angular / gems-sdk
 
 > **TL;DR:**
 > - `provideGemsTheme()` em `app.config.ts` — obrigatório, sem exceção.
-> - **NUNCA** hex hardcoded nos estilos. Sempre `var(--gems-primary-500)`, `var(--gems-bg-subtle)`, etc.
+> - **NUNCA** hex cravado num uso. Sempre `var(--gems-primary-500)`, `var(--gems-bg-subtle)`, etc.;
+>   cor sem equivalente na SDK vira **token local `--meduc-*`** declarado uma vez em `styles.css` (§2.1).
 > - Confira a tabela da §2 antes de usar uma variável: `--gems-gray-*`, `--gems-bg-page` e
->   `--gems-text-primary` **não existem** na SDK 1.1.0.
+>   `--gems-text-primary` **não existem** na SDK 2.0.0 — ela não tem escala de cinza.
 > - Botões: `btn-save` / `btn-cancel` / `btn-novo` / `btn-back` / `btn-danger` — classes globais da SDK.
 > - Ícones: **Font Awesome 6 Solid** (`fa-solid fa-{nome}`) — nunca `fa-regular`, `fa-light` ou Material Icons.
 > - Layout: `list-container` / `form-container` + `animate__animated animate__fadeIn`.
@@ -48,21 +49,26 @@ export const appConfig: ApplicationConfig = {
 
 ## 2. Variáveis CSS — Como Usar
 
-Sempre use variáveis da SDK. **Nunca** valores hex hardcoded.
+Todo **uso** de cor é por variável: da SDK quando ela tem a cor com o mesmo papel, e **token local
+do projeto** quando não tem. **Nunca** hex cravado num uso.
 
 ```css
-/* CORRETO */
+/* CORRETO — variável da SDK */
 color:            var(--gems-primary-500);
 background-color: var(--gems-secondary-100);
-border-color:     var(--gems-primary-300);
+border-color:     var(--gems-border-color);
 color:            var(--gems-text-muted);
 background:       var(--gems-bg-subtle);
 
-/* ERRADO — hex hardcoded */
+/* CORRETO — token local do projeto, declarado UMA vez em `:root` de `styles.css` (§2.1) */
+color:            var(--meduc-text-strong);
+border-color:     var(--meduc-border);
+
+/* ERRADO — hex cravado num uso */
 color:            #1e293b;
 background-color: #3b82f6;
 
-/* ERRADO — variáveis que NÃO EXISTEM na SDK 1.1.0.
+/* ERRADO — variáveis que NÃO EXISTEM na SDK 2.0.0.
    Não falham: resolvem para vazio e o navegador ignora a declaração, então o
    elemento simplesmente herda a cor errada, sem nenhum aviso no console. */
 color:            var(--gems-text-primary);
@@ -70,41 +76,69 @@ background:       var(--gems-bg-page);
 border-color:     var(--gems-gray-200);
 ```
 
-**Paleta completa disponível:**
-| Grupo | Variável | Uso típico |
-| :--- | :--- | :--- |
-| Primary | `--gems-primary-{50,100,200,300,400,500,600,700,800,900}` | Cor principal, headers |
-| Secondary | `--gems-secondary-{50..900}` | Cor de destaque, links |
-| Tertiary | `--gems-tertiary-{50..900}` | Cor de apoio, hover |
-| Danger | `--gems-danger-{50..900}` | Erro, exclusão, validação |
-| Success | `--gems-success-{50..900}` | Confirmação, estado positivo |
-| Warning | `--gems-warning-{50..900}` | Alerta |
-| Info | `--gems-info-{50..900}` | Informação |
-| BG | `--gems-bg`, `--gems-bg-subtle`, `--gems-bg-muted`, `--gems-bg-emphasis`, `--gems-bg-inverse` | Fundos de página, card, divisórias |
-| Text | `--gems-text-main`, `--gems-text-muted` | Hierarquia textual |
+**Paleta completa disponível — SDK 2.0.0** (conferida em `gems-palette.util.ts` e
+`gems-design-tokens.css`; **não há escala de cinza**):
 
-Cada uma das sete paletas de cor (`primary`, `secondary`, `tertiary`, `danger`, `success`,
-`warning`, `info`) emite, além da escala `50..900`, seis variáveis de estado:
+| Grupo | Variável | Valor | Uso típico |
+| :--- | :--- | :--- | :--- |
+| Sete paletas | `--gems-{cor}` para `primary`, `secondary`, `tertiary`, `danger`, `success`, `warning`, `info` | o hex exato de `provideGemsTheme()` | a cor de marca |
+| Escala | `--gems-{cor}-{50,100,200,300,400,500,600,700,800,900}` | **derivada em HSL** (hue e saturação da cor, lightness ancorada no 500) — nunca um hex de marca fora do 500 | headers, fundos suaves, bordas coloridas |
+| Estados | `--gems-{cor}-hover` (lightness +8), `-active` (−5), `-disabled` (saturação −20, lightness +20), `-focus-ring` (alpha 0.3) | derivados | botões e campos |
+| Contraste | `--gems-{cor}-contrast` | `#111827` se a cor é clara (lightness > 55), senão `#ffffff` | **texto sobre a cor** — é o único token para "branco sobre botão" |
+| Fundo | `--gems-bg` (o hex de `background`), `--gems-bg-subtle` (L 97), `--gems-bg-muted` (L 93), `--gems-bg-emphasis` (L 88), `--gems-bg-inverse` (L 10) | derivados do `background` | página, card, divisória |
+| Texto | `--gems-text-main` (`#1e293b`), `--gems-text-muted` (`#64748b`) | fixos em fundo claro (`#f1f5f9`/`#94a3b8` em fundo escuro) | hierarquia textual |
+| Borda | `--gems-border-color` (`rgba(0,0,0,.08)`), `--gems-border-color-emphasis` (`rgba(0,0,0,.15)`) | fixos | bordas e divisórias neutras |
 
-| Sufixo | Valor |
-| :--- | :--- |
-| `--gems-{cor}` | o hex exato informado em `provideGemsTheme()`, sem ajuste de lightness |
-| `--gems-{cor}-hover` | lightness +8 |
-| `--gems-{cor}-active` | lightness -5 |
-| `--gems-{cor}-disabled` | saturação -20, lightness +20 |
-| `--gems-{cor}-focus-ring` | a cor com alpha 0.3, para anel de foco |
-| `--gems-{cor}-contrast` | `#111827` ou `#ffffff`, o que contrastar com a cor |
+> Versões anteriores deste arquivo documentavam `--gems-gray-*`, `--gems-bg-page`,
+> `--gems-bg-surface`, `--gems-bg-elevated`, `--gems-text-primary` e `--gems-text-secondary`, que
+> **nunca existiram** — nem na 1.1.0 nem na 2.0.0. Só há dois níveis de texto e cinco de fundo.
 
-> **Esta lista foi conferida contra a SDK 1.1.0 instalada.** Versões anteriores deste arquivo
-> documentavam `--gems-gray-*`, `--gems-bg-page`, `--gems-bg-surface`, `--gems-bg-elevated`,
-> `--gems-text-primary` e `--gems-text-secondary`, que **nunca existiram**. Só há dois níveis de
-> texto (`main` e `muted`) e cinco de fundo — para bordas e divisórias use `--gems-bg-muted`.
->
-> ⚠️ **A SDK Angular 2.0.0 já foi publicada, e esta lista ainda descreve a 1.1.0.** O projeto
-> declara `^1.1.0`; a subida é da rodada `009` (bloco E10). **Quem fizer a subida revisa esta
-> seção contra o `gems-global.css` da 2.0.0 na mesma alteração** — uma variável que deixe de
-> existir não falha: ela resolve para vazio, o navegador ignora a declaração e o elemento herda a
-> cor errada, sem nada no console. Registrado na rodada `008` (bloco M, item A-9 da `medicao-m01.md`).
+### 2.1 Token local de projeto
+
+A SDK não tem cinza, e um projeto tem cinzas: texto forte, borda, superfície, placeholder. Cor que
+**não tem token da SDK com a mesma cor e o mesmo papel** vira **token local**:
+
+- declarado **uma única vez**, em `:root` de `frontend/src/styles.css` — nunca em CSS de componente;
+- com o **prefixo do projeto** (`--meduc-*`), nunca `--gems-*` (que é reservado à SDK e proibido de
+  sobrescrever fora de `provideGemsTheme()`, §1);
+- nomeado pelo **papel**, não pela cor: `--meduc-text-strong`, `--meduc-border`, `--meduc-surface`
+  — não `--meduc-gray-300`;
+- consumido por `var(--meduc-…)` em todo uso, como qualquer variável da SDK.
+
+"Mesma cor e mesmo papel" é a regra de decisão: `--gems-secondary-contrast` resolve para
+`#111827` com a secundária atual, mas acoplar o cinza-tinta do texto à secundária mudaria o texto
+quando a marca mudar — é papel diferente, então é token local.
+
+**Cor literal é cor literal em qualquer grafia.** O que vale para o hex vale para a cor **por nome**
+(`white`, `black`, `red`, … — as cores nomeadas do CSS) e para a cor **por função** (`rgb()`, `rgba()`,
+`hsl()`, `hsla()`): em CSS de componente, como **valor** de propriedade de cor (`color`, `background*`,
+`border*-color`, `outline-color`, `fill`, `stroke`, `box-shadow`), nenhuma das três formas é admitida.
+`transparent`, `currentColor`, `inherit` e `var(...)` passam — não são cor, são referência. Um branco
+que o projeto precisa vira token: `--meduc-surface` em `styles.css`, e `var(--meduc-surface)` no uso.
+
+```css
+/* ERRADO — cor literal em CSS de componente, em qualquer grafia */
+color:            white;
+background:       rgba(0, 0, 0, .5);
+border-color:     hsl(210 20% 90%);
+
+/* CORRETO */
+color:            var(--gems-primary-contrast);
+background:       var(--meduc-overlay);
+```
+
+O gate `verify-conventions.mjs` (`hexEmCss`) reprova hex, cor nomeada e função de cor em **todo** uso
+em CSS de componente, e admite cor literal **somente na declaração** de custom property em
+`styles.css`. Hex em CSS de componente, mesmo numa declaração `--meduc-x: #…`, reprova — o dono do
+token é o `styles.css`.
+
+> **Registro.** Até a `versao: 2.0.0` esta seção descrevia a SDK 1.1.0 e não admitia token local:
+> prescrevia tokens que a SDK não tem para cores que o projeto precisa, e por isso `--cor-fundo` e
+> `--cor-terciaria` viviam no baseline de conformidade. Corrigido na rodada `009` (decisão 15 do
+> product owner; R-03 do `research.md`), fechando o item A-9 da `medicao-m01.md` da `008`. Até a
+> `versao: 2.1.0` a proibição alcançava só o hex — `white` e `rgba(...)` passavam pelo gate e a `009`
+> os mediu fora dele (§11 dela). Estendida na rodada `010` (decisão 6, R-06) à cor por nome e por
+> função, com o gate acompanhando na mesma alteração.
 
 ---
 
@@ -206,7 +240,9 @@ Use exclusivamente **Font Awesome 6 Solid** (`fa-solid`).
 
 | Proibido | Correto |
 | :--- | :--- |
-| `color: #1e293b` no CSS | `color: var(--gems-primary-900)` |
+| `color: #1e293b` no CSS | `color: var(--gems-text-main)` |
+| `color: #374151` no CSS (cinza que a SDK não tem) | `color: var(--meduc-text-strong)`, token declarado em `:root` de `styles.css` (§2.1) |
+| `--meduc-x: #…` em CSS de componente | a declaração só vive em `styles.css`; o componente consome `var(--meduc-x)` |
 | `:root { --gems-primary-500: red }` em CSS de componente | `provideGemsTheme({ primary: '#...' })` em `app.config.ts` |
 | `ngx-spinner` ou spinner customizado com `border + @keyframes` | `@if (isLoading()) { <i class="fa-solid fa-circle-notch fa-spin"> }` |
 | `<i class="fa-regular fa-eye">` | `<i class="fa-solid fa-eye">` — apenas Font Awesome 6 **Solid** |

@@ -5,7 +5,7 @@ severity: mandatory
 see-also: [services.md, repositories.md, controllers.md]
 origem: local
 precedencia: local-vence
-versao: 2.0.0
+versao: 2.1.0
 ---
 
 # Testes — Backend Java / Spring Boot
@@ -21,7 +21,7 @@ versao: 2.0.0
 ## 1. Testes de Service (Unitários)
 
 ```java
-@ExtendWith( MockitoExtension.class )
+@ExtendWith(MockitoExtension.class)
 class {Entidade}ServiceTest {
 
     @Mock
@@ -51,7 +51,7 @@ class {Entidade}ServiceTest {
         var dto = new {Entidade}DTO();
 
         when( repository.findById( id ) ).thenReturn( Optional.of( entity ) );
-        when( mapper.toResponse( entity ) ).thenReturn( dto );
+        when( mapper.toDTO( entity ) ).thenReturn( dto );
 
         // Act
         var result = service.findById( id );
@@ -71,7 +71,7 @@ class {Entidade}ServiceTest {
 
         // Act + Assert
         var exception = assertThrows( BusinessException.class, () -> service.insert( dto ) );
-        assertTrue( exception.getErrors().contains( "O campo obrigatório é obrigatório." ) );
+        assertTrue( exception.getDetalhes().contains( "O campo obrigatório é obrigatório." ) );
     }
 
     @Test
@@ -85,7 +85,7 @@ class {Entidade}ServiceTest {
 
         when( mapper.toEntity( dto ) ).thenReturn( entity );
         when( repository.save( entity ) ).thenReturn( savedEntity );
-        when( mapper.toResponse( savedEntity ) ).thenReturn( responseDto );
+        when( mapper.toDTO( savedEntity ) ).thenReturn( responseDto );
 
         // Act
         var result = service.insert( dto );
@@ -103,7 +103,7 @@ class {Entidade}ServiceTest {
 
 ```java
 @DataJpaTest
-@AutoConfigureTestDatabase( replace = AutoConfigureTestDatabase.Replace.NONE )  // Use Testcontainers ou H2
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)  // Use Testcontainers ou H2
 class {Entidade}RepositoryTest {
 
     @Autowired
@@ -150,8 +150,8 @@ class {Entidade}RepositoryTest {
 ## 3. Testes de Controller (Integração com MockMvc)
 
 ```java
-@WebMvcTest( {Entidade}Controller.class )
-@Import( SecurityConfig.class )
+@WebMvcTest({Entidade}Controller.class)
+@Import(SecurityConfig.class)
 class {Entidade}ControllerTest {
 
     @Autowired
@@ -164,7 +164,7 @@ class {Entidade}ControllerTest {
     private ObjectMapper objectMapper;
 
     @Test
-    @WithMockUser( roles = "ADMINISTRADOR" )
+    @WithMockUser(roles = "INSERIR_{ENTIDADE}")  // a ação concreta de AcaoSistema que o endpoint exige
     void deveRetornar201_quandoInsertValido() throws Exception {
         // Arrange
         var dto = new {Entidade}DTO();
@@ -181,7 +181,7 @@ class {Entidade}ControllerTest {
     }
 
     @Test
-    @WithMockUser( roles = "ADMINISTRADOR" )
+    @WithMockUser(roles = "INSERIR_{ENTIDADE}")  // a ação concreta de AcaoSistema que o endpoint exige
     void deveRetornar400_quandoBusinessException() throws Exception {
         // Arrange
         var dto = new {Entidade}DTO();
@@ -219,7 +219,7 @@ Alternativa em inglês: `should_{action}_when_{condition}()`.
 - Não teste comportamento do framework (ex.: que `@Transactional` faz rollback) — teste lógica de negócio.
 - Mocks apenas para dependências externas (Repository, outras Services) — nunca mock da classe sendo testada.
 - Use `assertThrows` para verificar exceções — nunca `try/catch` manual.
-- Para `BusinessException` com lista de erros: `exception.getErrors()` para verificar mensagens específicas.
+- Para `BusinessException` com lista de erros: `exception.getDetalhes()` para verificar mensagens específicas — é o acessor que a `br.com.gems.exception.exception.BusinessException` (gems-exception 3.0.0) expõe; `getErrors()` não existe.
 
 ---
 

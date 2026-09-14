@@ -5,7 +5,7 @@ severity: mandatory
 see-also: [services.md, rest-common.md, controllers.md]
 origem: local
 precedencia: local-vence
-versao: 2.0.0
+versao: 2.1.0
 ---
 
 # Validação — gems-validation + BusinessException
@@ -65,7 +65,7 @@ private void validate( {Entidade}DTO dto ) {
         }
     }
 
-    if ( !errors.isEmpty() ) {
+    if ( ObjectUtil.isNotNullAndNotEmpty( errors ) ) {
         throw new BusinessException( errors );
     }
 }
