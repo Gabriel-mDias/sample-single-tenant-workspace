@@ -1,60 +1,300 @@
 # Roteiro da Rodada — 002 Conformidade GEMS
 
-**Feature**: `002-conformidade-gems` · **Branch**: `feature/conformidade-gems` · **Requisito**: prova S-codex da rodada 010 do Meduc (decisão 8)
-**Data**: 2026-09-14 · **Status**: fase 1 concluída; planejamento não iniciado
+**Feature**: `002-conformidade-gems` · **Branch**: `feature/conformidade-gems` · **Requisito**: prova S-codex da rodada 010
+**Data**: 2026-09-14 · **Status**: aguardando aprovação humana do planejamento revisado
 
-> **O que é este documento.** A peça de aprovação da rodada. Nesta fase 1 existem somente o objetivo
-> e as decisões de entrada; banco, backend, frontend, testes, impacto, tarefas, riscos, fora de escopo
-> e critérios de aprovação serão consolidados na fase 2. Não há portão assinado e nenhuma
-> implementação está autorizada por este estado.
+> Este documento apresenta escopo, decisões, impactos, testes e ordem da rodada. Quatro decisões
+> continuam humanas; nenhuma está assinada e nenhuma implementação está autorizada.
+
+**Índice**: [1 Objetivo](#1-objetivo-da-rodada) · [2 Decisões](#2-decisões-de-entrada-e-pendentes) ·
+[3 Banco](#3-banco-de-dados) · [4 Backend](#4-backend) · [5 Frontend](#5-frontend) ·
+[6 Testes](#6-testes-esperados-por-bloco) · [7 Impacto](#7-interação-e-isolamento) ·
+[8 Tasks](#8-divisão-de-tasks-e-delegação-por-modelo) · [9 SDD](#9-prompts-sdd-da-rodada) ·
+[10 Riscos](#10-riscos-e-mitigações) · [11 Fora](#11-fora-de-escopo) ·
+[12 Aprovação](#12-critérios-de-aprovação)
 
 ---
 
 ## 1. Objetivo da rodada
 
-Tornar o `sample-single-tenant-workspace` um molde coerente com a constituição 2.0.0, com as regras
-GEMS 2.4.0 e com as SDKs publicadas Java 3.1.0 e Angular 2.1.0. A rodada conforma os mecanismos e a
-forma do código, substitui duplicações locais cobertas pela SDK e reduz a dívida congelada pelos
-gates, preservando o comportamento observável de parceiro, solicitação, localidade, normalização,
-usuário, consulta de auditoria, autorização e upload S3.
+Tornar o sample coerente com a constituição 2.0.0, regras GEMS 2.4.0 e módulos publicados, preservando
+as features de referência. O backend termina sem dívida tolerada; o frontend termina no mínimo medido,
+e qualquer residual continua pendente até aceite humano nominal.
 
-### Por que este requisito agora
+### Por que agora
 
-A rodada é a segunda metade da prova final da 010 do Meduc: depois da propagação das definições e da
-instalação dos gates em S-def, o Codex conduz sozinho a conformidade do sample. O congelamento T057
-fixou o estado real da dívida e o checkpoint T058 confirmou o reator verde com 204 testes. Planejar
-agora evita usar como verdade as medições históricas do levantamento e prova se o próprio molde
-consegue convergir para as regras que deve ensinar.
+S-def instalou definições/gates e T058 confirmou o reator verde. S-codex precisa transformar o molde
+em exemplo conforme: reduzir apenas totais não satisfaz S-12, e adotar SDK sem equivalência viola a
+própria constituição.
 
-### O que a rodada carrega junto
+### O que a rodada carrega
 
-A adoção dos módulos transversais da SDK exige medir o grafo antes e depois, nomear e preservar cada
-garantia local, provar a equivalência neste repositório por teste e mutação e remover a implementação
-local na mesma alteração. Os gates instalados em S-def também fazem parte da entrega: as constantes e
-os conjuntos congelados devem encolher com o código conformado, sem transformar dívida em exceção.
-Os assets de silent check-sso instalados pelo orquestrador são contribuição aprovada de S-def e serão
-creditados em OK-1; o Codex produzirá o roadmap OK-2 ao final da prova.
+Medição de grafo; MapStruct em seis services; rollback integrado em dois fluxos; auditoria atômica;
+autorização/Keycloak; Angular 2.1.0; quatro repositories, dois controllers, quatro handlers, 177 nomes;
+remoção das 22 supressões de dívida e do Spotless ratchet; medição/decisão de residual frontend.
 
 ---
 
-## 2. Decisões de entrada
+## 2. Decisões de entrada e pendentes
 
-| # | Ponto | Decisão | O que isso fecha |
+### 2.1 Entradas aprovadas na fase Start
+
+| # | Ponto | Decisão |
+| :-- | :--- | :--- |
+| 1 | Condução | Codex/Sol conduz a prova S-codex dentro da 010, sem Terra. |
+| 2 | Autoridade | Constituição 2.0.0 e regras 2.4.0 vencem código; `medicao-gates.md` vence histórico. |
+| 3 | Fronteira | Preservar parceiro, solicitação, localidade, normalização, usuário, auditoria e S3. |
+| 4 | Java | Adotar versão publicada, uma propriedade pai e árvores antes/depois. |
+| 5 | Angular | Adotar 2.1.0/overrides e retirar a flag operacional de peers. |
+| 6 | Mapping | Seis services em MapStruct/GemsMappingConfig estrito. |
+| 7 | Transação | Spring `rollbackFor`, com mutação nas duas exceções. |
+| 8 | Auditoria | SDK só entra com tela/consulta, autoria, correlação, agregados, sigilo, busca e data preservados; escrita local sai junto. |
+| 9 | Keycloak/autorização | SDKs só substituem clientes locais com catálogo, bootstrap, perfis e ciclo de usuário preservados. |
+| 10 | Backend | Controllers, repositories, services, handlers, OpenAPI, eventos, persistência, validação, observabilidade e S3 conformes; agente não cria exceção. |
+| 11 | Frontend | `isAuthorized`, quatro paths por feature, `shared`, componentes SDK, forms/signals/stores/tokens. |
+| 12 | Gates | T057 é ponto inicial; S-12 exige Java zero e frontend mínimo medido, não mera redução. |
+| 13 | Baseline | T058: 204 backend e 21/118 frontend verdes. |
+| 14 | Dependências | D-01/D-02 e labels não são reabertas. |
+| 15 | Tenant | O sample permanece single tenant. |
+| 16 | Fora | ADACI, Keycloak Angular 22, TS7 e promoção de commons ficam fora. |
+| 17 | Prova 010 | Silent check-sso recebe crédito OK-1; roadmap OK-2 no fechamento. |
+
+### 2.2 Clarificações que este portão precisa resolver
+
+| ID | Evidência | Opções | Recomendação |
+| :--- | :--- | :--- | :--- |
+| D-P01 | Auditing 3.1.0 não grava identidade estável/correlação. | Release SDK prévia ou emenda aceitando perda. | **Preservar e bloquear até release publicada.** |
+| D-P02 | Keycloak gateway 3.1.0 não cobre update/enable/disable/delete/compensação/grupos completos nem criar/compor roles. | Release SDK prévia ou emenda de contrato. | **Preservar e bloquear até release publicada.** |
+| D-P03 | Realm declarativo altera ambiente fora do EDIT original. | Não alterar; ou expandir e derivar só roles/compostas. | Condicional à alternativa de D-P02; preferir release e manter ambiente. |
+| D-P04 | Mínimo frontend só existe depois da correção/medição. | Aceitar ou recusar cada residual. | Deixar desmarcado até inventário final. |
+
+---
+
+## 3. Banco de dados
+
+O schema atual preserva `ID_AUTOR` e `CD_CORRELACAO`. A SDK 3.1.0 escreve somente nome/tipo do ator;
+colunas extras não resolvem porque o writer não as preenche. Resolver id por login atual falha após
+rename/delete/reuso e foi retirado do plano.
+
+### Bloco de auditoria
+
+Depois de D-P01 e de nova API publicada aferida, migration, read adapter, provider, configuração,
+ativação e remoção dos escritores locais entram em **uma única alteração**. Testes de upgrade são
+escritos primeiro; backfills precedem constraints; dado incompatível para a migração; índices/FKs são
+recriados; `ddl-auto: validate` fecha verde. Não existe checkpoint com tabela e writer incompatíveis.
+
+Se o PO escolher perda semântica, a §12 precisa nomear que linhas novas não terão identidade estável
+nem correlação e que o filtro por autor ficará incompleto. Este roteiro não registra esse aceite.
+
+---
+
+## 4. Backend
+
+### 4.1 Dependências e mapping
+
+POM pai concentra versão/processadores. Entram seis mappers nominais para localidade, contato,
+endereço, pessoa, parceiro e solicitação. `ModelMapper` sai quando a última referência sair.
+
+### 4.2 Transações
+
+Parceiro e solicitação usam transação Spring com `rollbackFor`. A prova vive em `app-deploy`, chama
+bean proxied contra PostgreSQL e lança checked após escrita. O teste não é transacional; nova leitura
+afirma dado, filhos, efeito e trilha ausentes. Retirar `rollbackFor` precisa persistir algo e falhar.
+
+### 4.3 Conformidade nominal
+
+| Dívida atual | Alvo final |
+| :--- | :--- |
+| 314 Checkstyle em 22 supressões | zero; supressões de dívida removidas |
+| repositories | exatamente CampoAlterado, Estado, Pais e EtapaSolicitacao corrigidos |
+| controllers | Localidade e Cep em BaseController |
+| ordens | seis services corrigidos |
+| nomes | 177 identidades `deveX_quandoY` |
+| Spotless | `spotless:apply`, rechecagem total e `ratchetFrom` removido |
+
+### 4.4 Handlers e órfãos
+
+Saem juntos `ProvedorExternoExceptionHandler`, `AccessDeniedExceptionHandler`,
+`IdentityProviderExceptionHandler` e `RequisicaoInvalidaExceptionHandler`, após testes de envelope.
+`ProvedorExternoException` adota a base externa publicada. `PublicEndpoint`, `PublicRoute`,
+`CreateUserDTO` e outros tipos saem somente quando busca nominal provar zero consumidor; `SecurityRoles`
+e `PasswordUtil` permanecem enquanto tiverem uso real.
+
+### 4.5 Autorização/Keycloak
+
+Catálogo/scan da SDK são compatíveis. A remoção das quatro classes administrativas fica bloqueada por
+D-P02: o gateway aferido não preserva todo o ciclo. Um adapter novo não será criado para contornar.
+
+---
+
+## 5. Frontend
+
+### 5.1 Forma e comportamento
+
+Parceiro e solicitação terão `list`, `form`, `form/:id`, `view/:id`. Os 12 arquivos medidos deixam
+`hasRole`/`hasAnyRole`; sete componentes deixam navegação direta onde a SDK se aplica; dez arquivos
+`commons` ganham destinos CREATE nominais em `shared`; field-error local sai após equivalência.
+
+### 5.2 Instalação e expansão
+
+SDK 2.1.0/overrides permitem `npm ci` sem flag. Os pontos operacionais atuais estão em
+`frontend/Dockerfile`, `.github/workflows/ci.yml`, `README.md` e `.github/dependabot.yml`. Os três
+últimos exigem expansão do escopo de implementação. Menções normativas em constituição/regras são
+imutáveis e reportadas, não alteradas por conveniência.
+
+### 5.3 Mínimo medido
+
+O gate mede visual, testes, signals e organização por identidade. O objetivo é zero quando aplicável.
+Qualquer residual vem com arquivo, regra, motivo e alternativa e continua desmarcado até D-P04. O
+agente não transforma contagem menor em autorização.
+
+---
+
+## 6. Testes esperados por bloco
+
+| Bloco | Prova | Gate |
+| :--- | :--- | :--- |
+| Dependências | árvores antes/depois; host/Docker/CI sem flag | `dependency:tree`, `npm ci`, Docker build |
+| Keycloak/autorização | 21 ações, scan, ciclo completo, compensações | teste focado T024; bloqueado por D-P02 |
+| Auditoria atômica | upgrade, commit/rollback, sigilo, identidade/correlação, consulta | teste focado T035 + mutações T036 |
+| Mapping/transação | seis mappers; proxy/banco/checked sem falso rollback | T050 + mutações T048/T049 |
+| Java zero | quatro repos, dois controllers, seis ordens, 177 nomes, 314/22, ratchet | T052–T061 |
+| Frontend | auth, oito rotas, SDK/shared, 70 cores, residual nominal | T072/T073 e gate completo |
+| Fechamento | todas as redes mutadas e quickstart | T074–T079 |
+
+Baseline reutilizado nesta fase: backend exit 0/204 (13 security, 132 core, 59 deploy) e frontend exit
+0/21 arquivos/118 testes. Não foi repetido porque não houve alteração de código.
+
+---
+
+## 7. Interação e isolamento
+
+**Parcialmente isolada.** A rodada preserva domínio, mas altera build, persistência, segurança,
+ambiente condicional e UI compartilhada. A atomicidade da auditoria e os gates completos limitam a
+exposição.
+
+| Recurso | Impacto | Garantia |
+| :--- | :--- | :--- |
+| POM/build Java | todos os módulos | árvores e clean install; zero/ratchet removido |
+| auditoria | toda entidade auditável | bloco único e D-P01 |
+| Keycloak | usuário/perfis/endpoints | D-P02 e testes completos |
+| realm condicional | local/staging/prod | D-P03, one-shot e seções não derivadas preservadas |
+| Angular/shared | shell e duas features | testes focados, 21/118 + novos e D-P04 |
+
+Não há violação constitucional justificada. Pendência humana não é exceção nem Complexity Tracking.
+
+---
+
+## 8. Divisão de tasks e delegação por modelo
+
+**79 tarefas em 8 fases**: decisões 4; dependências 8; autorização/Keycloak 12; auditoria atômica 12;
+mappers/transações 15; Java zero 10; frontend 12; fechamento 6.
+
+| Fase | Tasks | Modelo | Gate |
+| :--- | :--- | :--- | :--- |
+| 0 decisões | T001–T004 | Humano + Sol registra | decisões/expansões explícitas |
+| 1 dependências | T005–T012 | Sol/Codex | resolução publicada e sem flag operacional |
+| 2 auth/Keycloak | T013–T024 | Sol/Codex | contrato completo; bloqueado D-P02 |
+| 3 auditoria | T025–T036 | Sol/Codex | um gate atômico; bloqueado D-P01 |
+| 4 mapping/rollback | T037–T051 | Sol/Codex | seis mappers e dois rollbacks reais |
+| 5 Java zero | T052–T061 | Sol/Codex | zero Java e ratchet removido |
+| 6 frontend | T062–T073 | Sol/Codex | mínimo medido; D-P04 humano |
+| 7 fechamento | T074–T079 | Sol/Codex | gates/quickstart/analyze |
+
+Sem delegação para Terra. Opus é elegível, mas não foi chamado por proibição do pacote. Auditoria não
+admite paralelismo interno nem checkpoint parcial.
+
+---
+
+## 9. Prompts SDD da rodada
+
+| Ordem | Comando | Situação | Saída |
 | :-- | :--- | :--- | :--- |
-| 1 | Sequência e condução | **Executar a rodada 002 dentro da rodada 010 do Meduc, com o Codex como condutor da prova S-codex e sem delegação para Terra.** | Aplica a decisão 8 da 010, preserva a sessão T058 e evita reabrir a ordem da rodada ou terceirizar o julgamento. |
-| 2 | Autoridade das definições | **Constituição 2.0.0 e regras GEMS 2.4.0 prevalecem sobre o código consolidado; `medicao-gates.md` prevalece sobre números históricos de `levantamento.md` e `MIGRACAO-2.4.0.md`.** | Fecha a hierarquia usada no planejamento e impede tratar o diagnóstico anterior à S-def como estado atual. |
-| 3 | Fronteira funcional | **Preservar parceiro, solicitação, localidade, normalização, usuário, consulta de auditoria e upload S3; conformar forma e mecanismos, sem remover o conteúdo demonstrado pelo molde.** | Impede que saneamento técnico elimine features existentes ou altere escopo de negócio. |
-| 4 | SDK Java | **Adotar a versão publicada Java GEMS SDK 3.1.0, declarada uma vez no POM pai, após medir o `dependency:tree` antes e depois.** | Habilita os módulos atuais sem versão em filhos e transforma o alcance da atualização em evidência. |
-| 5 | SDK Angular | **Adotar `@gabriel-mdias/angular-gems-sdk` 2.1.0 com os `overrides` aprovados e retirar `--legacy-peer-deps` no mesmo bloco.** | Fecha a resolução de peers e habilita os componentes e contratos frontend atuais sem antecipar `keycloak-angular` 22. |
-| 6 | Mapeamento | **Migrar os seis services medidos de `ModelMapper` para MapStruct com `GemsMappingConfig` e `unmappedTargetPolicy = ERROR`.** | Faz campo novo não mapeado reprovar na compilação e remove `ModelMapper` como padrão ensinado pelo sample. |
-| 7 | Transações | **Trocar `jakarta.transaction.Transactional` por `org.springframework.transaction.annotation.Transactional`, usando `rollbackFor`, com mutação que prove rollback nas exceções lançadas pelos dois services afetados.** | Autoriza a mudança observável de semântica transacional e define sua prova de não regressão. |
-| 8 | Auditoria | **Adotar `gems-auditing` e remover a implementação local na mesma alteração, preservando a tela e os contratos de consulta somente leitura, histórico do cadastro e agregados, busca ampla, campos alterados, autoria e data final inclusiva; incluir `CD_ACTOR_TYPE` por Liquibase.** | Nomeia as garantias que a adoção deve provar e impede coexistência ou perda da consulta existente. |
-| 9 | Keycloak e autorização backend | **Adotar `gems-keycloak-admin` e `gems-security-authorization`, removendo as quatro classes administrativas locais e derivando o catálogo do enum com gate.** | Substitui os mecanismos duplicados, preservando autorização por ação e exigindo prova local das garantias atuais de bootstrap, perfis e integração com usuário. |
-| 10 | Conformidade backend obrigatória | **Aplicar as regras vigentes a controllers, repositories, services, handlers, OpenAPI, eventos, persistência, validação, observabilidade e S3; agente não cria `GEMS-EXCEPTION` para liberar gate.** | Fecha por convenção constitucional os desvios já medidos, inclusive dois controllers sem `BaseController`, quatro repositories fora do fragmento e envelope de erro local. |
-| 11 | Conformidade frontend obrigatória | **Migrar autorização de `hasRole` para `isAuthorized` por ação, usar rotas `list/form/form/:id/view/:id`, mover estruturas compartilhadas para `shared/`, substituir componentes locais cobertos pela SDK e aplicar signals, stores, formulários, testes e tokens visuais vigentes.** | Fecha os desvios frontend congelados sem criar uma nova feature ou um segundo dono para componentes transversais. |
-| 12 | Catracas e baseline | **Usar o congelamento T057 como ponto de partida: 314 ocorrências Checkstyle em 22 supressões, 189 identidades de arquitetura/fonte e 174 ocorrências frontend; Spotless ratchet em `411156d`; zero exceções escritas. Cada bloco reduz também a constante e o conjunto congelado.** | Impede crescimento, supressão genérica e falso verde por redução apenas do número agregado. |
-| 13 | Gate de referência | **Tomar como baseline executável o T058: `BUILD SUCCESS`, 204 testes — 13 security, 132 core e 59 deploy — sem falhas ou erros.** | Fixa a contagem real anterior à implementação para a futura prova de não regressão. |
-| 14 | Dependências já decididas | **As decisões D-01/D-02 e as quatro labels criadas não serão reabertas nesta rodada; o alinhamento restante segue os destinos já registrados.** | Evita misturar manutenção Dependabot já decidida com a conformidade do sample. |
-| 15 | Single tenant | **`multi-tenant.md` é referência para extensão futura; esta rodada mantém o sample single tenant.** | Impede importar schema por tenant ou mecanismos exclusivos do Meduc. |
-| 16 | Fora da fronteira | **ADACI não é alvo; `keycloak-angular` 22, TypeScript 7 e promoção dos utilitários `commons/` para a SDK permanecem nos destinos já registrados.** | Evita expansão silenciosa da prova S-codex e preserva as decisões de evolução futura. |
-| 17 | Evidência da prova 010 | **Creditar os assets silent check-sso de S-def ao orquestrador em OK-1 e produzir o roadmap OK-2 pelo Codex no fechamento.** | Mantém autoria e limites verificáveis entre preparação S-def e execução S-codex. |
+| 1 | `/speckit-specify` | revisado | 5 histórias, 30 FR, 9 SC |
+| 2 | `/speckit-clarify` | revisado | D-P01–D-P04 pendentes e prontas ao PO |
+| 3 | `/speckit-plan` | revisado | nove princípios reais, desenho e contratos condicionais |
+| 4 | `/speckit-tasks` | revisado | 79 tasks em 8 fases |
+| 5 | `/speckit-analyze` | revisado | 0 CRITICAL documental; achados incorporados |
+| 6 | **`roteiro.md`** | aguardando aprovação | este documento, sem assinatura |
+| 7 | `/speckit-implement` | bloqueado | somente depois das decisões e aprovação explícita |
+
+### Resultado dos checklists
+
+Requirements, technical e security estão **CONDITIONAL PASS**. D-P01–D-P04 permanecem desmarcadas;
+checklist não assina portão.
+
+### Achados incorporados
+
+| Achado | Sev. | Decisão |
+| :--- | :--- | :--- |
+| Java precisa zerar | HIGH | zero 314/189, 177 nomes; 22 supressões e ratchet removidos |
+| auditoria separada | HIGH | Phase 3 atômica |
+| rollback Mockito | HIGH | integração proxied/PostgreSQL/checked sem transação de teste |
+| identidade/correlação SDK | HIGH | D-P01, preservação recomendada |
+| Keycloak incompleto | MEDIUM | D-P02, preservação recomendada |
+| realm/escopo | MEDIUM | D-P03 condicional, seções derivadas apenas |
+| frontend residual | MEDIUM | D-P04 humano após medição |
+| paths/contagens | MEDIUM | 79 tasks nominais e números atuais |
+| linguagem spec | MEDIUM | histórias/SC por contrato |
+
+---
+
+## 10. Riscos e mitigações
+
+| # | Risco | Gravidade | Mitigação |
+| :-- | :--- | :--- | :--- |
+| 1 | misturar autores após rename/reuso | alta | D-P01; identidade estável publicada |
+| 2 | perder correlação | alta | D-P01; não aceitar nome como equivalência |
+| 3 | schema/writer incompatível | alta | bloco único sem checkpoint |
+| 4 | falso positivo de rollback | alta | teste sem transação própria e mutação no `rollbackFor` real |
+| 5 | perder ciclo/compensação Keycloak | alta | D-P02; não remover classes antes de release equivalente |
+| 6 | realm apagar clients/mappers/defaults | alta | D-P03; derivar só partes e gate semântico |
+| 7 | dívida Java sobreviver menor | alta | alvo zero e remoção de baseline/ratchet |
+| 8 | residual frontend aceito pelo agente | média | D-P04 desmarcada e inventário nominal |
+| 9 | CI/Docker ainda usarem flag | média | inventário operacional e expansão T004 |
+
+---
+
+## 11. Fora de escopo
+
+| Item | Destino |
+| :--- | :--- |
+| editar SDK Java/Angular nesta rodada | rodada própria + publicação, se D-P01/D-P02 aprovarem |
+| ADACI | roadmap próprio |
+| keycloak-angular 22 / TypeScript 7 | atualização futura |
+| multi-tenancy | requisito futuro |
+| promover commons à SDK | roadmap OK-2 |
+| alterar constituição/regras imutáveis para limpar menção textual | processo de definições, não S-codex |
+
+---
+
+## 12. Critérios de aprovação
+
+### Decisões deste portão
+
+- [ ] **D-P01**: preservar por release SDK prévia (recomendado) ou registrar emenda de perda de identidade/correlação.
+- [ ] **D-P02**: preservar por release SDK prévia (recomendado) ou registrar emenda de perda no ciclo/roles Keycloak.
+- [ ] **D-P03**: se aplicável, expandir ambiente/GitHub/README e limitar geração às seções derivadas.
+- [ ] O escopo, atomicidade, zero Java, testes reais e execução Sol/Codex estão aprovados.
+
+### Decisão posterior à implementação
+
+- [ ] **D-P04**: cada residual frontend medido foi aceito ou devolvido para correção pelo product owner.
+
+### Para concluir a rodada depois do código
+
+- [ ] Backend `clean install` verde, Java zero, supressões/ratchet removidos.
+- [ ] Frontend `npm ci`, testes, build e Prettier verdes; residual decidido por humano.
+- [ ] Auditoria/Keycloak preservam contratos escolhidos e quickstart passa.
+- [ ] Analyze final sem CRITICAL nem violação constitucional.
+
+**Portão humano não assinado.** O roteiro está aguardando aprovação; pedidos anteriores de prosseguir
+não resolvem D-P01–D-P04 nem autorizam `/speckit-implement`.
+
+---
+
+## Referência
+
+[spec.md](spec.md) · [plan.md](plan.md) · [research.md](research.md) ·
+[data-model.md](data-model.md) · [contracts/](contracts/) · [tasks.md](tasks.md) ·
+[quickstart.md](quickstart.md) · [analysis.md](analysis.md) · [checklists/](checklists/)
