@@ -39,6 +39,19 @@ class ConvencoesFonteTest {
     }
 
     @Test
+    void deveRecusarCrescimento_quandoBaselineCheckstyleMuda() throws java.io.IOException {
+        var congelado = java.nio.file.Files
+                .readAllLines( java.nio.file.Path.of( "src/test/resources/checkstyle-baseline.txt" ) );
+        var atual = java.nio.file.Files
+                .readAllLines( java.nio.file.Path.of( "../config/checkstyle/suppressions.xml" ) );
+        var novas = atual.stream().map( String::strip ).filter( linha -> linha.startsWith( "<suppress " ) )
+                .filter( linha -> !congelado.contains( linha ) ).toList();
+        if ( !novas.isEmpty() ) {
+            throw new AssertionError( "Baseline Checkstyle so encolhe: " + novas );
+        }
+    }
+
+    @Test
     void deveManterJoinsIdenticos_quandoCountQueryESearchQueryCoexistem() {
         avaliar( "Fonte · JOINs idênticos", RegrasDeFonte::joinsIdenticos );
     }

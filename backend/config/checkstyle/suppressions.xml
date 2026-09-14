@@ -18,4 +18,26 @@
   na mão — congelar dívida antes de medi-la seria congelar uma suposição.
 -->
 <suppressions>
+  <suppress files="app\-core[/\\]src[/\\]main[/\\]java[/\\]br[/\\]com[/\\]gems[/\\]app[/\\]autorizacao[/\\]MapaPerfilAcoes\.java$" checks="AvoidStarImport" lines="12"/>
+  <suppress files="app\-core[/\\]src[/\\]main[/\\]java[/\\]br[/\\]com[/\\]gems[/\\]app[/\\]parceiro[/\\]controller[/\\]ParceiroController\.java$" checks="AvoidStarImport" lines="20"/>
+  <suppress files="app\-core[/\\]src[/\\]main[/\\]java[/\\]br[/\\]com[/\\]gems[/\\]app[/\\]solicitacao[/\\]controller[/\\]SolicitacaoController\.java$" checks="AvoidStarImport" lines="20"/>
+  <suppress files="app\-core[/\\]src[/\\]test[/\\]java[/\\]br[/\\]com[/\\]gems[/\\]app[/\\]autorizacao[/\\]AutorizacaoBootstrapTest\.java$" checks="AvoidStarImport" lines="21"/>
+  <suppress files="app\-core[/\\]src[/\\]test[/\\]java[/\\]br[/\\]com[/\\]gems[/\\]app[/\\]parceiro[/\\]service[/\\]ParceiroServiceTest\.java$" checks="AvoidStarImport" lines="28"/>
+  <suppress files="app\-core[/\\]src[/\\]test[/\\]java[/\\]br[/\\]com[/\\]gems[/\\]app[/\\]solicitacao[/\\]service[/\\]SolicitacaoServiceTest\.java$" checks="AvoidStarImport" lines="24"/>
+  <suppress files="app\-deploy[/\\]src[/\\]main[/\\]java[/\\]br[/\\]com[/\\]gems[/\\]app[/\\]AppApplication\.java$" checks="ParenPad" lines="20,21"/>
+  <suppress files="app\-deploy[/\\]src[/\\]test[/\\]java[/\\]br[/\\]com[/\\]gems[/\\]app[/\\]security[/\\]S3EndpointsSecurityIntegrationTest\.java$" checks="ParenPad" lines="63,69,70,71,72,73,79,80,81,82,88,89,90,91,97,98,99,100"/>
+  <suppress files="app\-deploy[/\\]src[/\\]test[/\\]java[/\\]br[/\\]com[/\\]gems[/\\]app[/\\]support[/\\]AbstractIntegrationTest\.java$" checks="ParenPad" lines="44,45,46,47,59,60,61,62"/>
+  <suppress files="app\-model[/\\]src[/\\]main[/\\]java[/\\]br[/\\]com[/\\]gems[/\\]app[/\\]model[/\\]entity[/\\]localidades[/\\]Estado\.java$" checks="AvoidStarImport" lines="3,4"/>
+  <suppress files="app\-model[/\\]src[/\\]main[/\\]java[/\\]br[/\\]com[/\\]gems[/\\]app[/\\]model[/\\]entity[/\\]localidades[/\\]Pais\.java$" checks="AvoidStarImport" lines="3,4"/>
+  <suppress files="app\-model[/\\]src[/\\]main[/\\]java[/\\]br[/\\]com[/\\]gems[/\\]app[/\\]model[/\\]entity[/\\]normalizacao[/\\]Contato\.java$" checks="AvoidStarImport" lines="4,5"/>
+  <suppress files="app\-model[/\\]src[/\\]main[/\\]java[/\\]br[/\\]com[/\\]gems[/\\]app[/\\]model[/\\]entity[/\\]normalizacao[/\\]Endereco\.java$" checks="AvoidStarImport" lines="6,7"/>
+  <suppress files="app\-model[/\\]src[/\\]main[/\\]java[/\\]br[/\\]com[/\\]gems[/\\]app[/\\]model[/\\]entity[/\\]normalizacao[/\\]Pessoa\.java$" checks="AvoidStarImport" lines="5,6"/>
+  <suppress files="app\-model[/\\]src[/\\]main[/\\]java[/\\]br[/\\]com[/\\]gems[/\\]app[/\\]model[/\\]entity[/\\]parceiro[/\\]Parceiro\.java$" checks="AvoidStarImport" lines="8,9"/>
+  <suppress files="app\-model[/\\]src[/\\]main[/\\]java[/\\]br[/\\]com[/\\]gems[/\\]app[/\\]model[/\\]entity[/\\]seguranca[/\\]Usuario\.java$" checks="AvoidStarImport" lines="4,5"/>
+  <suppress files="app\-model[/\\]src[/\\]main[/\\]java[/\\]br[/\\]com[/\\]gems[/\\]app[/\\]model[/\\]entity[/\\]solicitacao[/\\]EtapaSolicitacao\.java$" checks="AvoidStarImport" lines="4,5"/>
+  <suppress files="app\-model[/\\]src[/\\]main[/\\]java[/\\]br[/\\]com[/\\]gems[/\\]app[/\\]model[/\\]entity[/\\]solicitacao[/\\]Solicitacao\.java$" checks="AvoidStarImport" lines="6,7"/>
+  <suppress files="app\-security[/\\]src[/\\]main[/\\]java[/\\]br[/\\]com[/\\]gems[/\\]app[/\\]security[/\\]PasswordUtil\.java$" checks="ParenPad" lines="43,44,48"/>
+  <suppress files="app\-security[/\\]src[/\\]main[/\\]java[/\\]br[/\\]com[/\\]gems[/\\]app[/\\]security[/\\]config[/\\]KeycloakConfig\.java$" checks="ParenPad" lines="21,22,23,24,25"/>
+  <suppress files="app\-security[/\\]src[/\\]main[/\\]java[/\\]br[/\\]com[/\\]gems[/\\]app[/\\]security[/\\]config[/\\]SecurityConfig\.java$" checks="ParenPad" lines="53,54,58,60,62,80,96,98,100,101,103,104,106,109,111,113,114,117,118,132,133,134,135,141,144,162,166,170,174,175,177,179,180,181,183,184,190,199,200,205,209,210,211,212,213,218,219,221,222,223,224,225"/>
+  <suppress files="app\-security[/\\]src[/\\]main[/\\]java[/\\]br[/\\]com[/\\]gems[/\\]app[/\\]security[/\\]service[/\\]KeycloakUserService\.java$" checks="ParenPad" lines="36,39,40,43,45,48,49,52,56,72,73,76,83,84,93,94,95,97,98,101,102,103,164,166,170"/>
 </suppressions>

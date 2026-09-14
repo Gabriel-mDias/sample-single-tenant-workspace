@@ -41,7 +41,7 @@ final class RelatorioDeConformidade {
      * O tamanho congelado do baseline. Reduzi-lo ao corrigir dívida é o caminho normal; aumentá-lo
      * exige decisão humana registrada, e é o que a mutação de T082 prova.
      */
-    static final int MAXIMO_DE_ENTRADAS = 0;
+    static final int MAXIMO_DE_ENTRADAS = 189;
 
     private static final Path BASELINE = Path.of( "src", "test", "resources", "archunit-baseline.txt" );
 
@@ -123,7 +123,11 @@ final class RelatorioDeConformidade {
         if ( Boolean.getBoolean( "gems.convencoes.relatorio" ) ) {
             try {
                 var destino = Path.of( "target", "convencoes-medicao.txt" );
-                Files.write( destino, violacoes.stream().map( v -> v.chave() + "\t" + v.formatada().replace( "\n", " " ).replace( "\r", " " ) ).toList(), StandardCharsets.UTF_8,
+                Files.write( destino,
+                        violacoes.stream()
+                                .map( v -> v.chave() + "\t" + v.formatada().replace( "\n", " " ).replace( "\r", " " ) )
+                                .toList(),
+                        StandardCharsets.UTF_8,
                         java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND );
                 System.out.println( gate + ": " + violacoes.size() + " violações (relatório)" );
                 return;

@@ -30,3 +30,18 @@ Nenhum `spotless:apply` sobre o código de domínio pelo orquestrador.
 **Bloqueio de T057:** decidir o tratamento dos assets de autenticação ausentes;
 ajuste concreto no roteiro da rodada 010 do Meduc, `ajuste-s-def.md`.
 O catálogo de ações foi copiado desligado conforme contrato, até S-09.
+
+## T057 — congelamento aprovado em 2026-09-14
+
+Aprovação do ajuste registrada na §12 da rodada 010 do Meduc. Assets HTML/JS instalados
+pelo orquestrador; contribuição explicitada em OK-1. Checkstyle: 314 ocorrências em
+22 supressões específicas; arquitetura/fonte: 189 identidades; frontend: 174 ocorrências.
+Catraca Checkstyle recusa supressões fora do conjunto congelado. Frontend e Java recusam
+crescimento dos totais. S-codex deve reduzir também constantes e conjunto congelado.
+Spotless ratchet `411156d`; apenas infraestrutura dos gates formatada.
+POM em reprovação por padrão; frontend sem variável de relatório.
+
+Gate final T057: BUILD SUCCESS, 204 testes (13 security + 132 core + 59 deploy),
+zero falhas/erros, 01:02 min; contexto JPA com validate verde. npm test: 21/118;
+build: 724,68 kB; prettier e contexto verdes. Nove mutações rejeitadas/restauradas.
+Avisos preexistentes de budget e CommonJS mantidos. CI recebe fetch-depth=0 para o ratchet.

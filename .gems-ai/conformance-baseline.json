@@ -1,0 +1,856 @@
+{
+  "entradas": [
+    {
+      "arquivo": "frontend/src/app/features/acesso-negado/acesso-negado.component.css",
+      "regra": "visual-standards.md#2",
+      "violacao": "rgba(...)",
+      "ocorrencias": 2
+    },
+    {
+      "arquivo": "frontend/src/app/core/footer/app-footer.component.css",
+      "regra": "visual-standards.md#2",
+      "violacao": "#fff",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/styles.css",
+      "regra": "visual-standards.md#2",
+      "violacao": "#333333",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/styles.css",
+      "regra": "visual-standards.md#2",
+      "violacao": "#d1d5db",
+      "ocorrencias": 3
+    },
+    {
+      "arquivo": "frontend/src/styles.css",
+      "regra": "visual-standards.md#2",
+      "violacao": "#1e293b",
+      "ocorrencias": 2
+    },
+    {
+      "arquivo": "frontend/src/styles.css",
+      "regra": "visual-standards.md#2",
+      "violacao": "#9ca3af",
+      "ocorrencias": 2
+    },
+    {
+      "arquivo": "frontend/src/styles.css",
+      "regra": "visual-standards.md#2",
+      "violacao": "#6366f1",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/styles.css",
+      "regra": "visual-standards.md#2",
+      "violacao": "#f1f5f9",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/styles.css",
+      "regra": "visual-standards.md#2",
+      "violacao": "#94a3b8",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/styles.css",
+      "regra": "visual-standards.md#2",
+      "violacao": "#1d4ed8",
+      "ocorrencias": 3
+    },
+    {
+      "arquivo": "frontend/src/styles.css",
+      "regra": "visual-standards.md#2",
+      "violacao": "#fff",
+      "ocorrencias": 6
+    },
+    {
+      "arquivo": "frontend/src/styles.css",
+      "regra": "visual-standards.md#2",
+      "violacao": "#1e40af",
+      "ocorrencias": 2
+    },
+    {
+      "arquivo": "frontend/src/styles.css",
+      "regra": "visual-standards.md#2",
+      "violacao": "#3b82f6",
+      "ocorrencias": 4
+    },
+    {
+      "arquivo": "frontend/src/styles.css",
+      "regra": "visual-standards.md#2",
+      "violacao": "#2563eb",
+      "ocorrencias": 4
+    },
+    {
+      "arquivo": "frontend/src/styles.css",
+      "regra": "visual-standards.md#2",
+      "violacao": "#ffffff",
+      "ocorrencias": 3
+    },
+    {
+      "arquivo": "frontend/src/styles.css",
+      "regra": "visual-standards.md#2",
+      "violacao": "#374151",
+      "ocorrencias": 2
+    },
+    {
+      "arquivo": "frontend/src/styles.css",
+      "regra": "visual-standards.md#2",
+      "violacao": "#eff6ff",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/styles.css",
+      "regra": "visual-standards.md#2",
+      "violacao": "#93c5fd",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/styles.css",
+      "regra": "visual-standards.md#2",
+      "violacao": "#4b5563",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/styles.css",
+      "regra": "visual-standards.md#2",
+      "violacao": "#dc2626",
+      "ocorrencias": 4
+    },
+    {
+      "arquivo": "frontend/src/styles.css",
+      "regra": "visual-standards.md#2",
+      "violacao": "#b91c1c",
+      "ocorrencias": 2
+    },
+    {
+      "arquivo": "frontend/src/styles.css",
+      "regra": "visual-standards.md#2",
+      "violacao": "#22c55e",
+      "ocorrencias": 2
+    },
+    {
+      "arquivo": "frontend/src/styles.css",
+      "regra": "visual-standards.md#2",
+      "violacao": "#16a34a",
+      "ocorrencias": 2
+    },
+    {
+      "arquivo": "frontend/src/styles.css",
+      "regra": "visual-standards.md#2",
+      "violacao": "#f59e0b",
+      "ocorrencias": 2
+    },
+    {
+      "arquivo": "frontend/src/styles.css",
+      "regra": "visual-standards.md#2",
+      "violacao": "#d97706",
+      "ocorrencias": 2
+    },
+    {
+      "arquivo": "frontend/src/styles.css",
+      "regra": "visual-standards.md#2",
+      "violacao": "#6b7280",
+      "ocorrencias": 2
+    },
+    {
+      "arquivo": "frontend/src/styles.css",
+      "regra": "visual-standards.md#2",
+      "violacao": "#e5e7eb",
+      "ocorrencias": 2
+    },
+    {
+      "arquivo": "frontend/src/app/app.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "cria o componente",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/app.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "oculta a casca quando não autenticado",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/app.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "mostra a casca quando autenticado (rota inicial)",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/app.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "com as ações de consulta → menu com os recursos correspondentes",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/app.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "sem ação de consulta nenhuma → menu vazio",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/commons/data-br.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "converte a data ISO simples para o formato brasileiro",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/commons/data-br.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "aceita data-hora ISO, ignorando a parte de hora",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/commons/data-br.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "não desloca o dia por fuso horário",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/commons/data-br.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "devolve null para ausência, em vez de \"Invalid Date\"",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/commons/data-br.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "devolve null para entrada que não é data ISO",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/commons/data-br.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "usa o travessão como ausência por padrão — é o que a tabela do projeto exibe",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/commons/data-br.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "aceita um texto próprio de ausência",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/commons/data-br.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "formata normalmente quando há data",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/commons/moeda-br.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "lê o formato brasileiro, com ponto de milhar e vírgula decimal",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/commons/moeda-br.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "lê também o formato com ponto decimal, que é como o teclado numérico produz",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/commons/moeda-br.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "lê o formato en-US, com vírgula de milhar e ponto decimal",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/commons/moeda-br.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "trata separador repetido como milhar, nos dois sentidos",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/commons/moeda-br.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "lê inteiros nos dois formatos",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/commons/moeda-br.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "ignora espaços em volta e no meio",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/commons/moeda-br.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "devolve null para vazio — valor é opcional, e ausente não é zero",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/commons/moeda-br.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "devolve null para texto que não vira número, em vez de NaN",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/commons/moeda-br.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "formata com duas casas e separador brasileiro",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/commons/moeda-br.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "devolve string vazia quando não há valor",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/commons/moeda-br.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "é a volta do parse: o que sai da tela e volta para ela não muda",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/commons/password.validator.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "permite valores nulos ou vazios (deixando obrigatoriedade para Validators.required)",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/commons/password.validator.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "valida com sucesso senhas que atendem a todos os critérios",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/commons/password.validator.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "rejeita senhas com menos de 12 caracteres",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/commons/password.validator.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "rejeita senhas sem letras maiúsculas",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/commons/password.validator.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "rejeita senhas sem letras minúsculas",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/commons/password.validator.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "rejeita senhas sem caracteres especiais",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/commons/password.validator.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "rejeita senhas com espaços em branco",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/commons/password.validator.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "funciona quando chamado como factory de ValidatorFn",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/commons/password.validator.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "exporta regex PASSWORD_PATTERN correspondente ao backend",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/commons/table-sort.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "lê campo e direção do formato do Spring Data",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/commons/table-sort.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "devolve o padrão quando a tabela emite sem ordenação",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/commons/table-sort.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "trata qualquer direção que não seja \"desc\" como ascendente",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/commons/table-sort.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "sem padrão explícito, devolve campo indefinido e direção ascendente",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/core/guards/role.guard.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "não logado ⇒ dispara login e nega",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/core/guards/role.guard.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "logado sem data.roles ⇒ negado (rota mal configurada falha fechada)",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/core/guards/role.guard.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "logado com a ação exigida ⇒ libera",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/core/guards/role.guard.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "logado sem a ação exigida ⇒ redireciona para /acesso-negado",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/core/guards/routes-coverage.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "a varredura alcança as rotas guardadas de todas as features",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/core/localidade/localidade.store.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "listarPaises faz GET em /api/localidades/paises",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/core/localidade/localidade.store.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "listarEstados aninha o id do país na rota",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/core/menu/menu.builder.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "sem ação nenhuma, o menu é vazio — falha FECHADO",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/core/menu/menu.builder.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "cada ação de consulta acrescenta exatamente um item",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/core/menu/menu.builder.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "o item de parceiros aponta para a rota de parceiros",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/core/menu/menu.builder.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "ação de ESCRITA não abre item de menu sozinha",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/core/menu/menu.builder.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "quem tem tudo vê todos os itens, sem duplicata",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/core/menu/menu.builder.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "a home não tem entrada de menu",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/features/parceiro/services/parceiro-form-state.service.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "começa vazio, no passo 1 e em modo de criação",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/features/parceiro/services/parceiro-form-state.service.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "cada passo escreve só a sua fatia, sem apagar as demais",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/features/parceiro/services/parceiro-form-state.service.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "modo view é somente leitura",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/features/parceiro/services/parceiro-form-state.service.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "clearState zera o estado e volta ao passo 1",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/features/parceiro/services/parceiro-form-state.service.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "vai quando o usuário PODE vê-la",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/features/parceiro/services/parceiro-form-state.service.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "NÃO vai quando o usuário não pode vê-la — o campo é omitido, não enviado como null",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/features/parceiro/services/parceiro-form-state.service.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "quem pode ver e limpou o campo envia null — apagar é uma edição legítima",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/features/parceiro/services/parceiro-form-state.service.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "o estado sem estado no endereço não envia estado vazio — país estrangeiro não tem UF",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/auditoria/historico-registro/historico-registro.component.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "renderiza as operações do histórico, com autor e data",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/auditoria/historico-registro/historico-registro.component.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "campo sigiloso exibe \"valor não registrado\", e não vazio",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/auditoria/historico-registro/historico-registro.component.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "campo não sigiloso mostra o valor anterior e o novo",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/auditoria/historico-registro/historico-registro.component.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "registro vindo de um agregado mostra de qual parte do cadastro veio",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/auditoria/historico-registro/historico-registro.component.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "registro da própria raiz não repete o nome da entidade como origem",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/auditoria/historico-registro/historico-registro.component.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "registro sem alterações não quebra e mostra a mensagem de vazio",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/auditoria/historico-registro/historico-registro.component.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "não busca nada enquanto o modal está fechado",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/auditoria/historico-registro/historico-registro.component.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "emite o fechamento quando o modal é fechado",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/components/field-tooltip/field-tooltip.component.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "liga o botão ao tooltip e permite abri-lo por clique",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/components/field-tooltip/field-tooltip.component.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "posiciona o balão em coordenadas de janela para escapar do overflow do card",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/forms/contato/contato-fields.component.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "renderiza e-mail e telefone com os ícones consolidados",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/forms/contato/contato-form.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "mantém e-mail e telefone obrigatórios na ordem canônica",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/forms/dados-pessoais/dados-pessoais-fields.component.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "renderiza campos e ícones na ordem canônica",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/forms/dados-pessoais/dados-pessoais-fields.component.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "emite a intenção de busca pelo botão visível",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/forms/dados-pessoais/dados-pessoais-fields.component.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "oculta a busca no modo somente leitura",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/forms/dados-pessoais/dados-pessoais-fields.component.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "desabilita a busca e exibe o loading durante a consulta",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/forms/dados-pessoais/dados-pessoais-form.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "mantém a ordem canônica dos dados pessoais",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/forms/dados-pessoais/dados-pessoais-form.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "exige os campos obrigatórios e CPF com onze dígitos",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/forms/dados-pessoais/dados-pessoais-form.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "exige o sexo e o inicializa em null para o placeholder aparecer",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/forms/dados-pessoais/dados-pessoais-form.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "rotula as três opções de sexo e devolve travessão quando não há valor",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/forms/endereco/cep-lookup.service.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "não consulta com CEP incompleto",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/forms/endereco/cep-lookup.service.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "preenche cidade, bairro, logradouro e estado a partir da resposta",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/forms/endereco/cep-lookup.service.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "avisa quando o CEP existe mas o estado não está no cadastro",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/forms/endereco/cep-lookup.service.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "trata 400 como aviso, preservando o preenchimento manual",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/forms/endereco/cep-lookup.service.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "trata 502 como aviso: provedor fora do ar não bloqueia o cadastro",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/forms/endereco/cep-lookup.service.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "encaminha status inesperado para errorFromApi, sem virar aviso",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/forms/endereco/cep-lookup.service.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "invalidar() descarta a resposta de uma consulta em voo",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/forms/enter-busca/enter-busca.directive.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "emite a busca no Enter de um campo de texto",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/forms/enter-busca/enter-busca.directive.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "cancela o evento, para que um botão de submit acrescentado depois não recarregue a página",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/forms/enter-busca/enter-busca.directive.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "não busca no Enter dentro de textarea — ali a tecla é quebra de linha",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/forms/enter-busca/enter-busca.directive.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "ignora o Enter que apenas confirma um candidato de IME",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/forms/enter-busca/enter-busca.directive.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "ignora outras teclas",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/forms/field-error/field-error.component.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "não exibe nada enquanto o campo está intocado",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/forms/field-error/field-error.component.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "exibe a mensagem customizada depois de markAllAsTouched — o caso do botão salvar",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/forms/field-error/field-error.component.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "some quando o campo passa a ser válido",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/forms/field-error/field-error.component.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "cai na mensagem padrão em pt-BR quando o validador não tem mensagem customizada",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/forms/field-error/field-error.component.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "acompanha a troca do control informado no input",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/forms/field-error/field-error.component.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "caracterização: o gems-field-error da SDK 1.1.0 continua sem exibir a mensagem",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/forms/perfil-atuacao.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "tem exatamente os perfis do enum do backend, na mesma ordem",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/forms/perfil-atuacao.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "nenhum rótulo é vazio",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/forms/perfil-atuacao.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "devolve o rótulo do perfil",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/forms/perfil-atuacao.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "perfil ausente ou desconhecido devolve string vazia, nunca undefined",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/forms/rg/rg-format.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "formata o RG paulista com dígito verificador numérico",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/forms/rg/rg-format.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "preserva o dígito verificador alfabético do RG paulista",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/forms/rg/rg-format.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "reconhece a sigla da UF e não inventa dígito verificador",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/forms/rg/rg-format.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "não separa dígito verificador em RG curto",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/forms/rg/rg-format.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "acomoda emissores com mais de nove dígitos",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/forms/rg/rg-format.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "é idempotente sobre um valor já formatado",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/forms/rg/rg-format.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "não descarta caractere digitado dentro do limite",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/forms/rg/rg-format.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "mantém o valor legível enquanto a sigla ainda está sendo digitada",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/forms/rg/rg-format.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "nunca ultrapassa os 20 caracteres aceitos pelo cadastro",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/shared/forms/rg/rg-format.spec.ts",
+      "regra": "testing.md#7",
+      "violacao": "trata vazio, nulo e indefinido como string vazia",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/core/footer/app-footer.component.ts",
+      "regra": "signals-standards.md#1",
+      "violacao": "standalone",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/features/solicitacao/form/solicitacao-form.component.ts",
+      "regra": "organization.md#1",
+      "violacao": "../../parceiro/services/parceiro.store",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/features/parceiro/services/parceiro-form-state.service.spec.ts",
+      "regra": "organization.md#6",
+      "violacao": "parceiro-form-state.service.spec.ts",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/features/parceiro/services/parceiro-form-state.service.ts",
+      "regra": "organization.md#6",
+      "violacao": "parceiro-form-state.service.ts",
+      "ocorrencias": 1
+    },
+    {
+      "arquivo": "frontend/src/app/features/parceiro/models/parceiro-response.model.ts",
+      "regra": "organization.md#6",
+      "violacao": "parceiro-response.model.ts",
+      "ocorrencias": 1
+    }
+  ]
+}

@@ -56,13 +56,8 @@ const repoRoot = resolve(frontendRoot, '..');
 const srcRoot = resolve(frontendRoot, 'src');
 const baselinePath = resolve(repoRoot, '.gems-ai', 'conformance-baseline.json');
 
-/**
- * O total de ocorrências congelado. A fase 7 da rodada 008 (T081) o fixou em 31; a rodada 009
- * (E-06, T046) zerou a dívida — os hex de uso viraram token da SDK ou token local `--app-*`, cuja
- * declaração em `styles.css` o gate isenta. Aumentar exige decisão humana registrada — é o que as
- * mutações de T082 (008) e T049 (009) provam.
- */
-const CONGELADO_EM = 0;
+/** Total medido e congelado em S-def, T057 (2026-09-14). Só encolhe em S-codex. */
+const CONGELADO_EM = 174;
 
 const REGRAS = '.gems-ai/rules/frontend-angular/';
 const MARCA = 'GEMS-EXCEPTION(';
@@ -950,7 +945,10 @@ const orfas = excecoes.filter(
 
 if (process.env.GEMS_CONVENCOES_RELATORIO === 'true') {
   const { writeFileSync } = await import('node:fs');
-  writeFileSync(resolve(repoRoot, 'frontend', 'conventions-report.json'), JSON.stringify(bruto.violacoes, null, 2) + '\n');
+  writeFileSync(
+    resolve(repoRoot, 'frontend', 'conventions-report.json'),
+    JSON.stringify(bruto.violacoes, null, 2) + '\n',
+  );
   console.log(`Convenções: ${bruto.violacoes.length} violações brutas (relatório)`);
   process.exit(0);
 }

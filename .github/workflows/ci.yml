@@ -60,6 +60,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # Spotless ratchetFrom=411156d requires history
 
       - name: JDK 21
         uses: actions/setup-java@v6
