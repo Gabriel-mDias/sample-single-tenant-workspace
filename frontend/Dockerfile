@@ -30,9 +30,8 @@ RUN if [ -n "$GEMS_REGISTRY_USER" ] && [ -n "$GEMS_REGISTRY_TOKEN" ]; then \
       printf '@gabriel-mdias:registry=https://npm.pkg.github.com\n//npm.pkg.github.com/:_authToken=%s\n' "$GEMS_REGISTRY_TOKEN" > .npmrc; \
     fi
 
-# --legacy-peer-deps é OBRIGATÓRIO: angular-gems-sdk@1.1.0 declara peer @angular/common@^20 e o
-# projeto está no Angular 22. Sem a flag, o install aborta com ERESOLVE (CLAUDE.md §2).
-RUN npm ci --legacy-peer-deps
+# A SDK 2.1.0 e os overrides do package.json resolvem os peers no Angular 22.
+RUN npm ci
 
 COPY . .
 

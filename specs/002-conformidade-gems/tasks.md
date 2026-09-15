@@ -15,10 +15,10 @@ fecha verde. `CREATE` marca arquivo inexistente. D-P01–D-P03 e T004 foram deci
 
 ## Phase 1 — Dependências (8 tarefas)
 
-- [ ] T005 Executar em `backend`: `.\mvnw.cmd dependency:tree`; guardar saída antes da troca e exigir exit 0.
-- [ ] T006 Atualizar `backend/pom.xml`: GEMS publicada, processors MapStruct/Lombok e futura remoção de `ratchetFrom`; atualizar `backend/app-core/pom.xml`, `backend/app-model/pom.xml`, `backend/app-security/pom.xml`, `backend/app-deploy/pom.xml` apenas para módulos efetivamente consumidos.
-- [ ] T007 Atualizar `frontend/package.json` e `frontend/package-lock.json` para SDK 2.1.0/overrides; executar em `frontend`: `npm ci`; exigir exit 0 sem flag.
-- [ ] T008 Remover comando/comentário obsoleto de `frontend/Dockerfile`; executar em `frontend`: `docker build --target build .`; exigir instalação/build exit 0 sem flag.
+- [x] T005 Executar em `backend`: `.\mvnw.cmd dependency:tree`; guardar saída antes da troca e exigir exit 0. **C00: exit 0, BUILD SUCCESS nos seis módulos; GEMS 3.1.0 e ModelMapper 3.2.4 resolvidos.**
+- [x] T006 Atualizar `backend/pom.xml`: GEMS publicada, processors MapStruct/Lombok e futura remoção de `ratchetFrom`; atualizar `backend/app-core/pom.xml`, `backend/app-model/pom.xml`, `backend/app-security/pom.xml`, `backend/app-deploy/pom.xml` apenas para módulos efetivamente consumidos. **C00: diff nominal conferido; `app-core -am test` verde com 13 testes security e 132 core.**
+- [x] T007 Atualizar `frontend/package.json` e `frontend/package-lock.json` para SDK 2.1.0/overrides; executar em `frontend`: `npm ci`; exigir exit 0 sem flag. **C00: `npm ci` exit 0, 392 pacotes e 0 vulnerabilidades.**
+- [ ] T008 Remover comando/comentário obsoleto de `frontend/Dockerfile`; executar em `frontend`: `docker build --target build .`; exigir instalação/build exit 0 sem flag. **Implementação preservada; `docker build --target build .` permanece pendente e será executado em C10.**
 - [ ] T009 Após expansão T004, remover comando/comentário de `.github/workflows/ci.yml`; validar sintaxe do workflow e que o step executa `npm ci` sem flag.
 - [ ] T010 Após expansão T004, corrigir instruções em `README.md` e comentário em `.github/dependabot.yml`; exigir zero orientação ativa para usar a flag nesses arquivos.
 - [ ] T011 Executar busca nominal sobre `frontend/Dockerfile`, `.github/workflows/ci.yml`, `.github/dependabot.yml`, `README.md`, `frontend/package.json` e `frontend/package-lock.json`; exigir zero invocação operacional da flag. Reportar separadamente menções imutáveis em `.specify/memory/constitution.md`, `.gems-ai/MIGRACAO-2.4.0.md` e `.gems-ai/recipes/setup-frontend-sdk.md`.

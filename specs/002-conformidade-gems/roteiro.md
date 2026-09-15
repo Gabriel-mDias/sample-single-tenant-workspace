@@ -218,7 +218,7 @@ admite paralelismo interno nem checkpoint parcial.
 | 4 | `/speckit-tasks` | revisado | 79 tasks em 8 fases |
 | 5 | `/speckit-analyze` | revisado | 0 CRITICAL documental; achados incorporados |
 | 6 | **`roteiro.md`** | aprovado em 2026-09-14 | portão assinado pelo product owner |
-| 7 | `/speckit-implement` | liberado com condicionantes | blocos independentes podem iniciar; auditoria e Keycloak esperam releases compatíveis |
+| 7 | `/speckit-implement` | C00 verde; retomar por C01 | T005–T007 revalidadas; T008 preservada com gate Docker pendente para C10; T009 não iniciada |
 
 ### Resultado dos checklists
 
