@@ -40,8 +40,8 @@ updates:
         patterns: ['@angular/*']
         update-types: [minor, patch]
     ignore:
-      # Angular major é rodada própria: o projeto já convive com --legacy-peer-deps por causa do
-      # descompasso entre a SDK (peer ^20) e o Angular 22.
+      # Angular major é rodada própria: o projeto usa Angular 22, SDK 2.1.0 e overrides de peers
+      # do keycloak-angular; a instalação limpa usa npm ci.
       - dependency-name: '@angular/*'
         update-types: [version-update:semver-major]
       - dependency-name: '@gabriel-mdias/angular-gems-sdk'

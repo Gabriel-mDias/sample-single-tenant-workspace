@@ -218,7 +218,17 @@ admite paralelismo interno nem checkpoint parcial.
 | 4 | `/speckit-tasks` | revisado | 79 tasks em 8 fases |
 | 5 | `/speckit-analyze` | revisado | 0 CRITICAL documental; achados incorporados |
 | 6 | **`roteiro.md`** | aprovado em 2026-09-14 | portão assinado pelo product owner |
-| 7 | `/speckit-implement` | C00 verde; retomar por C01 | T005–T007 revalidadas; T008 preservada com gate Docker pendente para C10; T009 não iniciada |
+| 7 | `/speckit-implement` | C00 e C01 verdes; próxima retomada definida pelo orquestrador | T005–T007 revalidadas; T009–T012 concluídas em 2026-09-15; T008 preservada com gate Docker pendente para C10 |
+
+### Resultado C01 — 2026-09-15
+
+CI e README usam `npm ci`; comentários de CI/Dependabot refletem Angular 22, SDK 2.1.0 e overrides.
+YAML do workflow e step de instalação validados (exit 0). Busca nos seis alvos operacionais do
+pacote sem ocorrências da flag (rg exit 1). `dependency:tree` retornou exit 0/BUILD SUCCESS nos seis
+módulos, mantendo GEMS 3.1.0, ModelMapper 3.2.4 temporário e MapStruct 1.6.3 conforme POMs e C00;
+os POMs não receberam alterações. `git diff --check` verde (exit 0).
+As três referências imutáveis informadas pelo pacote estão separadas no estado C01, sem nova
+leitura fora de READ. T008 e Docker build seguem em C10; o próximo checkpoint cabe ao orquestrador.
 
 ### Resultado dos checklists
 

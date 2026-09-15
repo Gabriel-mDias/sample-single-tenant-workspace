@@ -28,7 +28,7 @@ cd backend
 .\mvnw.cmd clean install
 
 cd ..\frontend
-npm install --legacy-peer-deps
+npm ci
 npm test
 npm run build
 
@@ -145,8 +145,8 @@ confunde com token errado:
 ## Restrições operacionais
 
 - No Windows o build é `.\mvnw.cmd`. O script shell `./mvnw` falha na invocação por `powershell.exe`.
-- `npm install` exige `--legacy-peer-deps`: a SDK declara peer `@angular/common@^20` e o projeto está
-  no 22. Sem a flag, `ERESOLVE` aborta.
+- Use `npm ci` para instalar as versões do lockfile. O Angular 22 usa a SDK 2.1.0 e os overrides
+  de peers do `keycloak-angular` declarados em `frontend/package.json`.
 - **Nunca `docker compose down -v`.** O volume guarda o banco da aplicação **e** o do Keycloak, e as
   senhas dos usuários existem apenas no segundo.
 - O Keycloak leva ~80s no primeiro boot. Espere `keycloak-config-cli ran in` nos logs.

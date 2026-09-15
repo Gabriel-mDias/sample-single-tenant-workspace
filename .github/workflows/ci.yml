@@ -128,10 +128,10 @@ jobs:
         env:
           GEMS_REGISTRY_TOKEN: ${{ secrets.GEMS_REGISTRY_TOKEN || secrets.GITHUB_TOKEN }}
 
-      # --legacy-peer-deps é OBRIGATÓRIO: angular-gems-sdk@1.1.0 declara peer @angular/common@^20 e o
-      # projeto está no Angular 22. Sem a flag, o install aborta com ERESOLVE.
+      # Angular 22 usa angular-gems-sdk 2.1.0 e overrides de peers do keycloak-angular.
+      # npm ci instala as versões registradas no lockfile.
       - name: Instalar dependências
-        run: npm ci --legacy-peer-deps
+        run: npm ci
         working-directory: frontend
 
       - name: Testes
