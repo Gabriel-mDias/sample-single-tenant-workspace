@@ -7,17 +7,17 @@ import br.com.gems.app.model.params.SolicitacaoFilterParams;
 import br.com.gems.app.model.response.SolicitacaoResponseDTO;
 import br.com.gems.app.parceiro.repository.ParceiroRepository;
 import br.com.gems.app.solicitacao.event.SolicitacaoConcluidaEvent;
+import br.com.gems.app.solicitacao.mapper.SolicitacaoMapper;
 import br.com.gems.app.solicitacao.repository.EtapaSolicitacaoRepository;
 import br.com.gems.app.solicitacao.repository.SolicitacaoRepository;
 import br.com.gems.exception.exception.BusinessException;
-import br.com.gems.mapper.ModelMapperUtils;
 import br.com.gems.utils.ObjectUtil;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -26,11 +26,13 @@ import java.util.UUID;
 /**
  * Regras de negócio da solicitação — o domínio de fluxo.
  *
- * <p>Ordem canônica dos métodos (Princípio IV): {@code findById > search > delete > insert > save >
+ * <p>
+ * Ordem canônica dos métodos (Princípio IV): {@code findById > search > delete > insert > save >
  * validate}. As transições vêm depois de {@code save}, agrupadas, porque são um bloco coeso: cada
  * uma é chamada por um endpoint de ação próprio, com a sua ação de {@code AcaoSistema}.
  *
- * <p><b>A situação nunca é lida do DTO de entrada.</b> {@link #insert} a define como
+ * <p>
+ * <b>A situação nunca é lida do DTO de entrada.</b> {@link #insert} a define como
  * {@code RASCUNHO}; {@link #save} a preserva; e só os métodos de transição a alteram, sempre
  * passando por {@link #transitar}, que é o único ponto que consulta a máquina de estados.
  */
@@ -40,6 +42,7 @@ public class SolicitacaoService {
 
     private static final String NAO_ENCONTRADA = "Solicitação não encontrada.";
 
+    private final SolicitacaoMapper mapper;
     private final SolicitacaoRepository repository;
     private final EtapaSolicitacaoRepository etapaRepository;
     private final ParceiroRepository parceiroRepository;
@@ -57,7 +60,7 @@ public class SolicitacaoService {
         return repository.search( filterParams, pageable );
     }
 
-    @Transactional( rollbackOn = Exception.class )
+    @Transactional(rollbackFor = Exception.class)
     public void delete( String id ) {
         delete( UUID.fromString( id ) );
     }
@@ -65,11 +68,12 @@ public class SolicitacaoService {
     /**
      * Só rascunho e solicitação cancelada podem ser excluídos.
      *
-     * <p>Excluir uma solicitação concluída apagaria o fato que alimentou o contador do parceiro, e o
+     * <p>
+     * Excluir uma solicitação concluída apagaria o fato que alimentou o contador do parceiro, e o
      * evento já foi publicado — não há como desfazê-lo. A recusa aqui é o que mantém as duas coisas
      * coerentes sem precisar de evento de compensação.
      */
-    @Transactional( rollbackOn = Exception.class )
+    @Transactional(rollbackFor = Exception.class)
     public void delete( UUID id ) {
         var solicitacao = buscarAtiva( id );
 
@@ -85,7 +89,7 @@ public class SolicitacaoService {
         etapaRepository.findBySolicitacaoIdOrderByOrdemAsc( id ).forEach( etapaRepository::delete );
     }
 
-    @Transactional( rollbackOn = Exception.class )
+    @Transactional(rollbackFor = Exception.class)
     public SolicitacaoDTO insert( SolicitacaoDTO dto ) {
         validate( dto, true );
 
@@ -100,7 +104,7 @@ public class SolicitacaoService {
         return toDTO( repository.save( solicitacao ) );
     }
 
-    @Transactional( rollbackOn = Exception.class )
+    @Transactional(rollbackFor = Exception.class)
     public SolicitacaoDTO save( String id, SolicitacaoDTO dto ) {
         return save( UUID.fromString( id ), dto );
     }
@@ -110,7 +114,7 @@ public class SolicitacaoService {
      * de propósito, e é por isso que não existe caminho para alguém concluir uma solicitação
      * mandando um PUT.
      */
-    @Transactional( rollbackOn = Exception.class )
+    @Transactional(rollbackFor = Exception.class)
     public SolicitacaoDTO save( UUID id, SolicitacaoDTO dto ) {
         var solicitacao = buscarAtiva( id );
 
@@ -129,12 +133,12 @@ public class SolicitacaoService {
     // ---- Transições ------------------------------------------------------------------------
     // Uma por endpoint, cada uma com a sua ação. Todas passam por transitar().
 
-    @Transactional( rollbackOn = Exception.class )
+    @Transactional(rollbackFor = Exception.class)
     public SolicitacaoDTO abrir( UUID id ) {
         return toDTO( transitar( id, SituacaoSolicitacao.ABERTA ) );
     }
 
-    @Transactional( rollbackOn = Exception.class )
+    @Transactional(rollbackFor = Exception.class)
     public SolicitacaoDTO iniciar( UUID id ) {
         return toDTO( transitar( id, SituacaoSolicitacao.EM_ANDAMENTO ) );
     }
@@ -142,11 +146,12 @@ public class SolicitacaoService {
     /**
      * Conclui e <b>publica o evento</b>.
      *
-     * <p>O contador do parceiro não é atualizado aqui: chamar o {@code ParceiroService} seria
+     * <p>
+     * O contador do parceiro não é atualizado aqui: chamar o {@code ParceiroService} seria
      * escrever no dado de outro domínio, que o Princípio I proíbe. Este service avisa; quem reage é
      * um listener que vive junto do domínio que reage.
      */
-    @Transactional( rollbackOn = Exception.class )
+    @Transactional(rollbackFor = Exception.class)
     public SolicitacaoDTO concluir( UUID id ) {
         var solicitacao = buscarAtiva( id );
 
@@ -164,7 +169,7 @@ public class SolicitacaoService {
         return toDTO( salva );
     }
 
-    @Transactional( rollbackOn = Exception.class )
+    @Transactional(rollbackFor = Exception.class)
     public SolicitacaoDTO cancelar( UUID id, String motivo ) {
         if ( ObjectUtil.isNullOrEmpty( motivo ) ) {
             // Cancelar sem motivo é perda de informação: ninguém consegue responder depois por que
@@ -191,7 +196,8 @@ public class SolicitacaoService {
     /**
      * O <b>único</b> ponto que altera a situação.
      *
-     * <p>A regra de quais transições existem vive no enum, não aqui: acrescentar uma transição é uma
+     * <p>
+     * A regra de quais transições existem vive no enum, não aqui: acrescentar uma transição é uma
      * linha lá, e este método não muda.
      */
     private Solicitacao transitar( Solicitacao solicitacao, SituacaoSolicitacao destino ) {
@@ -214,7 +220,7 @@ public class SolicitacaoService {
     }
 
     private SolicitacaoDTO toDTO( Solicitacao solicitacao ) {
-        return ModelMapperUtils.mapStrict( solicitacao, SolicitacaoDTO.class );
+        return mapper.toDTO( solicitacao );
     }
 
     /** Validação acumulada (Princípio IV): reúne tudo e lança uma vez. */

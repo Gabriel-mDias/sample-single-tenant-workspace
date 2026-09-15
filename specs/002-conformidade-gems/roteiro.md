@@ -218,7 +218,7 @@ admite paralelismo interno nem checkpoint parcial.
 | 4 | `/speckit-tasks` | revisado | 79 tasks em 8 fases |
 | 5 | `/speckit-analyze` | revisado | 0 CRITICAL documental; achados incorporados |
 | 6 | **`roteiro.md`** | aprovado em 2026-09-14 | portão assinado pelo product owner |
-| 7 | `/speckit-implement` | C00 e C01 verdes; próxima retomada definida pelo orquestrador | T005–T007 revalidadas; T009–T012 concluídas em 2026-09-15; T008 preservada com gate Docker pendente para C10 |
+| 7 | `/speckit-implement` | C00, C01 e C02 verdes; próxima retomada definida pelo orquestrador | T005–T007 revalidadas; T009–T012 e T037–T045 concluídas em 2026-09-15; T008 preservada com gate Docker pendente para C10 |
 
 ### Resultado C01 — 2026-09-15
 
@@ -229,6 +229,16 @@ módulos, mantendo GEMS 3.1.0, ModelMapper 3.2.4 temporário e MapStruct 1.6.3 c
 os POMs não receberam alterações. `git diff --check` verde (exit 0).
 As três referências imutáveis informadas pelo pacote estão separadas no estado C01, sem nova
 leitura fora de READ. T008 e Docker build seguem em C10; o próximo checkpoint cabe ao orquestrador.
+
+### Resultado C02 — 2026-09-15
+
+Os seis services passaram a usar mappers MapStruct nominais configurados por
+`br.com.gems.mapstruct.GemsMappingConfig`; identidade, auditoria, referências gerenciadas,
+normalização de CPF, sigilo de comissão e relações de solicitação foram preservados. Parceiro e
+solicitação usam a transação Spring com `rollbackFor = Exception.class`. O vermelho test-first foi
+registrado no `testCompile` com 12 erros para seis mappers ausentes. Após a implementação e a
+recuperação do FQCN, o gate focado terminou com exit 0: 70 testes, 0 falhas, 0 erros e 0 ignorados;
+`git diff --check` também terminou com exit 0. T046–T051 permanecem para o checkpoint seguinte.
 
 ### Resultado dos checklists
 

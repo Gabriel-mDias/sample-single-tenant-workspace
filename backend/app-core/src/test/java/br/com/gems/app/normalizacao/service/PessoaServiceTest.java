@@ -3,8 +3,8 @@ package br.com.gems.app.normalizacao.service;
 import br.com.gems.app.model.dto.PessoaDTO;
 import br.com.gems.app.model.entity.normalizacao.Pessoa;
 import br.com.gems.app.model.enums.Sexo;
+import br.com.gems.app.normalizacao.mapper.PessoaMapper;
 import br.com.gems.app.normalizacao.repository.PessoaRepository;
-import br.com.gems.mapper.ModelMapperUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,7 +15,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.modelmapper.ModelMapper;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -26,6 +25,8 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -33,12 +34,12 @@ import static org.mockito.Mockito.when;
 /**
  * Cobertura das regras V1 a V7 do {@code data-model.md} da feature 007-vinculos-de-servico.
  *
- * <p>O {@link ModelMapper} aqui é real, não mock: o mapeamento DTO↔entidade é parte da regra que se
- * quer proteger — em especial o {@code skip} de identidade, que impede o payload de sobrescrever o
- * id da pessoa já persistida.
+ * <p>
+ * O {@link PessoaMapper} é mockado com o comportamento de atualização necessário para proteger a
+ * preservação da identidade: o payload não pode sobrescrever o id da pessoa já persistida.
  */
-@ExtendWith( MockitoExtension.class )
-@MockitoSettings( strictness = Strictness.LENIENT )
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class PessoaServiceTest {
 
     private static final UUID ID_PESSOA = UUID.fromString( "11111111-1111-1111-1111-111111111111" );
@@ -50,21 +51,40 @@ class PessoaServiceTest {
     @Mock
     private ApplicationEventPublisher eventPublisher;
 
+    private PessoaMapper mapper;
     private PessoaService service;
 
     @BeforeEach
     void setUp() {
-        var modelMapper = new ModelMapper();
-        ModelMapperUtils.ignoreLazyFieldsNotInitialized( modelMapper );
-        modelMapper.getConfiguration().setAmbiguityIgnored( true );
+        mapper = mock( PessoaMapper.class );
+        service = new PessoaService( mapper, repository, eventPublisher );
 
-        service = new PessoaService( modelMapper, repository, eventPublisher );
+        doAnswer( invocation -> {
+            var dto = invocation.getArgument( 0, PessoaDTO.class );
+            var entity = invocation.getArgument( 1, Pessoa.class );
+            entity.setPrimeiroNome( dto.getPrimeiroNome() );
+            entity.setSobrenome( dto.getSobrenome() );
+            entity.setDataNascimento( dto.getDataNascimento() );
+            entity.setCpf( dto.getCpf() );
+            entity.setRg( dto.getRg() );
+            entity.setSexo( dto.getSexo() );
+            entity.setDataObito( dto.getDataObito() );
+            entity.setDataAproximada( dto.getDataAproximada() );
+            return null;
+        } ).when( mapper ).atualizar( any( PessoaDTO.class ), any( Pessoa.class ) );
+
+        when( mapper.toDTO( any( Pessoa.class ) ) ).thenAnswer( invocation -> {
+            var entity = invocation.getArgument( 0, Pessoa.class );
+            return new PessoaDTO( entity.getId(), entity.getPrimeiroNome(), entity.getSobrenome(),
+                    entity.getDataNascimento(), entity.getCpf(), entity.getRg(), entity.getSexo(),
+                    entity.getDataObito(), entity.getDataAproximada() );
+        } );
 
         when( repository.save( any( Pessoa.class ) ) ).thenAnswer( invocation -> invocation.getArgument( 0 ) );
     }
 
     @Test
-    @DisplayName( "V1 a V5: payload vazio acumula todas as mensagens de uma vez, nunca a primeira" )
+    @DisplayName("V1 a V5: payload vazio acumula todas as mensagens de uma vez, nunca a primeira")
     void validacaoEhAcumuladaNuncaFailFast() {
         var errors = new ArrayList<String>();
 
@@ -79,7 +99,7 @@ class PessoaServiceTest {
     }
 
     @Test
-    @DisplayName( "PessoaDTO nulo acusa que os dados pessoais são obrigatórios" )
+    @DisplayName("PessoaDTO nulo acusa que os dados pessoais são obrigatórios")
     void pessoaNulaFalha() {
         var errors = new ArrayList<String>();
 
@@ -89,7 +109,7 @@ class PessoaServiceTest {
     }
 
     @Test
-    @DisplayName( "V4: data de nascimento no futuro é recusada" )
+    @DisplayName("V4: data de nascimento no futuro é recusada")
     void dataNascimentoNoFuturoFalha() {
         var errors = new ArrayList<String>();
         var dto = pessoaValida();
@@ -101,7 +121,7 @@ class PessoaServiceTest {
     }
 
     @Test
-    @DisplayName( "V4: data de nascimento igual a hoje também é recusada" )
+    @DisplayName("V4: data de nascimento igual a hoje também é recusada")
     void dataNascimentoHojeFalha() {
         var errors = new ArrayList<String>();
         var dto = pessoaValida();
@@ -113,7 +133,7 @@ class PessoaServiceTest {
     }
 
     @Test
-    @DisplayName( "V4: data de nascimento no passado passa sem erro" )
+    @DisplayName("V4: data de nascimento no passado passa sem erro")
     void dataNascimentoNoPassadoPassa() {
         var errors = new ArrayList<String>();
         var dto = pessoaValida();
@@ -126,7 +146,7 @@ class PessoaServiceTest {
     }
 
     @Test
-    @DisplayName( "V6: CPF com menos de 11 dígitos é recusado" )
+    @DisplayName("V6: CPF com menos de 11 dígitos é recusado")
     void cpfComMenosDeOnzeDigitosFalha() {
         var errors = new ArrayList<String>();
         var dto = pessoaValida();
@@ -139,7 +159,7 @@ class PessoaServiceTest {
     }
 
     @Test
-    @DisplayName( "V6: CPF com mais de 11 dígitos é recusado" )
+    @DisplayName("V6: CPF com mais de 11 dígitos é recusado")
     void cpfComMaisDeOnzeDigitosFalha() {
         var errors = new ArrayList<String>();
         var dto = pessoaValida();
@@ -152,7 +172,7 @@ class PessoaServiceTest {
     }
 
     @Test
-    @DisplayName( "CPF com máscara é normalizado para dígitos antes de validar e consultar o repositório" )
+    @DisplayName("CPF com máscara é normalizado para dígitos antes de validar e consultar o repositório")
     void cpfComMascaraEhNormalizadoAntesDaConsulta() {
         var errors = new ArrayList<String>();
         var dto = pessoaValida();
@@ -166,7 +186,7 @@ class PessoaServiceTest {
     }
 
     @Test
-    @DisplayName( "V7: CPF duplicado sem idExistente é recusado" )
+    @DisplayName("V7: CPF duplicado sem idExistente é recusado")
     void cpfDuplicadoSemIdExistenteFalha() {
         var errors = new ArrayList<String>();
         var dto = pessoaValida();
@@ -179,7 +199,7 @@ class PessoaServiceTest {
     }
 
     @Test
-    @DisplayName( "V7: CPF duplicado com idExistente não acusa quando o único registro é a própria pessoa" )
+    @DisplayName("V7: CPF duplicado com idExistente não acusa quando o único registro é a própria pessoa")
     void cpfDuplicadoComIdExistenteDaPropriaPessoaPassa() {
         var errors = new ArrayList<String>();
         var dto = pessoaValida();
@@ -193,7 +213,7 @@ class PessoaServiceTest {
     }
 
     @Test
-    @DisplayName( "V7: CPF duplicado com idExistente ainda acusa quando pertence a outra pessoa" )
+    @DisplayName("V7: CPF duplicado com idExistente ainda acusa quando pertence a outra pessoa")
     void cpfDuplicadoComIdExistenteDeOutraPessoaFalha() {
         var errors = new ArrayList<String>();
         var dto = pessoaValida();
@@ -205,7 +225,7 @@ class PessoaServiceTest {
     }
 
     @Test
-    @DisplayName( "Genealogia aceita CPF e nascimento ausentes sem consultar duplicidade" )
+    @DisplayName("Genealogia aceita CPF e nascimento ausentes sem consultar duplicidade")
     void genealogiaAceitaCpfENascimentoAusentes() {
         var errors = new ArrayList<String>();
         var dto = pessoaValida();
@@ -220,7 +240,7 @@ class PessoaServiceTest {
     }
 
     @Test
-    @DisplayName( "Dois CPFs ausentes não são tratados como identidade duplicada" )
+    @DisplayName("Dois CPFs ausentes não são tratados como identidade duplicada")
     void doisCpfsAusentesNaoSaoDuplicados() {
         var primeira = pessoaValida();
         primeira.setCpf( null );
@@ -238,7 +258,7 @@ class PessoaServiceTest {
     }
 
     @Test
-    @DisplayName( "Genealogia ainda valida formato e unicidade quando o CPF é informado" )
+    @DisplayName("Genealogia ainda valida formato e unicidade quando o CPF é informado")
     void genealogiaValidaCpfInformado() {
         var errors = new ArrayList<String>();
         var dto = pessoaValida();
@@ -250,7 +270,7 @@ class PessoaServiceTest {
     }
 
     @Test
-    @DisplayName( "Cliente e usuário continuam exigindo CPF e nascimento" )
+    @DisplayName("Cliente e usuário continuam exigindo CPF e nascimento")
     void fluxoLegadoContinuaExigindoCpfENascimento() {
         var errors = new ArrayList<String>();
         var dto = pessoaValida();
@@ -265,7 +285,7 @@ class PessoaServiceTest {
     }
 
     @Test
-    @DisplayName( "Óbito anterior ao nascimento é recusado" )
+    @DisplayName("Óbito anterior ao nascimento é recusado")
     void obitoAnteriorAoNascimentoFalha() {
         var errors = new ArrayList<String>();
         var dto = pessoaValida();
@@ -278,7 +298,7 @@ class PessoaServiceTest {
     }
 
     @Test
-    @DisplayName( "buscarPorCpf normaliza a máscara antes de consultar o repositório" )
+    @DisplayName("buscarPorCpf normaliza a máscara antes de consultar o repositório")
     void buscarPorCpfNormalizaMascara() {
         var pessoa = pessoaPersistida();
         when( repository.findByCpf( "12345678901" ) ).thenReturn( Optional.of( pessoa ) );
@@ -290,7 +310,7 @@ class PessoaServiceTest {
     }
 
     @Test
-    @DisplayName( "buscarPorCpf devolve vazio para CPF nulo sem tocar o repositório" )
+    @DisplayName("buscarPorCpf devolve vazio para CPF nulo sem tocar o repositório")
     void buscarPorCpfNuloDevolveVazio() {
         var encontrada = service.buscarPorCpf( null );
 
@@ -299,7 +319,7 @@ class PessoaServiceTest {
     }
 
     @Test
-    @DisplayName( "buscarPorCpf devolve vazio para CPF em branco sem tocar o repositório" )
+    @DisplayName("buscarPorCpf devolve vazio para CPF em branco sem tocar o repositório")
     void buscarPorCpfVazioDevolveVazio() {
         var encontrada = service.buscarPorCpf( "" );
 
@@ -308,7 +328,7 @@ class PessoaServiceTest {
     }
 
     @Test
-    @DisplayName( "insert devolve instância gerenciada e grava o CPF só com dígitos" )
+    @DisplayName("insert devolve instância gerenciada e grava o CPF só com dígitos")
     void insertDevolveInstanciaGerenciadaComCpfSemMascara() {
         var dto = pessoaValida();
         dto.setCpf( "123.456.789-01" );
@@ -325,7 +345,7 @@ class PessoaServiceTest {
     }
 
     @Test
-    @DisplayName( "insert preserva CPF nulo e aplica false como padrão de data aproximada" )
+    @DisplayName("insert preserva CPF nulo e aplica false como padrão de data aproximada")
     void insertAceitaCpfNuloEAplicaPadraoDaEstimativa() {
         var dto = pessoaValida();
         dto.setCpf( null );
@@ -338,7 +358,7 @@ class PessoaServiceTest {
     }
 
     @Test
-    @DisplayName( "save sobre instância existente preserva o id, mesmo com id diferente no DTO" )
+    @DisplayName("save sobre instância existente preserva o id, mesmo com id diferente no DTO")
     void savePreservaId() {
         var existente = Pessoa.builder().id( ID_PESSOA ).primeiroNome( "Antigo" ).build();
         var dto = pessoaValida();
@@ -351,7 +371,7 @@ class PessoaServiceTest {
     }
 
     @Test
-    @DisplayName( "toDTO mapeia todos os campos da pessoa" )
+    @DisplayName("toDTO mapeia todos os campos da pessoa")
     void toDtoMapeiaTodosOsCampos() {
         var pessoa = pessoaPersistida();
 

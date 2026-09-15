@@ -7,17 +7,17 @@ import br.com.gems.app.model.response.ParceiroResponseDTO;
 import br.com.gems.app.normalizacao.service.ContatoService;
 import br.com.gems.app.normalizacao.service.EnderecoService;
 import br.com.gems.app.normalizacao.service.PessoaService;
+import br.com.gems.app.parceiro.mapper.ParceiroMapper;
 import br.com.gems.app.parceiro.repository.ParceiroRepository;
 import br.com.gems.app.security.AcaoSistema;
 import br.com.gems.app.security.service.UsuarioAutenticadoService;
 import br.com.gems.exception.exception.BusinessException;
-import br.com.gems.mapper.ModelMapperUtils;
 import br.com.gems.utils.ObjectUtil;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.UUID;
@@ -25,15 +25,18 @@ import java.util.UUID;
 /**
  * Regras de negócio do cadastro de parceiros — <b>o service de referência deste projeto</b>.
  *
- * <p>Ordem canônica dos métodos (Princípio IV): {@code findById > search > delete > insert > save >
+ * <p>
+ * Ordem canônica dos métodos (Princípio IV): {@code findById > search > delete > insert > save >
  * validate}. Os auxiliares privados ficam entre {@code save} e {@code validate}, que é sempre o
  * último método da classe.
  *
- * <p><b>Nada é gravado por cascade.</b> Pessoa, contato e endereço são dados normalizados de apoio,
+ * <p>
+ * <b>Nada é gravado por cascade.</b> Pessoa, contato e endereço são dados normalizados de apoio,
  * com services próprios. Em troca da conveniência do cascade, a ordem das operações é
  * responsabilidade explícita deste serviço — ver os comentários em {@link #insert} e {@link #delete}.
  *
- * <p>É também onde vive a <b>autorização de campo</b>: a comissão só é preenchida para quem tem
+ * <p>
+ * É também onde vive a <b>autorização de campo</b>: a comissão só é preenchida para quem tem
  * {@link AcaoSistema#VISUALIZAR_COMISSAO}, e nos <b>três</b> caminhos — leitura, busca e gravação.
  */
 @Service
@@ -42,6 +45,7 @@ public class ParceiroService {
 
     private static final String NAO_ENCONTRADO = "Parceiro não encontrado.";
 
+    private final ParceiroMapper mapper;
     private final ParceiroRepository repository;
     private final PessoaService pessoaService;
     private final ContatoService contatoService;
@@ -74,20 +78,22 @@ public class ParceiroService {
     /**
      * Exclusão lógica em cascata, explícita.
      *
-     * <p>Os deletes viram {@code UPDATE ... SET DT_EXCLUSAO = NOW()} por conta do {@code @SQLDelete}
+     * <p>
+     * Os deletes viram {@code UPDATE ... SET DT_EXCLUSAO = NOW()} por conta do {@code @SQLDelete}
      * de cada entidade, então não há risco de violação de chave estrangeira em nenhuma ordem — a
      * sequência dono → agregados é semântica. As linhas continuam fisicamente na base; apenas somem
      * das consultas, por conta do {@code @SQLRestriction}.
      *
-     * <p>O {@code @EntityGraph} de {@code findById} garante que os agregados já estão inicializados
+     * <p>
+     * O {@code @EntityGraph} de {@code findById} garante que os agregados já estão inicializados
      * aqui, o que importa com {@code open-in-view: false}.
      */
-    @Transactional( rollbackOn = Exception.class )
+    @Transactional(rollbackFor = Exception.class)
     public void delete( String id ) {
         delete( UUID.fromString( id ) );
     }
 
-    @Transactional( rollbackOn = Exception.class )
+    @Transactional(rollbackFor = Exception.class)
     public void delete( UUID id ) {
         var parceiro = buscarAtivo( id );
         var pessoa = parceiro.getPessoa();
@@ -104,11 +110,12 @@ public class ParceiroService {
      * Grava parceiro, pessoa, contato e endereço em uma única transação, a partir do payload único
      * do wizard.
      *
-     * <p><b>A ordem é obrigatória.</b> As chaves estrangeiras são {@code nullable = false} e não há
+     * <p>
+     * <b>A ordem é obrigatória.</b> As chaves estrangeiras são {@code nullable = false} e não há
      * {@code CascadeType.PERSIST}: salvar o parceiro com um agregado transiente estouraria
      * {@code TransientPropertyValueException}. Os três precisam estar gerenciados <b>antes</b>.
      */
-    @Transactional( rollbackOn = Exception.class )
+    @Transactional(rollbackFor = Exception.class)
     public ParceiroDTO insert( ParceiroDTO dto ) {
         validate( dto, true );
 
@@ -124,12 +131,12 @@ public class ParceiroService {
         return toDTO( repository.save( parceiro ) );
     }
 
-    @Transactional( rollbackOn = Exception.class )
+    @Transactional(rollbackFor = Exception.class)
     public ParceiroDTO save( String id, ParceiroDTO dto ) {
         return save( UUID.fromString( id ), dto );
     }
 
-    @Transactional( rollbackOn = Exception.class )
+    @Transactional(rollbackFor = Exception.class)
     public ParceiroDTO save( UUID id, ParceiroDTO dto ) {
         var parceiro = buscarAtivo( id );
 
@@ -157,7 +164,8 @@ public class ParceiroService {
     /**
      * Copia para a entidade o que é do próprio parceiro.
      *
-     * <p><b>A comissão só é escrita por quem pode lê-la.</b> Não é excesso de zelo: sem esta guarda,
+     * <p>
+     * <b>A comissão só é escrita por quem pode lê-la.</b> Não é excesso de zelo: sem esta guarda,
      * um payload de quem não vê o campo — e que por isso o recebeu {@code null} na leitura —
      * sobrescreveria o valor existente com {@code null} no primeiro salvamento. A autorização de
      * leitura viraria uma autorização de escrita ao contrário, e ninguém notaria até faltar o número.
@@ -174,7 +182,7 @@ public class ParceiroService {
     private ParceiroDTO toDTO( Parceiro parceiro ) {
         // STRICT, e não o mapper padrão: o DTO tem caminhos aninhados que competiriam pelo mesmo
         // destino sob a estratégia STANDARD, e o mapeamento errado passaria silencioso.
-        var dto = ModelMapperUtils.mapStrict( parceiro, ParceiroDTO.class );
+        var dto = mapper.toDTO( parceiro );
 
         if ( !podeVerComissao() ) {
             dto.setComissao( null );
@@ -204,7 +212,8 @@ public class ParceiroService {
      * Validação <b>acumulada</b> (Princípio IV): todas as violações são reunidas e lançadas de uma
      * vez, nunca a primeira encontrada. O usuário corrige tudo de um submit só.
      *
-     * <p>Os serviços de normalização acumulam na mesma lista e nunca lançam — este é o único ponto
+     * <p>
+     * Os serviços de normalização acumulam na mesma lista e nunca lançam — este é o único ponto
      * que dispara a {@link BusinessException}.
      */
     private void validate( ParceiroDTO dto, boolean isInsert ) {

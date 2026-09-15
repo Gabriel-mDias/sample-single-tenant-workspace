@@ -1,10 +1,12 @@
 package br.com.gems.app.solicitacao.service;
 
+import br.com.gems.app.model.dto.SolicitacaoDTO;
 import br.com.gems.app.model.entity.parceiro.Parceiro;
 import br.com.gems.app.model.entity.solicitacao.Solicitacao;
 import br.com.gems.app.model.enums.SituacaoSolicitacao;
 import br.com.gems.app.parceiro.repository.ParceiroRepository;
 import br.com.gems.app.solicitacao.event.SolicitacaoConcluidaEvent;
+import br.com.gems.app.solicitacao.mapper.SolicitacaoMapper;
 import br.com.gems.app.solicitacao.repository.EtapaSolicitacaoRepository;
 import br.com.gems.app.solicitacao.repository.SolicitacaoRepository;
 import br.com.gems.exception.exception.BusinessException;
@@ -21,17 +23,22 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * As regras da máquina de estados, atacadas diretamente.
  *
- * <p>Nenhum destes casos aparece num teste de controller: o {@code @PreAuthorize} já barraria quem
+ * <p>
+ * Nenhum destes casos aparece num teste de controller: o {@code @PreAuthorize} já barraria quem
  * não pode chamar, e passaria quem pode — inclusive para uma transição inválida. É aqui que a regra
  * mora, e é aqui que ela precisa falhar quando afrouxada.
  */
 class SolicitacaoServiceTest {
 
+    private SolicitacaoMapper mapper;
     private SolicitacaoRepository repository;
     private EtapaSolicitacaoRepository etapaRepository;
     private ParceiroRepository parceiroRepository;
@@ -43,21 +50,37 @@ class SolicitacaoServiceTest {
 
     @BeforeEach
     void preparar() {
+        mapper = mock( SolicitacaoMapper.class );
         repository = mock( SolicitacaoRepository.class );
         etapaRepository = mock( EtapaSolicitacaoRepository.class );
         parceiroRepository = mock( ParceiroRepository.class );
         eventPublisher = mock( ApplicationEventPublisher.class );
-        service = new SolicitacaoService( repository, etapaRepository, parceiroRepository, eventPublisher );
+        service = new SolicitacaoService( mapper, repository, etapaRepository, parceiroRepository, eventPublisher );
 
+        when( mapper.toDTO( any( Solicitacao.class ) ) ).thenAnswer( invocation -> {
+            var entity = invocation.getArgument( 0, Solicitacao.class );
+            var dto = new SolicitacaoDTO();
+            dto.setId( entity.getId() );
+            dto.setTitulo( entity.getTitulo() );
+            dto.setDescricao( entity.getDescricao() );
+            dto.setSituacao( entity.getSituacao() );
+            dto.setMotivoCancelamento( entity.getMotivoCancelamento() );
+            dto.setDataConclusao( entity.getDataConclusao() );
+            if ( entity.getParceiro() != null ) {
+                dto.setParceiroId( entity.getParceiro().getId() );
+                dto.setParceiroNome( entity.getParceiro().getNome() );
+            }
+            return dto;
+        } );
         when( repository.save( any( Solicitacao.class ) ) ).thenAnswer( i -> i.getArgument( 0 ) );
     }
 
     @Nested
-    @DisplayName( "A situação só avança pelas transições declaradas" )
+    @DisplayName("A situação só avança pelas transições declaradas")
     class Transicoes {
 
         @Test
-        @DisplayName( "rascunho abre" )
+        @DisplayName("rascunho abre")
         void rascunhoAbre() {
             dado( SituacaoSolicitacao.RASCUNHO );
 
@@ -67,7 +90,7 @@ class SolicitacaoServiceTest {
         }
 
         @Test
-        @DisplayName( "rascunho NÃO conclui direto — pular a execução é o defeito que a máquina impede" )
+        @DisplayName("rascunho NÃO conclui direto — pular a execução é o defeito que a máquina impede")
         void rascunhoNaoConcluiDireto() {
             dado( SituacaoSolicitacao.RASCUNHO );
 
@@ -77,7 +100,7 @@ class SolicitacaoServiceTest {
         }
 
         @Test
-        @DisplayName( "solicitação concluída não volta atrás" )
+        @DisplayName("solicitação concluída não volta atrás")
         void concluidaEhTerminal() {
             dado( SituacaoSolicitacao.CONCLUIDA );
 
@@ -86,7 +109,7 @@ class SolicitacaoServiceTest {
         }
 
         @Test
-        @DisplayName( "solicitação cancelada não é reaberta" )
+        @DisplayName("solicitação cancelada não é reaberta")
         void canceladaEhTerminal() {
             dado( SituacaoSolicitacao.CANCELADA );
 
@@ -96,11 +119,11 @@ class SolicitacaoServiceTest {
     }
 
     @Nested
-    @DisplayName( "A conclusão" )
+    @DisplayName("A conclusão")
     class Conclusao {
 
         @Test
-        @DisplayName( "publica o evento com o parceiro, para que o listener não precise consultar de volta" )
+        @DisplayName("publica o evento com o parceiro, para que o listener não precise consultar de volta")
         void publicaEvento() {
             dado( SituacaoSolicitacao.EM_ANDAMENTO );
             when( etapaRepository.existsBySolicitacaoIdAndConcluidaFalse( id ) ).thenReturn( false );
@@ -114,7 +137,7 @@ class SolicitacaoServiceTest {
         }
 
         @Test
-        @DisplayName( "é recusada com etapa pendente, e o evento NÃO é publicado" )
+        @DisplayName("é recusada com etapa pendente, e o evento NÃO é publicado")
         void recusaComEtapaPendente() {
             dado( SituacaoSolicitacao.EM_ANDAMENTO );
             when( etapaRepository.existsBySolicitacaoIdAndConcluidaFalse( id ) ).thenReturn( true );
@@ -130,11 +153,11 @@ class SolicitacaoServiceTest {
     }
 
     @Nested
-    @DisplayName( "O cancelamento" )
+    @DisplayName("O cancelamento")
     class Cancelamento {
 
         @Test
-        @DisplayName( "exige motivo" )
+        @DisplayName("exige motivo")
         void exigeMotivo() {
             assertThatThrownBy( () -> service.cancelar( id, "  " ) )
                     .isInstanceOf( BusinessException.class )
@@ -142,7 +165,7 @@ class SolicitacaoServiceTest {
         }
 
         @Test
-        @DisplayName( "grava o motivo informado" )
+        @DisplayName("grava o motivo informado")
         void gravaMotivo() {
             dado( SituacaoSolicitacao.ABERTA );
 
@@ -154,11 +177,11 @@ class SolicitacaoServiceTest {
     }
 
     @Nested
-    @DisplayName( "A situação nunca vem do corpo" )
+    @DisplayName("A situação nunca vem do corpo")
     class SituacaoNaoVemDoCorpo {
 
         @Test
-        @DisplayName( "um PUT que declare CONCLUIDA não altera a situação" )
+        @DisplayName("um PUT que declare CONCLUIDA não altera a situação")
         void putIgnoraSituacao() {
             dado( SituacaoSolicitacao.RASCUNHO );
 
