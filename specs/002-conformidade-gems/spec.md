@@ -147,16 +147,18 @@ Como product owner, quero evidência reproduzível de que a rodada zerou a dívi
 - **SC-008**: Oito rotas passam nos cenários permitido, negado e modo correto.
 - **SC-009**: Gates mantêm pelo menos 204 testes backend e 21/118 frontend aplicáveis, mais novas provas, verdes.
 
-## Clarifications Pending Human Decision
+## Clarifications decididas no portão de 2026-09-14
 
-- **D-P01 — Auditoria (recomendação: preservar)**: autorizar rodada/release SDK com identidade estável e correlação antes da adoção, ou emendar explicitamente o contrato aceitando perda. A 3.1.0 não preserva essas garantias.
-- **D-P02 — Keycloak (recomendação: preservar)**: autorizar rodada/release SDK com ciclo atual completo e roles/compostas, ou emendar o contrato. O gateway 3.1.0 é insuficiente.
-- **D-P03 — Ambiente (condicional)**: só se escolhido provisionamento declarativo, autorizar escrita futura no realm/gates, limitada a seções derivadas.
-- **D-P04 — Residual frontend**: aceitar/recusar individualmente o mínimo que só será medido depois das correções; o agente não antecipa aceite.
+- **D-P01 — Auditoria**: preservar identidade estável e correlação; adoção bloqueada até release SDK compatível publicada.
+- **D-P02 — Keycloak**: preservar ciclo atual completo e roles/compostas; substituição bloqueada até release SDK compatível publicada.
+- **D-P03 — Ambiente**: não aplicável; o realm e os ambientes atuais permanecem inalterados.
+- **T004 — Operação**: autorizada a correção nominal de `.github/workflows/ci.yml`, `.github/dependabot.yml` e `README.md`.
+- **D-P04 — Residual frontend**: decisão mantida para depois da medição; o agente não antecipa aceite.
 
 ## Assumptions
 
 - Java SDK 3.1.0 (`137f18f`) e Angular SDK 2.1.0 (`e452ba0`) são os releases atuais aferidos.
 - A aplicação permanece single tenant.
 - Estado atual: 314 Checkstyle/22 supressões; 189 identidades (4 repositories, 2 controllers, 6 ordens, 177 nomes); 174 frontend; 204 testes backend; 21/118 frontend.
-- D-P01–D-P04 bloqueiam implementação dependente até registro humano; esta fase 2 não as assina.
+- D-P01 e D-P02 bloqueiam apenas a implementação dependente até as releases compatíveis; D-P04
+  permanece para o portão posterior à medição.

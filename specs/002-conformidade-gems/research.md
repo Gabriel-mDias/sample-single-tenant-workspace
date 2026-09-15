@@ -31,9 +31,8 @@ sigilosos e registra `NM_ACTOR`/`CD_ACTOR_TYPE`. Ele não grava `ID_AUTOR` nem `
 persistidos pela implementação local. Nome/login não é identidade estável: rename, remoção e reuso
 podem perder ou misturar o filtro histórico. Resolver id atual para login não reconstitui a garantia.
 
-**Decisão pendente D-P01**: recomendar preservação e bloquear o bloco até release publicada que
-carregue identidade estável e correlação. A alternativa é emenda humana explícita aceitando perda
-semântica. O agente não escolhe a perda.
+**Decisão D-P01 — aprovada em 2026-09-14**: preservar e bloquear o bloco até release publicada que
+carregue identidade estável e correlação. A alternativa de perda semântica foi recusada.
 
 Quando habilitado, o bloco de adoção é único e indivisível: testes primeiro; migration/read adapter;
 provider; configuração; ativação; remoção de `AuditoriaGravador`, `AuditoriaInterceptor`,
@@ -47,9 +46,9 @@ lista de membros e associação de role existente a grupo. A implementação atu
 habilita/desabilita/exclui usuário, consulta grupos para compensação, cria realm roles e compõe perfis.
 Essas operações não existem no gateway aferido.
 
-**Decisão pendente D-P02**: recomendar preservação e bloquear a remoção das quatro classes locais até
-release publicada com a superfície completa. Criar adapter local seria a duplicata proibida. A outra
-alternativa é emenda humana que retire garantias do ciclo de usuário/bootstrap.
+**Decisão D-P02 — aprovada em 2026-09-14**: preservar e bloquear a remoção das quatro classes locais
+até release publicada com a superfície completa. Criar adapter local continua sendo a duplicata
+proibida; a alternativa de perda de garantias foi recusada.
 
 ## R-06 — Realm declarativo é alternativa, não pressuposto
 

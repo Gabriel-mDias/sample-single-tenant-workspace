@@ -1,12 +1,13 @@
 # Roteiro da Rodada — 002 Conformidade GEMS
 
 **Feature**: `002-conformidade-gems` · **Branch**: `feature/conformidade-gems` · **Requisito**: prova S-codex da rodada 010
-**Data**: 2026-09-14 · **Status**: aguardando aprovação humana do planejamento revisado
+**Data**: 2026-09-14 · **Status**: **portão aprovado em 2026-09-14** — fase 3 liberada com os
+bloqueios de release de D-P01 e D-P02 preservados
 
-> Este documento apresenta escopo, decisões, impactos, testes e ordem da rodada. Quatro decisões
-> continuam humanas; nenhuma está assinada e nenhuma implementação está autorizada.
+> Este documento apresenta escopo, decisões, impactos, testes e ordem da rodada. D-P01–D-P03 e a
+> expansão T004 foram decididas no portão; D-P04 permanece deliberadamente posterior à medição.
 
-**Índice**: [1 Objetivo](#1-objetivo-da-rodada) · [2 Decisões](#2-decisões-de-entrada-e-pendentes) ·
+**Índice**: [1 Objetivo](#1-objetivo-da-rodada) · [2 Decisões](#2-decisões-de-entrada-e-do-portão) ·
 [3 Banco](#3-banco-de-dados) · [4 Backend](#4-backend) · [5 Frontend](#5-frontend) ·
 [6 Testes](#6-testes-esperados-por-bloco) · [7 Impacto](#7-interação-e-isolamento) ·
 [8 Tasks](#8-divisão-de-tasks-e-delegação-por-modelo) · [9 SDD](#9-prompts-sdd-da-rodada) ·
@@ -35,7 +36,7 @@ remoção das 22 supressões de dívida e do Spotless ratchet; medição/decisã
 
 ---
 
-## 2. Decisões de entrada e pendentes
+## 2. Decisões de entrada e do portão
 
 ### 2.1 Entradas aprovadas na fase Start
 
@@ -59,14 +60,15 @@ remoção das 22 supressões de dívida e do Spotless ratchet; medição/decisã
 | 16 | Fora | ADACI, Keycloak Angular 22, TS7 e promoção de commons ficam fora. |
 | 17 | Prova 010 | Silent check-sso recebe crédito OK-1; roadmap OK-2 no fechamento. |
 
-### 2.2 Clarificações que este portão precisa resolver
+### 2.2 Clarificações resolvidas no portão de 2026-09-14
 
-| ID | Evidência | Opções | Recomendação |
+| ID | Evidência | Opções | Decisão do product owner |
 | :--- | :--- | :--- | :--- |
-| D-P01 | Auditing 3.1.0 não grava identidade estável/correlação. | Release SDK prévia ou emenda aceitando perda. | **Preservar e bloquear até release publicada.** |
-| D-P02 | Keycloak gateway 3.1.0 não cobre update/enable/disable/delete/compensação/grupos completos nem criar/compor roles. | Release SDK prévia ou emenda de contrato. | **Preservar e bloquear até release publicada.** |
-| D-P03 | Realm declarativo altera ambiente fora do EDIT original. | Não alterar; ou expandir e derivar só roles/compostas. | Condicional à alternativa de D-P02; preferir release e manter ambiente. |
-| D-P04 | Mínimo frontend só existe depois da correção/medição. | Aceitar ou recusar cada residual. | Deixar desmarcado até inventário final. |
+| D-P01 | Auditing 3.1.0 não grava identidade estável/correlação. | Release SDK prévia ou emenda aceitando perda. | **Preservar e bloquear até release compatível publicada.** |
+| D-P02 | Keycloak gateway 3.1.0 não cobre update/enable/disable/delete/compensação/grupos completos nem criar/compor roles. | Release SDK prévia ou emenda de contrato. | **Preservar e bloquear até release compatível publicada.** |
+| D-P03 | Realm declarativo altera ambiente fora do EDIT original. | Não alterar; ou expandir e derivar só roles/compostas. | **Não aplicável: manter o ambiente e o realm atuais.** |
+| T004 | CI, Dependabot e README ainda instruem a flag operacional antiga. | Manter fora do EDIT ou autorizar correção nominal. | **Expansão autorizada para `.github/workflows/ci.yml`, `.github/dependabot.yml` e `README.md`.** |
+| D-P04 | Mínimo frontend só existe depois da correção/medição. | Aceitar ou recusar cada residual. | **Decisão adiada até o inventário final; nenhum aceite antecipado.** |
 
 ---
 
@@ -211,17 +213,17 @@ admite paralelismo interno nem checkpoint parcial.
 | Ordem | Comando | Situação | Saída |
 | :-- | :--- | :--- | :--- |
 | 1 | `/speckit-specify` | revisado | 5 histórias, 30 FR, 9 SC |
-| 2 | `/speckit-clarify` | revisado | D-P01–D-P04 pendentes e prontas ao PO |
+| 2 | `/speckit-clarify` | concluído | D-P01/D-P02 preservam garantias; D-P03 não aplicável; T004 autorizada; D-P04 fica para a medição |
 | 3 | `/speckit-plan` | revisado | nove princípios reais, desenho e contratos condicionais |
 | 4 | `/speckit-tasks` | revisado | 79 tasks em 8 fases |
 | 5 | `/speckit-analyze` | revisado | 0 CRITICAL documental; achados incorporados |
-| 6 | **`roteiro.md`** | aguardando aprovação | este documento, sem assinatura |
-| 7 | `/speckit-implement` | bloqueado | somente depois das decisões e aprovação explícita |
+| 6 | **`roteiro.md`** | aprovado em 2026-09-14 | portão assinado pelo product owner |
+| 7 | `/speckit-implement` | liberado com condicionantes | blocos independentes podem iniciar; auditoria e Keycloak esperam releases compatíveis |
 
 ### Resultado dos checklists
 
-Requirements, technical e security estão **CONDITIONAL PASS**. D-P01–D-P04 permanecem desmarcadas;
-checklist não assina portão.
+Requirements, technical e security registram **PASS DE PORTÃO**. D-P01 e D-P02 foram resolvidas pela
+preservação, D-P03 não se aplica e T004 foi autorizada; D-P04 continua no portão posterior previsto.
 
 ### Achados incorporados
 
@@ -272,10 +274,11 @@ checklist não assina portão.
 
 ### Decisões deste portão
 
-- [ ] **D-P01**: preservar por release SDK prévia (recomendado) ou registrar emenda de perda de identidade/correlação.
-- [ ] **D-P02**: preservar por release SDK prévia (recomendado) ou registrar emenda de perda no ciclo/roles Keycloak.
-- [ ] **D-P03**: se aplicável, expandir ambiente/GitHub/README e limitar geração às seções derivadas.
-- [ ] O escopo, atomicidade, zero Java, testes reais e execução Sol/Codex estão aprovados.
+- [x] **D-P01**: preservar identidade estável/correlação e bloquear a adoção até release SDK compatível publicada.
+- [x] **D-P02**: preservar ciclo/roles Keycloak e bloquear a substituição até release SDK compatível publicada.
+- [x] **D-P03**: não aplicável; ambiente e realm atuais permanecem inalterados.
+- [x] **T004**: expansão autorizada para `.github/workflows/ci.yml`, `.github/dependabot.yml` e `README.md`.
+- [x] O escopo, atomicidade, zero Java, testes reais e execução Sol/Codex estão aprovados.
 
 ### Decisão posterior à implementação
 
@@ -288,8 +291,11 @@ checklist não assina portão.
 - [ ] Auditoria/Keycloak preservam contratos escolhidos e quickstart passa.
 - [ ] Analyze final sem CRITICAL nem violação constitucional.
 
-**Portão humano não assinado.** O roteiro está aguardando aprovação; pedidos anteriores de prosseguir
-não resolvem D-P01–D-P04 nem autorizam `/speckit-implement`.
+> ✅ **PORTÃO APROVADO pelo product owner em 2026-09-14.** Foram aceitos o escopo, a atomicidade,
+> o alvo Java zero, os testes reais, a execução Sol/Codex, a preservação das garantias de auditoria e
+> Keycloak mediante releases prévias compatíveis, a não aplicação de D-P03 e a expansão T004.
+> D-P04 permanece no portão posterior à medição, como planejado. **O `/speckit-implement` está
+> liberado para os blocos não bloqueados; auditoria e Keycloak aguardam as releases compatíveis.**
 
 ---
 

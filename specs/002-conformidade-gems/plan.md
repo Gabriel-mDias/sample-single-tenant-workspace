@@ -25,14 +25,14 @@ recomendação é preservar comportamento por evolução/publicação prévia da
 | Princípio constitucional real | Estado | Avaliação |
 | :--- | :--- | :--- |
 | I. Fronteiras de Módulo Impostas pelo Reator Maven | PASS | SDK entra no módulo consumidor; grafo `security/model/events → core → deploy` não ganha ciclo. |
-| II. Persistência Declarada, Nunca Inferida | **PENDENTE D-P01** | Liquibase/JPA e bloco atômico estão definidos, mas a SDK atual não preserva identidade estável/correlação. |
+| II. Persistência Declarada, Nunca Inferida | **PASS DE PORTÃO; BLOQUEADO POR RELEASE** | D-P01 preserva identidade/correlação; o bloco espera SDK compatível publicada. |
 | III. Changelog Liquibase Organizado e Rastreável | PASS DE DESENHO | Ordem, preconditions, backfill e teste de upgrade estão exigidos; execução virá na fase 3. |
 | IV. Validação Acumulada e Ordem Canônica de Serviço | PASS DE DESENHO | Seis services, validação e ordem serão corrigidos; gates Java devem zerar. |
-| V. Contrato REST e Autorização Espelhada na UI | **PENDENTE D-P02** | Catálogo/scan são compatíveis; gateway Keycloak não cobre ciclo e bootstrap atuais. |
-| VI. Frontend Modular e Padronizado pela GEMS SDK | **PENDENTE D-P04** | Correções estão definidas; residual mínimo só pode ser aceito pelo product owner após medição. |
+| V. Contrato REST e Autorização Espelhada na UI | **PASS DE PORTÃO; BLOQUEADO POR RELEASE** | D-P02 preserva ciclo/bootstrap; o bloco espera SDK compatível publicada. |
+| VI. Frontend Modular e Padronizado pela GEMS SDK | **PASS DE DESENHO** | Correções estão definidas; D-P04 continua no portão posterior à medição. |
 | VII. Testes como Gate (NÃO NEGOCIÁVEL) | PASS DE DESENHO | Testes primeiro, mutações e rollbacks integrados sem transação de teste estão especificados. |
-| VIII. Especificação Antes de Código, Sem Sobras de Exemplo | PASS | Fase 2 apenas documental; nenhuma implementação ou assinatura ocorreu. |
-| IX. Configuração de Ambiente é Código | **CONDICIONAL D-P03** | Caminho recomendado não altera realm; alternativa declarativa requer expansão SDD e preservação das seções não derivadas. |
+| VIII. Especificação Antes de Código, Sem Sobras de Exemplo | PASS | Fase 2 documental concluída e portão assinado antes do código. |
+| IX. Configuração de Ambiente é Código | PASS | D-P03 não se aplica; ambiente/realm preservados. T004 autoriza somente os três arquivos operacionais nominais. |
 
 ### Gate de adoção de módulos
 
@@ -44,8 +44,8 @@ recomendação é preservar comportamento por evolução/publicação prévia da
 | `gems-keycloak-admin` | sim, 3.1.0 | fonte aferida | **não** para ciclo/roles | bloqueado D-P02 |
 | Angular GEMS | sim, 2.1.0 | peers aferidos | a provar por componente | apto condicional |
 
-Nenhum PASS genérico supera decisão humana pendente. Após D-P01–D-P04, este check deve ser refeito
-antes da primeira edição de código dependente.
+O portão não supera os bloqueios materiais: `gems-auditing` e `gems-keycloak-admin` só entram após
+releases compatíveis publicadas e aferidas. D-P04 continua no portão posterior à medição.
 
 ## Project Structure
 
@@ -67,4 +67,5 @@ depois de migration + reader + provider + writer SDK + remoções locais + teste
 
 ## Complexity Tracking
 
-Nenhuma violação foi justificada. D-P01–D-P04 são decisões pendentes, não exceções.
+Nenhuma violação foi justificada. D-P01/D-P02 preservam garantias, D-P03 não se aplica e D-P04 é uma
+decisão posterior prevista, não exceção.

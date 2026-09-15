@@ -1,14 +1,15 @@
 # Tasks: Conformidade GEMS
 
 **Regra de execução**: testes/mutações antes da produção; cada bloco termina no comando nominal e só
-fecha verde. `CREATE` marca arquivo inexistente. D-P01–D-P04 não estão aprovadas.
+fecha verde. `CREATE` marca arquivo inexistente. D-P01–D-P03 e T004 foram decididas no portão de
+2026-09-14; D-P04 permanece para o inventário final.
 
 ## Phase 0 — Decisões bloqueantes (4 tarefas)
 
-- [ ] T001 Registrar D-P01: preservar identidade estável/correlação por release SDK prévia (recomendado) ou emendar perda em `specs/002-conformidade-gems/roteiro.md`; sem decisão, não iniciar Phase 3.
-- [ ] T002 Registrar D-P02: preservar ciclo Keycloak/roles por release SDK prévia (recomendado) ou emendar perda em `specs/002-conformidade-gems/roteiro.md`; sem decisão, não iniciar Phase 2.
-- [ ] T003 Se a alternativa declarativa for escolhida, registrar D-P03 e expansão para `environments/shared/keycloak/app-realm.yaml`, `environments/local/docker-compose.yml`, `environments/staging/docker-compose.yml`, `environments/production/docker-compose.yml`; sem expansão, esses arquivos não são editados.
-- [ ] T004 Registrar expansão necessária para remover instruções operacionais obsoletas em `.github/workflows/ci.yml`, `.github/dependabot.yml` e `README.md`; sem aprovação, reportar os pontos e não editar.
+- [x] T001 Registrar D-P01: preservar identidade estável/correlação por release SDK prévia (recomendado) ou emendar perda em `specs/002-conformidade-gems/roteiro.md`; sem decisão, não iniciar Phase 3. **Preservação aprovada em 2026-09-14.**
+- [x] T002 Registrar D-P02: preservar ciclo Keycloak/roles por release SDK prévia (recomendado) ou emendar perda em `specs/002-conformidade-gems/roteiro.md`; sem decisão, não iniciar Phase 2. **Preservação aprovada em 2026-09-14.**
+- [x] T003 Se a alternativa declarativa for escolhida, registrar D-P03 e expansão para `environments/shared/keycloak/app-realm.yaml`, `environments/local/docker-compose.yml`, `environments/staging/docker-compose.yml`, `environments/production/docker-compose.yml`; sem expansão, esses arquivos não são editados. **Não aplicável: ambiente/realm preservados.**
+- [x] T004 Registrar expansão necessária para remover instruções operacionais obsoletas em `.github/workflows/ci.yml`, `.github/dependabot.yml` e `README.md`; sem aprovação, reportar os pontos e não editar. **Expansão aprovada em 2026-09-14.**
 
 **Gate**: quatro decisões registradas; Constitution Check refeito sem PENDENTE aplicável.
 

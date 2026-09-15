@@ -22,12 +22,12 @@
 
 ## Clarificação
 
-- [ ] D-P01 autoria estável/correlação decidida pelo product owner.
-- [ ] D-P02 superfície Keycloak completa decidida pelo product owner.
-- [ ] D-P03 expansão de ambiente decidida se a alternativa declarativa for escolhida.
+- [x] D-P01 autoria estável/correlação preservada; adoção espera release compatível.
+- [x] D-P02 superfície Keycloak completa preservada; substituição espera release compatível.
+- [x] D-P03 não aplicável; ambiente/realm preservados.
 - [ ] D-P04 residuais frontend decididos depois da medição final.
 
 ## Resultado
 
-**CONDITIONAL PASS**: especificação completa e rastreável; quatro decisões continuam humanas. Este
-checklist não concede aprovação nem autoriza implementação.
+**PASS DE PORTÃO**: especificação completa e rastreável; D-P04 permanece corretamente adiada para a
+medição final. Os blocos de auditoria e Keycloak continuam condicionados às releases compatíveis.

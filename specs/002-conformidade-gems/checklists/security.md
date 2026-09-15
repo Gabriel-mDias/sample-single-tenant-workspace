@@ -16,5 +16,5 @@
 
 ## Resultado
 
-**CONDITIONAL PASS** por D-P01/D-P02/D-P03. Segurança não está declarada PASS enquanto as perdas
-potenciais de autoria, correlação e ciclo Keycloak não forem decididas por humano.
+**PASS DE PORTÃO**: D-P01 e D-P02 preservam autoria, correlação e ciclo Keycloak mediante releases
+compatíveis prévias; D-P03 não se aplica e o realm permanece inalterado.

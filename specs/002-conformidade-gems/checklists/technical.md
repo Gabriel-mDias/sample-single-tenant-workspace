@@ -12,17 +12,17 @@
 - [x] Cada fase tem comando focado e condição verde.
 - [x] Java fecha em zero, sem 22 supressões de dívida nem Spotless ratchet.
 - [x] Frontend fecha no mínimo medido, com residual sujeito a humano.
-- [x] Todos os locais operacionais atuais da flag de peers foram apurados; escopo externo está pendente.
+- [x] Todos os locais operacionais atuais da flag de peers foram apurados; expansão T004 aprovada.
 - [x] Realm one-shot/cache/dependências e preservação das seções não derivadas foram apurados.
 
 ## Decisões
 
-- [ ] D-P01 autoriza release de auditoria compatível ou emenda de perda.
-- [ ] D-P02 autoriza release Keycloak compatível ou emenda de perda.
-- [ ] D-P03 autoriza expansão de ambiente se aplicável.
+- [x] D-P01 preserva auditoria e exige release compatível antes da adoção.
+- [x] D-P02 preserva Keycloak e exige release compatível antes da substituição.
+- [x] D-P03 não aplicável; ambiente/realm preservados.
 - [ ] D-P04 aceita cada residual frontend depois da medição.
 
 ## Resultado
 
-**CONDITIONAL PASS**. O plano técnico está completo, mas nenhuma tarefa dependente das quatro decisões
-pode começar. Não existe aprovação implícita.
+**PASS DE PORTÃO**. O plano técnico está aprovado; auditoria e Keycloak não podem começar antes das
+releases compatíveis, e D-P04 permanece para a medição final.

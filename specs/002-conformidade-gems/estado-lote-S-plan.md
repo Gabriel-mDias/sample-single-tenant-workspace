@@ -111,3 +111,12 @@ são condicionais. Baselines executáveis anteriores foram preservados, sem nova
 
 - **Executor:** Codex
 - **Token de retomada:** `thread_id=01a0a11d-548c-7ea3-860f-de92b2196c67`
+
+---
+
+## 9. Portão humano — 2026-09-14
+
+O product owner aprovou o planejamento: D-P01 e D-P02 preservam as garantias atuais e bloqueiam os
+respectivos blocos até releases SDK compatíveis publicadas; D-P03 não se aplica; T004 autoriza a
+expansão nominal de CI, Dependabot e README; D-P04 permanece para a medição final. A §12 do
+`roteiro.md` foi assinada. Nenhuma implementação foi iniciada neste checkpoint.
