@@ -218,7 +218,7 @@ admite paralelismo interno nem checkpoint parcial.
 | 4 | `/speckit-tasks` | revisado | 79 tasks em 8 fases |
 | 5 | `/speckit-analyze` | revisado | 0 CRITICAL documental; achados incorporados |
 | 6 | **`roteiro.md`** | aprovado em 2026-09-14 | portão assinado pelo product owner |
-| 7 | `/speckit-implement` | C00, C01 e C02 verdes; próxima retomada definida pelo orquestrador | T005–T007 revalidadas; T009–T012 e T037–T045 concluídas em 2026-09-15; T008 preservada com gate Docker pendente para C10 |
+| 7 | `/speckit-implement` | C00, C01, C02 e C03 verdes; próxima retomada C04 | T005–T007 revalidadas; T009–T012 e T037–T045 concluídas em 2026-09-15; T046–T051 concluídas em 2026-09-16; T008 preservada com gate Docker pendente para C10 |
 
 ### Resultado C01 — 2026-09-15
 
@@ -239,6 +239,35 @@ solicitação usam a transação Spring com `rollbackFor = Exception.class`. O v
 registrado no `testCompile` com 12 erros para seis mappers ausentes. Após a implementação e a
 recuperação do FQCN, o gate focado terminou com exit 0: 70 testes, 0 falhas, 0 erros e 0 ignorados;
 `git diff --check` também terminou com exit 0. T046–T051 permanecem para o checkpoint seguinte.
+
+### Resultado C03 — 2026-09-16
+
+T046–T051 executadas em sessão nova por Codex/Sol, sem Terra. Dois testes integrados de parceiro e
+quatro de solicitação chamam services reais proxied contra PostgreSQL, sem transação de teste nem
+TransactionTemplate envolvendo a operação. O mapper colaborador executa mapeamento real, flush e
+comprovação física dos IDs antes de lançar IOException checked diretamente. SQL independente não
+esconde soft delete; fixtures/limpeza restringem IDs/correlação próprios. Controles positivos provam
+inserts/trilha e consumo do evento em memória pelo listener BEFORE_COMMIT/contador. A etapa criada
+no insert e sua alteração no concluir são explicitamente fixtures/hooks, não comportamento do insert.
+
+Três mutações isoladas ficaram vermelhas (cada exit 1, 1 falha, 0 erros/skips): ParceiroService.insert
+persistiu uma linha PARCEIRO; SolicitacaoService.insert persistiu uma SOLICITACAO; concluir(UUID)
+persistiu CONCLUIDA/data/alteração de etapa/contador 1 em vez de 0. Cada rollbackFor foi restaurado
+por patch inverso e T050 repetido verde, sem alteração permanente nos services. T050 pré/pós-T051
+também retornou exit 0/BUILD SUCCESS: 70 unitários + 2 parceiro + 4 solicitação = 76, zero
+falhas/erros/skips. ModelMapper saiu somente dos dois POMs (dependência/gerenciamento/propriedade/pin
+órfãos); GEMS/MapStruct/processadores ficaram intactos. Busca dois POMs/seis services sem ocorrências
+(rg exit 1), dependency:tree filtrada exit 0 sem os artefatos e git diff --check exit 0.
+O primeiro gate encontrou fixture sem país estrangeiro; payload parceiro ajustado ao seed Brasil com
+estado/CEP via LocalidadeService de READ. Logs completos em TEMP; nenhuma expansão, frontend/ambiente
+ou auditoria SDK tocados. O executor não fez commit/push/PR.
+
+Aceitação independente do orquestrador: diff integral revisado; verificador exit 0, 8 esperados/
+6 declarados/6 reais (ressalva esperada dos dois services restaurados). T050 pós-remoção e final
+pós-restauração repetidos com exit 0, 76 testes/zero falhas/erros/skips. A repetição conjunta dos
+três pontos independentes resultou em exatamente três falhas de asserção/zero erros/skips, nas
+três garantias nomeadas acima. Anotações restauradas por patch inverso, services sem diff.
+Busca/tree repetidas sem referências/artefatos ModelMapper. C03 aceito; próxima invocação C04.
 
 ### Resultado dos checklists
 
