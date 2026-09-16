@@ -81,10 +81,6 @@ public class PessoaService {
         return repository.save( gerenciada );
     }
 
-    private String apenasDigitos( String valor ) {
-        return ObjectUtil.isNullOrEmpty( valor ) ? valor : valor.replaceAll( "\\D", "" );
-    }
-
     /**
      * @param idExistente
      *            id da pessoa que está sendo reaproveitada ou editada, para que ela não
@@ -132,6 +128,10 @@ public class PessoaService {
         }
 
         validarCpf( pessoa, idExistente, exigeCpf, errors );
+    }
+
+    private String apenasDigitos( String valor ) {
+        return ObjectUtil.isNullOrEmpty( valor ) ? valor : valor.replaceAll( "\\D", "" );
     }
 
     private void validarCpf( PessoaDTO pessoa, UUID idExistente, boolean exigeCpf, List<String> errors ) {

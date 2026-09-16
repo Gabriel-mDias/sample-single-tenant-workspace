@@ -218,7 +218,7 @@ admite paralelismo interno nem checkpoint parcial.
 | 4 | `/speckit-tasks` | revisado | 79 tasks em 8 fases |
 | 5 | `/speckit-analyze` | revisado | 0 CRITICAL documental; achados incorporados |
 | 6 | **`roteiro.md`** | aprovado em 2026-09-14 | portão assinado pelo product owner |
-| 7 | `/speckit-implement` | C00, C01, C02 e C03 verdes; próxima retomada C04 | T005–T007 revalidadas; T009–T012 e T037–T045 concluídas em 2026-09-15; T046–T051 concluídas em 2026-09-16; T008 preservada com gate Docker pendente para C10 |
+| 7 | `/speckit-implement` | C00–C04 verdes; próxima retomada C05 | T005–T007 revalidadas; T009–T012 e T037–T055 concluídas; T008 preservada com gate Docker pendente para C10 |
 
 ### Resultado C01 — 2026-09-15
 
@@ -268,6 +268,29 @@ pós-restauração repetidos com exit 0, 76 testes/zero falhas/erros/skips. A re
 três pontos independentes resultou em exatamente três falhas de asserção/zero erros/skips, nas
 três garantias nomeadas acima. Anotações restauradas por patch inverso, services sem diff.
 Busca/tree repetidas sem referências/artefatos ModelMapper. C03 aceito; próxima invocação C04.
+
+### Resultado C04 — 2026-09-16
+
+T052–T055 concluídas sob o ajuste humano do envelope SDK registrado abaixo. Os quatro repositories
+estendem `JpaRepository` antes de `BaseCustomJpaRepository`, e os dois controllers somente leitura
+passaram a estender `BaseController`; medições nominais encerraram com zero repository e zero
+controller. A medição de ordem dos seis services também terminou em zero; o privado residual de
+`PessoaService` foi movido depois dos públicos, assim como o de `KeycloakUserService`, já alterado
+por T054.
+
+`ProvedorExternoException` passou a `ExternalServiceException`; falhas da Admin API do Keycloak são
+traduzidas com mensagem e causa. Os quatro handlers locais foram removidos na mesma alteração. O
+teste MockMvc nasceu antes da remoção e ficou vermelho em três casos; depois provou o envelope SDK
+para 502/403/404/400, inclusive path/method e ausência de eco da entrada na mensagem. A mensagem
+403 passou para “Você não possui acesso para este serviço!” e a 404 para “Recurso não encontrado.”;
+a mensagem 400 e as mensagens funcionais 502 foram preservadas. Em 404/400, os códigos específicos
+passaram para `codigo`, com `errorType` `FALHA`/`VALIDACAO`, conforme aprovação.
+
+A mutação real retirou temporariamente a herança SDK de `ProvedorExternoException`: o teste recebeu
+500 onde exigia 502 e ficou vermelho com uma falha exata. O patch inverso restaurou o alvo e o teste
+voltou a verde. O portão final do C04 terminou exit 0/BUILD SUCCESS, 28 testes, zero
+falhas/erros/skips; medições nominais: repository 0, controller 0, ordem 0. D-P01/D-P02 permanecem e
+nenhum baseline, frontend, ambiente ou adoção de auditoria/Keycloak foi tocado.
 
 ### Resultado dos checklists
 
@@ -334,6 +357,13 @@ preservação, D-P03 não se aplica e T004 foi autorizada; D-P04 continua no por
 - [ ] **D-P04**: cada residual frontend medido foi aceito ou devolvido para correção pelo product owner.
 
 ### Para concluir a rodada depois do código
+
+> ✅ **AJUSTE C04 APROVADO pelo product owner em 2026-09-16.** “Aprovar o envelope da SDK”
+> aceita o ajuste registrado em `D:/repos/Meduc/meduc-workspace/specs/010-habilitacao-de-agentes/ajuste-c04-envelope.md`:
+> status 400/403/404/502 preservados; 400 usa `VALIDACAO`/`codigo=PARAMETRO_INVALIDO`,
+> 404 usa `FALHA`/`codigo=RECURSO_NAO_ENCONTRADO`, 502 usa `SERVICO_INDISPONIVEL`;
+> mensagens de 403 e 404 passam às da SDK 3.1.0, 400 e mensagens funcionais 502 preservadas.
+> T054 liberada com testes HTTP e mutações. D-P01/D-P02 permanecem; não é homologação.
 
 - [ ] Backend `clean install` verde, Java zero, supressões/ratchet removidos.
 - [ ] Frontend `npm ci`, testes, build e Prettier verdes; residual decidido por humano.
