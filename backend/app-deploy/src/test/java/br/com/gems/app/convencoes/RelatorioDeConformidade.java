@@ -41,7 +41,7 @@ final class RelatorioDeConformidade {
      * O tamanho congelado do baseline. Reduzi-lo ao corrigir dívida é o caminho normal; aumentá-lo
      * exige decisão humana registrada, e é o que a mutação de T082 prova.
      */
-    static final int MAXIMO_DE_ENTRADAS = 189;
+    static final int MAXIMO_DE_ENTRADAS = 0;
 
     private static final Path BASELINE = Path.of( "src", "test", "resources", "archunit-baseline.txt" );
 

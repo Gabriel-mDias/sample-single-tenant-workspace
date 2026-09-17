@@ -41,7 +41,7 @@ class ConvencoesArquiteturaTest {
     }
 
     @Test
-    void deveManterOBaselineMonotonicamenteDecrescente_quandoOGateRoda() {
+    void deveRecusarQualquerEntrada_quandoOBaselineEstaZerado() {
         RelatorioDeConformidade.verificarTamanhoDoBaseline();
     }
 

@@ -218,7 +218,7 @@ admite paralelismo interno nem checkpoint parcial.
 | 4 | `/speckit-tasks` | revisado | 79 tasks em 8 fases |
 | 5 | `/speckit-analyze` | revisado | 0 CRITICAL documental; achados incorporados |
 | 6 | **`roteiro.md`** | aprovado em 2026-09-14 | portão assinado pelo product owner |
-| 7 | `/speckit-implement` | C00–C05 verdes; próxima retomada C06 | T005–T007 revalidadas; T009–T012 e T037–T059 concluídas; T008 preservada com gate Docker pendente para C10 |
+| 7 | `/speckit-implement` | C00–C06 verdes; próxima retomada C07 | T005–T007 revalidadas; T009–T012 e T037–T061 concluídas; T008 preservada com gate Docker pendente para C10 |
 
 ### Resultado C01 — 2026-09-15
 
@@ -305,6 +305,19 @@ dos públicos e removeu seis espaços finais já identificados em quatro Javadoc
 do portão terminou exit 0: `ConvencoesFonteTest` com 9 testes e zero falhas/erros/skips, `validate`
 com zero violações Checkstyle nos seis módulos, `spotless:check` integral verde e `git diff --check`
 exit 0. Nenhum arquivo fora da lista fechada foi tocado; o executor não fez commit, push ou PR.
+
+### Resultado C06 — 2026-09-16
+
+T060 fechou as tolerâncias Java em zero: o limite de entradas do baseline passou a `0`, o gate de
+arquitetura expressa a recusa de qualquer entrada, e o gate de fonte recusa qualquer supressão
+Checkstyle. A regra de nomes agora também admite explicitamente o padrão `naoDeve..._quando...` da
+regra GEMS.
+
+Três mutações temporárias foram observadas vermelhas e restauradas por edição inversa: uma entrada no
+baseline de arquitetura (1 entrada contra 0), uma supressão Checkstyle e a remoção artificial de
+`_quando` da regra de nomes. O reator completo `mvnw.cmd clean install` terminou verde nos seis
+módulos, com 216 testes em 30 relatórios, zero falhas/erros/skips, Checkstyle zero e Spotless verde.
+Próxima retomada: C07; C11/C12 continuam bloqueados pelas releases compatíveis das SDKs.
 
 ### Resultado dos checklists
 

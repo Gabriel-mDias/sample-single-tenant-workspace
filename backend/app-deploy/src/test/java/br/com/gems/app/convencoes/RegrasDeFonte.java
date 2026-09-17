@@ -240,13 +240,17 @@ final class RegrasDeFonte {
                 var ehTeste = metodo.getAnnotations().stream()
                         .anyMatch( anotacao -> ANOTACOES_DE_TESTE.contains( anotacao.getNameAsString() ) );
                 var nome = metodo.getNameAsString();
-                if ( ehTeste && !(nome.startsWith( "deve" ) && nome.contains( "_quando" )) ) {
+                if ( ehTeste && !nomeDeTesteSegueOPadrao( nome ) ) {
                     relatorio.registrar( chave( entrada.getKey(), "nome-de-teste|" + nome ), entrada.getKey(),
                             linha( metodo ), "testing.md#4", "método de teste chamado " + nome,
                             "deve{Acao}_quando{Condicao}, em camelCase e português" );
                 }
             }
         }
+    }
+
+    private static boolean nomeDeTesteSegueOPadrao( String nome ) {
+        return (nome.startsWith( "deve" ) || nome.startsWith( "naoDeve" )) && nome.contains( "_quando" );
     }
 
     // ---------------------------------------------------------------- leitura da árvore
