@@ -10,7 +10,8 @@ import java.util.UUID;
 /**
  * Acesso aos dados de contato normalizados.
  *
- * <p>Sem busca paginada: {@code Contato} nunca é listado por si só — ele é sempre parte de um
+ * <p>
+ * Sem busca paginada: {@code Contato} nunca é listado por si só — ele é sempre parte de um
  * agregado (parceiro, usuário e, nas ondas seguintes, cliente).
  */
 @Repository

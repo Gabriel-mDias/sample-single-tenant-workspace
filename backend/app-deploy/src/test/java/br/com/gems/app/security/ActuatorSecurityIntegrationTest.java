@@ -41,20 +41,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * endpoint, ele não mudaria ao acrescentar credencial.
  */
 @AutoConfigureMockMvc
-@TestPropertySource( properties = {
+@TestPropertySource(properties = {
         // Espelha a produção: o .env desliga os dois. Sem isto o teste do 404 provaria o contrário
         // do que interessa — que o contrato da API está publicado.
         "springdoc.api-docs.enabled=false",
         "springdoc.swagger-ui.enabled=false"
-} )
+})
 class ActuatorSecurityIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @Test
-    @DisplayName( "/actuator/health continua anônimo — é o que o HEALTHCHECK do contêiner usa" )
-    void healthContinuaAnonimo() throws Exception {
+    @DisplayName("/actuator/health continua anônimo — é o que o HEALTHCHECK do contêiner usa")
+    void deveComprovarHealthContinuaAnonimo_quandoExecutaOCenario() throws Exception {
         mockMvc.perform( get( "/actuator/health" ) )
                 .andExpect( status().isOk() );
     }
@@ -67,22 +67,22 @@ class ActuatorSecurityIntegrationTest extends AbstractIntegrationTest {
      * {@code docker compose ps}, que ninguém olha num deploy que "funcionou". Daí o teste.
      */
     @Test
-    @DisplayName( "as probes de liveness e readiness também continuam anônimas" )
-    void probesContinuamAnonimas() throws Exception {
+    @DisplayName("as probes de liveness e readiness também continuam anônimas")
+    void deveComprovarProbesContinuamAnonimas_quandoExecutaOCenario() throws Exception {
         mockMvc.perform( get( "/actuator/health/liveness" ) ).andExpect( status().isOk() );
         mockMvc.perform( get( "/actuator/health/readiness" ) ).andExpect( status().isOk() );
     }
 
     @Test
-    @DisplayName( "/actuator/metrics responde 401 sem token" )
-    void metricsExigeAutenticacao() throws Exception {
+    @DisplayName("/actuator/metrics responde 401 sem token")
+    void deveComprovarMetricsExigeAutenticacao_quandoExecutaOCenario() throws Exception {
         mockMvc.perform( get( "/actuator/metrics" ) )
                 .andExpect( status().isUnauthorized() );
     }
 
     @Test
-    @DisplayName( "/actuator/env e /actuator/beans também exigem token, mesmo não expostos hoje" )
-    void demaisEndpointsDeDiagnosticoExigemAutenticacao() throws Exception {
+    @DisplayName("/actuator/env e /actuator/beans também exigem token, mesmo não expostos hoje")
+    void deveComprovarDemaisEndpointsDeDiagnosticoExigemAutenticacao_quandoExecutaOCenario() throws Exception {
         mockMvc.perform( get( "/actuator/env" ) ).andExpect( status().isUnauthorized() );
         mockMvc.perform( get( "/actuator/beans" ) ).andExpect( status().isUnauthorized() );
     }
@@ -94,10 +94,10 @@ class ActuatorSecurityIntegrationTest extends AbstractIntegrationTest {
      * e não de o endpoint não existir.
      */
     @Test
-    @DisplayName( "com token, /actuator/metrics deixa de responder 401 — o 401 vinha da autorização" )
-    void comTokenAMesmaRotaDeixaDeSer401() throws Exception {
+    @DisplayName("com token, /actuator/metrics deixa de responder 401 — o 401 vinha da autorização")
+    void deveComprovarComTokenAMesmaRotaDeixaDeSer401_quandoExecutaOCenario() throws Exception {
         var resposta = mockMvc.perform( get( "/actuator/metrics" )
-                        .with( jwt().authorities( new SimpleGrantedAuthority( "ROLE_ADMIN" ) ) ) )
+                .with( jwt().authorities( new SimpleGrantedAuthority( "ROLE_ADMIN" ) ) ) )
                 .andReturn()
                 .getResponse();
 
@@ -110,14 +110,15 @@ class ActuatorSecurityIntegrationTest extends AbstractIntegrationTest {
      * Desligar por configuração em vez de por rota mantém o Swagger disponível em desenvolvimento,
      * que é onde ele serve.
      *
-     * <p>Asserta o código <b>e</b> o conteúdo. O 404 passou a ser confiável com o
+     * <p>
+     * Asserta o código <b>e</b> o conteúdo. O 404 passou a ser confiável com o
      * {@code RequisicaoInvalidaExceptionHandler}; a checagem de conteúdo continua porque é ela que
      * expressa a propriedade de segurança — o documento OpenAPI não sai — independentemente do
      * status.
      */
     @Test
-    @DisplayName( "com o springdoc desligado, o contrato da API não é publicado" )
-    void contratoDaApiNaoEhPublicadoComSpringdocDesligado() throws Exception {
+    @DisplayName("com o springdoc desligado, o contrato da API não é publicado")
+    void deveComprovarContratoDaApiNaoEhPublicadoComSpringdocDesligado_quandoExecutaOCenario() throws Exception {
         var apiDocs = mockMvc.perform( get( "/v3/api-docs" ) ).andReturn().getResponse();
         var swagger = mockMvc.perform( get( "/swagger-ui/index.html" ) ).andReturn().getResponse();
 
@@ -139,22 +140,24 @@ class ActuatorSecurityIntegrationTest extends AbstractIntegrationTest {
     /**
      * O defeito que este teste registrava foi <b>corrigido</b>, e o registro fica como história.
      *
-     * <p>Quando escrito, ele afirmava o contrário: qualquer caminho sem handler respondia
+     * <p>
+     * Quando escrito, ele afirmava o contrário: qualquer caminho sem handler respondia
      * <b>500 {@code ERRO_NAO_ESPERADO}</b>, porque o {@code GlobalExceptionHandler} do
      * {@code gems-exception} trata {@code Exception} de forma ampla e alcançava a
      * {@code NoResourceFoundException} do Spring. Não vazava nada, mas deixava um endereço digitado
      * errado indistinguível de aplicação quebrada em qualquer monitoração por taxa de 5xx.
      *
-     * <p>O conserto é o {@code RequisicaoInvalidaExceptionHandler}, que segue o padrão que o projeto
+     * <p>
+     * O conserto é o {@code RequisicaoInvalidaExceptionHandler}, que segue o padrão que o projeto
      * já usava duas vezes para corrigir mapeamentos ruins da SDK — {@code AccessDeniedExceptionHandler}
      * e {@code IdentityProviderExceptionHandler}. O teste foi escrito para falhar exatamente neste
      * momento, e foi o que aconteceu.
      */
     @Test
-    @DisplayName( "caminho não mapeado responde 404, não 500" )
-    void caminhoNaoMapeadoResponde404() throws Exception {
+    @DisplayName("caminho não mapeado responde 404, não 500")
+    void deveComprovarCaminhoNaoMapeadoResponde404_quandoExecutaOCenario() throws Exception {
         var resposta = mockMvc.perform( get( "/caminho/que/nao/existe" )
-                        .with( jwt().authorities( new SimpleGrantedAuthority( "ROLE_ADMIN" ) ) ) )
+                .with( jwt().authorities( new SimpleGrantedAuthority( "ROLE_ADMIN" ) ) ) )
                 .andReturn()
                 .getResponse();
 
@@ -165,17 +168,18 @@ class ActuatorSecurityIntegrationTest extends AbstractIntegrationTest {
     /**
      * O outro lado do mesmo conserto: {@code @PathVariable UUID} com valor malformado.
      *
-     * <p>O {@code FamiliaController} é o único do projeto que declara o id como {@code UUID} em vez
+     * <p>
+     * O {@code FamiliaController} é o único do projeto que declara o id como {@code UUID} em vez
      * de {@code String} — os outros seis recebem {@code String} e convertem no service, o que produz
      * {@code IllegalArgumentException} e 400 pelo handler da SDK. Ali o Spring lançava
      * {@code MethodArgumentTypeMismatchException}, que não descende de {@code IllegalArgumentException}
      * e escapava como 500. Agora os dois caminhos convergem em 400.
      */
     @Test
-    @DisplayName( "UUID malformado na rota responde 400, não 500" )
-    void uuidMalformadoResponde400() throws Exception {
+    @DisplayName("UUID malformado na rota responde 400, não 500")
+    void deveComprovarUuidMalformadoResponde400_quandoExecutaOCenario() throws Exception {
         var resposta = mockMvc.perform( post( "/api/solicitacoes/isto-nao-e-um-uuid/abrir" )
-                        .with( jwt().authorities( new SimpleGrantedAuthority( "ROLE_ABRIR_SOLICITACAO" ) ) ) )
+                .with( jwt().authorities( new SimpleGrantedAuthority( "ROLE_ABRIR_SOLICITACAO" ) ) ) )
                 .andReturn()
                 .getResponse();
 

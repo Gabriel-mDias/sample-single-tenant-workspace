@@ -9,7 +9,8 @@ import java.util.UUID;
 /**
  * Projeção da busca paginada de parceiros — construída por construtor na HQL, nunca por reflexão.
  *
- * <p>O construtor é o contrato: mudar a ordem dos parâmetros aqui sem mudar o {@code SELECT new}
+ * <p>
+ * O construtor é o contrato: mudar a ordem dos parâmetros aqui sem mudar o {@code SELECT new}
  * do repository compila e falha em runtime. Os dois andam juntos, sempre.
  */
 @Getter
@@ -25,7 +26,7 @@ public class ParceiroResponseDTO {
     private Integer solicitacoesConcluidas;
 
     public ParceiroResponseDTO( UUID id, String nome, String cpf, String email, String estadoSigla,
-                                BigDecimal comissao, Integer solicitacoesConcluidas ) {
+            BigDecimal comissao, Integer solicitacoesConcluidas ) {
         this.id = id;
         this.nome = nome;
         this.cpf = cpf;

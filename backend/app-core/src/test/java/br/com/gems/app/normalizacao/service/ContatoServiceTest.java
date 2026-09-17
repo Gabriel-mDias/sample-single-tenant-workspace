@@ -63,7 +63,7 @@ class ContatoServiceTest {
 
     @Test
     @DisplayName("ContatoDTO nulo acusa que os dados de contato são obrigatórios")
-    void contatoNuloFalha() {
+    void deveComprovarContatoNuloFalha_quandoExecutaOCenario() {
         var errors = new ArrayList<String>();
 
         service.validar( null, errors );
@@ -73,7 +73,7 @@ class ContatoServiceTest {
 
     @Test
     @DisplayName("V8 e V9: e-mail e telefone ausentes acumulam duas mensagens distintas")
-    void emailETelefoneAusentesAcumulamMensagens() {
+    void deveComprovarEmailETelefoneAusentesAcumulamMensagens_quandoExecutaOCenario() {
         var errors = new ArrayList<String>();
 
         service.validar( new ContatoDTO(), errors );
@@ -85,7 +85,7 @@ class ContatoServiceTest {
 
     @Test
     @DisplayName("ContatoDTO válido não acumula nenhuma mensagem")
-    void contatoValidoNaoAcumulaMensagem() {
+    void deveComprovarContatoValidoNaoAcumulaMensagem_quandoExecutaOCenario() {
         var errors = new ArrayList<String>();
 
         service.validar( contatoValido(), errors );
@@ -95,7 +95,7 @@ class ContatoServiceTest {
 
     @Test
     @DisplayName("insert devolve instância gerenciada")
-    void insertDevolveInstanciaGerenciada() {
+    void deveComprovarInsertDevolveInstanciaGerenciada_quandoExecutaOCenario() {
         var salvo = service.insert( contatoValido() );
 
         assertThat( salvo.getEmail() ).isEqualTo( "consolato@esteri.it" );
@@ -105,7 +105,7 @@ class ContatoServiceTest {
 
     @Test
     @DisplayName("save sobre instância existente preserva o id, mesmo com id diferente no DTO")
-    void savePreservaId() {
+    void deveComprovarSavePreservaId_quandoExecutaOCenario() {
         var existente = Contato.builder().id( ID_CONTATO ).email( "antigo@esteri.it" ).telefone( "0000" ).build();
         var dto = contatoValido();
         dto.setId( ID_OUTRO_CONTATO );
@@ -118,7 +118,7 @@ class ContatoServiceTest {
 
     @Test
     @DisplayName("delete com argumento nulo não estoura e não chama o repositório")
-    void deleteComArgumentoNuloNaoEstoura() {
+    void deveComprovarDeleteComArgumentoNuloNaoEstoura_quandoExecutaOCenario() {
         assertThatCode( () -> service.delete( null ) ).doesNotThrowAnyException();
 
         verify( repository, never() ).delete( any() );

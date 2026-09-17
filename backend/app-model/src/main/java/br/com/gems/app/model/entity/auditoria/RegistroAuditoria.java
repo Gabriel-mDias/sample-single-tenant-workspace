@@ -57,48 +57,45 @@ import java.util.UUID;
 @Setter
 @ToString
 @Entity
-@Table( name = "REGISTRO_AUDITORIA", schema = "auditoria" )
-@NamedEntityGraph(
-        name = "registro-auditoria-entity-graph",
-        attributeNodes = {
-                @NamedAttributeNode( value = "camposAlterados" ),
-        }
-)
+@Table(name = "REGISTRO_AUDITORIA", schema = "auditoria")
+@NamedEntityGraph(name = "registro-auditoria-entity-graph", attributeNodes = {
+        @NamedAttributeNode(value = "camposAlterados"),
+})
 public class RegistroAuditoria {
 
     @Id
-    @GeneratedValue( strategy = GenerationType.UUID )
-    @Column( name = "ID_REGISTRO_AUDITORIA" )
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "ID_REGISTRO_AUDITORIA")
     private UUID id;
 
-    @Column( name = "NM_ENTIDADE", nullable = false, length = 100 )
+    @Column(name = "NM_ENTIDADE", nullable = false, length = 100)
     private String entidade;
 
     /** Não é FK: precisa sobreviver à exclusão do alvo e aponta para tabelas diferentes. */
-    @Column( name = "ID_REGISTRO_AFETADO", nullable = false )
+    @Column(name = "ID_REGISTRO_AFETADO", nullable = false)
     private UUID registroAfetado;
 
-    @Enumerated( EnumType.STRING )
-    @Column( name = "CD_OPERACAO", nullable = false, length = 20 )
+    @Enumerated(EnumType.STRING)
+    @Column(name = "CD_OPERACAO", nullable = false, length = 20)
     private OperacaoAuditoria operacao;
 
-    @Column( name = "DT_OPERACAO", nullable = false )
+    @Column(name = "DT_OPERACAO", nullable = false)
     private LocalDateTime dataOperacao;
 
     /** Não é FK: a trilha precisa continuar legível se o usuário for removido. Nulo = sistema. */
-    @Column( name = "ID_AUTOR" )
+    @Column(name = "ID_AUTOR")
     private UUID autorId;
 
     /** Desnormalizado de propósito — ver javadoc da classe. O login, ou "sistema". */
-    @Column( name = "NM_AUTOR", nullable = false, length = 150 )
+    @Column(name = "NM_AUTOR", nullable = false, length = 150)
     private String autorNome;
 
     /** Amarra todas as entidades gravadas no mesmo {@code save}. */
-    @Column( name = "CD_CORRELACAO", length = 64 )
+    @Column(name = "CD_CORRELACAO", length = 64)
     private String correlacaoId;
 
     @ToString.Exclude
-    @OneToMany( mappedBy = "registroAuditoria", fetch = FetchType.LAZY )
+    @OneToMany(mappedBy = "registroAuditoria", fetch = FetchType.LAZY)
     @Builder.Default
     private List<CampoAlterado> camposAlterados = new ArrayList<>();
 

@@ -96,7 +96,7 @@ class EnderecoServiceTest {
 
     @Test
     @DisplayName("EnderecoDTO nulo acusa que o endereço é obrigatório")
-    void enderecoNuloFalha() {
+    void deveComprovarEnderecoNuloFalha_quandoExecutaOCenario() {
         var errors = new ArrayList<String>();
 
         service.validar( null, errors );
@@ -106,7 +106,7 @@ class EnderecoServiceTest {
 
     @Test
     @DisplayName("V13 a V16 e V11: obrigatórios ausentes acumulam mensagens; número e complemento são opcionais")
-    void camposObrigatoriosAusentesAcumulamMensagens() {
+    void deveComprovarCamposObrigatoriosAusentesAcumulamMensagens_quandoExecutaOCenario() {
         var errors = new ArrayList<String>();
 
         service.validar( new EnderecoDTO(), errors );
@@ -125,7 +125,7 @@ class EnderecoServiceTest {
 
     @Test
     @DisplayName("país ausente é recusado")
-    void paisAusenteFalha() {
+    void deveComprovarPaisAusenteFalha_quandoExecutaOCenario() {
         var errors = new ArrayList<String>();
         var dto = enderecoBrasileiro();
         dto.setPais( null );
@@ -137,7 +137,7 @@ class EnderecoServiceTest {
 
     @Test
     @DisplayName("país informado que não existe no repositório é recusado")
-    void paisInexistenteFalha() {
+    void deveComprovarPaisInexistenteFalha_quandoExecutaOCenario() {
         var inexistente = UUID.randomUUID();
         when( paisRepository.findById( inexistente ) ).thenReturn( Optional.empty() );
 
@@ -152,7 +152,7 @@ class EnderecoServiceTest {
 
     @Test
     @DisplayName("endereço no Brasil sem CEP é recusado")
-    void brasilSemCepFalha() {
+    void deveComprovarBrasilSemCepFalha_quandoExecutaOCenario() {
         var errors = new ArrayList<String>();
         var dto = enderecoBrasileiro();
         dto.setCep( null );
@@ -164,7 +164,7 @@ class EnderecoServiceTest {
 
     @Test
     @DisplayName("endereço no Brasil sem estado é recusado")
-    void brasilSemEstadoFalha() {
+    void deveComprovarBrasilSemEstadoFalha_quandoExecutaOCenario() {
         var errors = new ArrayList<String>();
         var dto = enderecoBrasileiro();
         dto.setEstado( null );
@@ -176,7 +176,7 @@ class EnderecoServiceTest {
 
     @Test
     @DisplayName("endereço fora do Brasil dispensa CEP e estado, exigindo apenas cidade, bairro e logradouro")
-    void estrangeiroSemCepESemEstadoPassa() {
+    void deveComprovarEstrangeiroSemCepESemEstadoPassa_quandoExecutaOCenario() {
         var errors = new ArrayList<String>();
         var dto = new EnderecoDTO();
         dto.setPais( paisDTO( ID_PORTUGAL ) );
@@ -191,7 +191,7 @@ class EnderecoServiceTest {
 
     @Test
     @DisplayName("fora do Brasil, cidade, bairro e logradouro continuam obrigatórios")
-    void estrangeiroSemCidadeFalha() {
+    void deveComprovarEstrangeiroSemCidadeFalha_quandoExecutaOCenario() {
         var errors = new ArrayList<String>();
         var dto = new EnderecoDTO();
         dto.setPais( paisDTO( ID_PORTUGAL ) );
@@ -207,7 +207,7 @@ class EnderecoServiceTest {
     @Test
     @DisplayName("CHECAGEM NOVA: estado que não pertence ao país informado é recusado — impossível antes, "
             + "quando o país era derivado do próprio estado")
-    void estadoDeOutroPaisFalha() {
+    void deveComprovarEstadoDeOutroPaisFalha_quandoExecutaOCenario() {
         var errors = new ArrayList<String>();
         var dto = enderecoBrasileiro();
         dto.setEstado( estadoDTO( ID_LISBOA ) );
@@ -219,7 +219,7 @@ class EnderecoServiceTest {
 
     @Test
     @DisplayName("país ausente NÃO relaxa CEP e estado: a relaxação exige a prova de um país que não é o Brasil")
-    void paisAusenteNaoRelaxaRegraBrasileira() {
+    void deveComprovarPaisAusenteNaoRelaxaRegraBrasileira_quandoExecutaOCenario() {
         var errors = new ArrayList<String>();
         var dto = new EnderecoDTO();
         dto.setCidade( "Lisboa" );
@@ -236,7 +236,7 @@ class EnderecoServiceTest {
 
     @Test
     @DisplayName("V12: estado informado que não existe no repositório é recusado")
-    void estadoInexistenteFalha() {
+    void deveComprovarEstadoInexistenteFalha_quandoExecutaOCenario() {
         var inexistente = UUID.randomUUID();
         when( estadoRepository.findById( inexistente ) ).thenReturn( Optional.empty() );
 
@@ -252,7 +252,7 @@ class EnderecoServiceTest {
     @Test
     @DisplayName("AUSÊNCIA DE TRAVA DE PAÍS: endereço fora do Brasil passa sem erro — a regra de "
             + "sede em território brasileiro é do ParceiroService, e não pode vazar para cá")
-    void enderecoComEstadoEstrangeiroPassaSemErro() {
+    void deveComprovarEnderecoComEstadoEstrangeiroPassaSemErro_quandoExecutaOCenario() {
         var errors = new ArrayList<String>();
         var dto = enderecoValido( ID_PORTUGAL, ID_LISBOA );
 
@@ -263,7 +263,7 @@ class EnderecoServiceTest {
 
     @Test
     @DisplayName("endereço válido com estado brasileiro não acumula nenhuma mensagem")
-    void enderecoValidoNaoAcumulaMensagem() {
+    void deveComprovarEnderecoValidoNaoAcumulaMensagem_quandoExecutaOCenario() {
         var errors = new ArrayList<String>();
 
         service.validar( enderecoBrasileiro(), errors );
@@ -273,7 +273,7 @@ class EnderecoServiceTest {
 
     @Test
     @DisplayName("save resolve o Estado pelo EstadoRepository e usa a instância gerenciada")
-    void saveUsaEstadoGerenciado() {
+    void deveComprovarSaveUsaEstadoGerenciado_quandoExecutaOCenario() {
         var salvo = service.save( new Endereco(), enderecoBrasileiro() );
 
         assertThat( salvo.getEstado() ).isSameAs( rioDeJaneiro );
@@ -281,7 +281,7 @@ class EnderecoServiceTest {
 
     @Test
     @DisplayName("save resolve o País pelo PaisRepository e usa a instância gerenciada")
-    void saveUsaPaisGerenciado() {
+    void deveComprovarSaveUsaPaisGerenciado_quandoExecutaOCenario() {
         var salvo = service.save( new Endereco(), enderecoBrasileiro() );
 
         assertThat( salvo.getPais() ).isSameAs( brasil );
@@ -289,7 +289,7 @@ class EnderecoServiceTest {
 
     @Test
     @DisplayName("save de endereço estrangeiro sem estado grava com estado nulo, sem estourar")
-    void saveEstrangeiroSemEstadoGravaComEstadoNulo() {
+    void deveComprovarSaveEstrangeiroSemEstadoGravaComEstadoNulo_quandoExecutaOCenario() {
         var dto = new EnderecoDTO();
         dto.setPais( paisDTO( ID_PORTUGAL ) );
         dto.setCidade( "Lisboa" );
@@ -304,7 +304,7 @@ class EnderecoServiceTest {
 
     @Test
     @DisplayName("save não adultera o Estado de referência mesmo com nome e sigla alterados no payload")
-    void saveNaoAdulteraEstadoDeReferencia() {
+    void deveComprovarSaveNaoAdulteraEstadoDeReferencia_quandoExecutaOCenario() {
         var dto = enderecoBrasileiro();
         dto.getEstado().setNome( "Rio de Janeiro ADULTERADO" );
         dto.getEstado().setSiglaEstado( "XX" );
@@ -317,7 +317,7 @@ class EnderecoServiceTest {
 
     @Test
     @DisplayName("save não adultera o País de referência mesmo com nome alterado no payload")
-    void saveNaoAdulteraPaisDeReferencia() {
+    void deveComprovarSaveNaoAdulteraPaisDeReferencia_quandoExecutaOCenario() {
         var dto = enderecoBrasileiro();
         dto.getPais().setNome( "Brasil ADULTERADO" );
 
@@ -328,7 +328,7 @@ class EnderecoServiceTest {
 
     @Test
     @DisplayName("save sobre instância existente preserva o id, mesmo com id diferente no DTO")
-    void savePreservaId() {
+    void deveComprovarSavePreservaId_quandoExecutaOCenario() {
         var existente = Endereco.builder().id( ID_ENDERECO ).pais( brasil ).estado( rioDeJaneiro ).build();
         var dto = enderecoBrasileiro();
         dto.setId( ID_OUTRO_ENDERECO );
@@ -340,13 +340,13 @@ class EnderecoServiceTest {
 
     @Test
     @DisplayName("buscarEstado devolve vazio para EnderecoDTO nulo")
-    void buscarEstadoComDtoNuloDevolveVazio() {
+    void deveComprovarBuscarEstadoComDtoNuloDevolveVazio_quandoExecutaOCenario() {
         assertThat( service.buscarEstado( null ) ).isEmpty();
     }
 
     @Test
     @DisplayName("buscarEstado devolve vazio quando o estado do DTO é nulo")
-    void buscarEstadoComEstadoNuloDevolveVazio() {
+    void deveComprovarBuscarEstadoComEstadoNuloDevolveVazio_quandoExecutaOCenario() {
         var dto = enderecoBrasileiro();
         dto.setEstado( null );
 
@@ -355,7 +355,7 @@ class EnderecoServiceTest {
 
     @Test
     @DisplayName("buscarEstado devolve vazio quando o id do estado do DTO é nulo")
-    void buscarEstadoComIdDoEstadoNuloDevolveVazio() {
+    void deveComprovarBuscarEstadoComIdDoEstadoNuloDevolveVazio_quandoExecutaOCenario() {
         var dto = enderecoBrasileiro();
         dto.getEstado().setId( null );
 
@@ -364,7 +364,7 @@ class EnderecoServiceTest {
 
     @Test
     @DisplayName("buscarPais devolve vazio para EnderecoDTO nulo, país nulo ou id nulo")
-    void buscarPaisDevolveVazioNosCasosDegenerados() {
+    void deveComprovarBuscarPaisDevolveVazioNosCasosDegenerados_quandoExecutaOCenario() {
         var semPais = enderecoBrasileiro();
         semPais.setPais( null );
 

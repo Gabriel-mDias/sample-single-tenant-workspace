@@ -8,7 +8,8 @@ import lombok.Setter;
 /**
  * Par constante/rótulo de um enum, para alimentar os campos de seleção da interface.
  *
- * <p>O backend é a fonte única dos rótulos: o frontend nunca duplica as listas.
+ * <p>
+ * O backend é a fonte única dos rótulos: o frontend nunca duplica as listas.
  */
 @Getter
 @Setter

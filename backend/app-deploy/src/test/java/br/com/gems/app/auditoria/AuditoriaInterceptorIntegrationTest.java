@@ -61,8 +61,8 @@ class AuditoriaInterceptorIntegrationTest extends AbstractIntegrationTest {
     // ------------------------------------------------------------------ T010
 
     @Test
-    @DisplayName( "T010: inserir uma entidade de negócio produz INSERCAO com autor e correlação" )
-    void insercaoProduzRegistro() {
+    @DisplayName("T010: inserir uma entidade de negócio produz INSERCAO com autor e correlação")
+    void deveComprovarInsercaoProduzRegistro_quandoExecutaOCenario() {
         MDC.put( "correlationId", "corr-" + sufixo );
         autenticarComo( UUID.randomUUID(), "maria.operadora" );
 
@@ -80,8 +80,8 @@ class AuditoriaInterceptorIntegrationTest extends AbstractIntegrationTest {
     // ------------------------------------------------------------- T011/T013
 
     @Test
-    @DisplayName( "T011/T013: alterar dois campos registra EXATAMENTE dois; o que não mudou fica de fora" )
-    void alteracaoRegistraSomenteOsCamposQueMudaram() {
+    @DisplayName("T011/T013: alterar dois campos registra EXATAMENTE dois; o que não mudou fica de fora")
+    void deveComprovarAlteracaoRegistraSomenteOsCamposQueMudaram_quandoExecutaOCenario() {
         var id = transactionTemplate.execute( status -> gravarPessoa( "Bruno" ).getId() );
 
         transactionTemplate.executeWithoutResult( status -> {
@@ -113,8 +113,8 @@ class AuditoriaInterceptorIntegrationTest extends AbstractIntegrationTest {
     // ------------------------------------------------------------------ T012
 
     @Test
-    @DisplayName( "T012: exclusão LÓGICA é interceptada como EXCLUSAO" )
-    void exclusaoLogicaProduzRegistro() {
+    @DisplayName("T012: exclusão LÓGICA é interceptada como EXCLUSAO")
+    void deveComprovarExclusaoLogicaProduzRegistro_quandoExecutaOCenario() {
         var id = transactionTemplate.execute( status -> gravarPessoa( "Carlos" ).getId() );
 
         transactionTemplate.executeWithoutResult(
@@ -128,8 +128,8 @@ class AuditoriaInterceptorIntegrationTest extends AbstractIntegrationTest {
     // ------------------------------------------------------------------ rollback
 
     @Test
-    @DisplayName( "rollback do dado é rollback da trilha" )
-    void rollbackNaoDeixaRegistro() {
+    @DisplayName("rollback do dado é rollback da trilha")
+    void deveComprovarRollbackNaoDeixaRegistro_quandoExecutaOCenario() {
         var id = UUID.randomUUID();
 
         try {
@@ -150,13 +150,14 @@ class AuditoriaInterceptorIntegrationTest extends AbstractIntegrationTest {
     // ------------------------------------------------------------------ T015
 
     @Test
-    @DisplayName( "T015: a trilha não audita a si mesma — não existe trilha da trilha" )
-    void trilhaDaTrilhaNaoExiste() {
+    @DisplayName("T015: a trilha não audita a si mesma — não existe trilha da trilha")
+    void deveComprovarTrilhaDaTrilhaNaoExiste_quandoExecutaOCenario() {
         transactionTemplate.execute( status -> gravarPessoa( "Eduarda" ).getId() );
 
         var trilhaDaTrilha = entityManager.createQuery(
-                        "SELECT COUNT(r) FROM RegistroAuditoria r WHERE r.entidade IN "
-                                + "('RegistroAuditoria', 'CampoAlterado')", Long.class )
+                "SELECT COUNT(r) FROM RegistroAuditoria r WHERE r.entidade IN "
+                        + "('RegistroAuditoria', 'CampoAlterado')",
+                Long.class )
                 .getSingleResult();
 
         assertThat( trilhaDaTrilha )
@@ -167,8 +168,8 @@ class AuditoriaInterceptorIntegrationTest extends AbstractIntegrationTest {
     // ------------------------------------------------------------------ T016
 
     @Test
-    @DisplayName( "T016: sem usuário autenticado, o autor é o sistema e o id fica nulo" )
-    void semAutenticadoAutorEhSistema() {
+    @DisplayName("T016: sem usuário autenticado, o autor é o sistema e o id fica nulo")
+    void deveComprovarSemAutenticadoAutorEhSistema_quandoExecutaOCenario() {
         SecurityContextHolder.clearContext();
 
         var id = transactionTemplate.execute( status -> gravarPessoa( "Fabio" ).getId() );
@@ -182,8 +183,8 @@ class AuditoriaInterceptorIntegrationTest extends AbstractIntegrationTest {
     // ------------------------------------------------------------------ T017
 
     @Test
-    @DisplayName( "T017: com autenticado, grava o sub em ID_AUTOR e o login em NM_AUTOR" )
-    void comAutenticadoGravaSubELogin() {
+    @DisplayName("T017: com autenticado, grava o sub em ID_AUTOR e o login em NM_AUTOR")
+    void deveComprovarComAutenticadoGravaSubELogin_quandoExecutaOCenario() {
         var sub = UUID.randomUUID();
         autenticarComo( sub, "joao.operador" );
 
@@ -212,9 +213,10 @@ class AuditoriaInterceptorIntegrationTest extends AbstractIntegrationTest {
 
     private List<RegistroAuditoria> trilhaDe( String entidade, UUID registroAfetado ) {
         return entityManager.createQuery(
-                        "SELECT DISTINCT r FROM RegistroAuditoria r LEFT JOIN FETCH r.camposAlterados "
-                                + "WHERE r.entidade = :entidade AND r.registroAfetado = :id "
-                                + "ORDER BY r.dataOperacao", RegistroAuditoria.class )
+                "SELECT DISTINCT r FROM RegistroAuditoria r LEFT JOIN FETCH r.camposAlterados "
+                        + "WHERE r.entidade = :entidade AND r.registroAfetado = :id "
+                        + "ORDER BY r.dataOperacao",
+                RegistroAuditoria.class )
                 .setParameter( "entidade", entidade )
                 .setParameter( "id", registroAfetado )
                 .getResultList();
@@ -223,10 +225,10 @@ class AuditoriaInterceptorIntegrationTest extends AbstractIntegrationTest {
     /** Toda a trilha de Pessoa produzida por esta execução — restrita pelo sobrenome-sufixo. */
     private List<RegistroAuditoria> trilhaDoSufixo() {
         return entityManager.createQuery(
-                        "SELECT r FROM RegistroAuditoria r WHERE r.entidade = 'Pessoa' "
-                                + "AND r.registroAfetado IN ("
-                                + "  SELECT p.id FROM Pessoa p WHERE p.sobrenome = :sufixo)",
-                        RegistroAuditoria.class )
+                "SELECT r FROM RegistroAuditoria r WHERE r.entidade = 'Pessoa' "
+                        + "AND r.registroAfetado IN ("
+                        + "  SELECT p.id FROM Pessoa p WHERE p.sobrenome = :sufixo)",
+                RegistroAuditoria.class )
                 .setParameter( "sufixo", sufixo )
                 .getResultList();
     }

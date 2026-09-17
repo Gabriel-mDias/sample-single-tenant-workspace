@@ -21,13 +21,15 @@ import java.util.List;
 /**
  * Regras da credencial de acesso de um usuário.
  *
- * <p><b>Este serviço nunca fala com o Keycloak.</b> Ele publica eventos; quem conversa com o
+ * <p>
+ * <b>Este serviço nunca fala com o Keycloak.</b> Ele publica eventos; quem conversa com o
  * provedor de identidade é o {@code UsuarioKeycloakListener}, que roda de forma síncrona, na mesma
  * transação, e sabe se desfazer caso ela não seja confirmada. A separação existe para que a regra de
  * negócio não fique acoplada à API de administração — e para que o envio de e-mail, quando entrar,
  * seja apenas mais um ouvinte do mesmo evento.
  *
- * <p>A ordem "publicar, depois persistir" no {@link #insert} não é acidental: é ela que permite ao
+ * <p>
+ * A ordem "publicar, depois persistir" no {@link #insert} não é acidental: é ela que permite ao
  * {@code CD_KEYCLOAK_ID} ser {@code NOT NULL} no banco. O listener preenche o identificador na
  * instância ainda transiente, e só então a linha nasce — completa.
  */
@@ -57,10 +59,14 @@ public class UsuarioService {
     /**
      * Cria a credencial e provisiona a conta no provedor de identidade.
      *
-     * @param dto login e senha vindos do formulário.
-     * @param perfil perfil de atuação, que determina o grupo do Keycloak.
-     * @param pessoa dados civis, usados para nome e sobrenome da conta.
-     * @param contato dados de contato, usados para o e-mail da conta.
+     * @param dto
+     *            login e senha vindos do formulário.
+     * @param perfil
+     *            perfil de atuação, que determina o grupo do Keycloak.
+     * @param pessoa
+     *            dados civis, usados para nome e sobrenome da conta.
+     * @param contato
+     *            dados de contato, usados para o e-mail da conta.
      * @return instância <b>gerenciada</b>, pronta para ser referenciada pelo usuário.
      */
     public Usuario insert( UsuarioDTO dto, PerfilAtuacao perfil, Pessoa pessoa, Contato contato ) {
@@ -72,7 +78,8 @@ public class UsuarioService {
         // Publicar ANTES de salvar: o listener é síncrono e preenche o keycloakId na instância
         // transiente. Se o Keycloak recusar, a exceção sobe daqui e nenhuma linha chega a existir.
         publisher.publishEvent( new UsuarioCriadoEvent(
-                usuario, dto.getSenha(), perfil, contato.getEmail(), pessoa.getPrimeiroNome(), pessoa.getSobrenome() ) );
+                usuario, dto.getSenha(), perfil, contato.getEmail(), pessoa.getPrimeiroNome(),
+                pessoa.getSobrenome() ) );
 
         return repository.save( usuario );
     }
@@ -80,7 +87,8 @@ public class UsuarioService {
     /**
      * Reabilita uma credencial existente para um novo vínculo, sem pedir senha nova.
      *
-     * <p>É o caminho de quem retorna à equipe: o login e a senha continuam os mesmos, e o
+     * <p>
+     * É o caminho de quem retorna à equipe: o login e a senha continuam os mesmos, e o
      * usuário é recolocado no grupo do perfil do novo vínculo — que pode ser diferente do
      * anterior.
      */
@@ -93,7 +101,8 @@ public class UsuarioService {
     /**
      * Propaga ao provedor de identidade os dados cadastrais e o perfil correntes.
      *
-     * <p>Chamado na edição de um vínculo. O login não muda por aqui — ele é a identidade da conta.
+     * <p>
+     * Chamado na edição de um vínculo. O login não muda por aqui — ele é a identidade da conta.
      */
     public void sincronizar( Usuario usuario, PerfilAtuacao perfil, Pessoa pessoa, Contato contato ) {
         publisher.publishEvent( new UsuarioAtualizadoEvent(
@@ -115,9 +124,10 @@ public class UsuarioService {
     }
 
     /**
-     * @param exigeSenha {@code true} quando o acesso está sendo criado; {@code false} quando ele já
-     *                   existe (edição ou usuário reaproveitado), caso em que login e senha são
-     *                   somente leitura e não precisam vir no payload.
+     * @param exigeSenha
+     *            {@code true} quando o acesso está sendo criado; {@code false} quando ele já
+     *            existe (edição ou usuário reaproveitado), caso em que login e senha são
+     *            somente leitura e não precisam vir no payload.
      */
     public void validar( UsuarioDTO usuario, boolean exigeSenha, List<String> errors ) {
         if ( !exigeSenha ) {

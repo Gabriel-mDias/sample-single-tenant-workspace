@@ -23,7 +23,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * as tabelas de rota <b>à mão</b> — e ignorou uma feature inteira, porque a tabela dela nunca entrou
  * na lista. A rede montada para pegar o esquecimento foi vítima do mesmo esquecimento.
  *
- * <p>Aqui a fonte é o {@code Metamodel} do Hibernate: tudo que é entidade mapeada aparece, queira o
+ * <p>
+ * Aqui a fonte é o {@code Metamodel} do Hibernate: tudo que é entidade mapeada aparece, queira o
  * autor ou não. Uma entidade criada em qualquer rodada futura entra nesta varredura no instante em
  * que for mapeada, sem que ninguém precise lembrar de nada.
  *
@@ -50,8 +51,8 @@ class AuditoriaCoberturaIntegrationTest extends AbstractIntegrationTest {
     private static final List<String> DA_TRILHA = List.of( "RegistroAuditoria", "CampoAlterado" );
 
     @Test
-    @DisplayName( "toda entidade de negócio mapeada está coberta pela trilha" )
-    void todaEntidadeDeNegocioEstaCoberta() {
+    @DisplayName("toda entidade de negócio mapeada está coberta pela trilha")
+    void deveComprovarTodaEntidadeDeNegocioEstaCoberta_quandoExecutaOCenario() {
         var descobertas = entidadesDeNegocio().stream()
                 .filter( tipo -> !interceptor.deveAuditar( instanciar( tipo ) ) )
                 .map( Class::getSimpleName )
@@ -71,8 +72,8 @@ class AuditoriaCoberturaIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @DisplayName( "SC-140: nenhuma entidade de negócio tem chave que o mecanismo não saiba registrar" )
-    void todaEntidadeDeNegocioTemChaveUuid() {
+    @DisplayName("SC-140: nenhuma entidade de negócio tem chave que o mecanismo não saiba registrar")
+    void deveComprovarTodaEntidadeDeNegocioTemChaveUuid_quandoExecutaOCenario() {
         var forasteiras = entidadesDeNegocio().stream()
                 .filter( tipo -> !UUID.class.equals( tipoDaChave( tipo ) ) )
                 .map( tipo -> tipo.getSimpleName() + " (" + tipoDaChave( tipo ) + ")" )
@@ -86,8 +87,8 @@ class AuditoriaCoberturaIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @DisplayName( "A trilha e as tabelas referenciais ficam FORA da cobertura, e isso é deliberado" )
-    void oQueFicaDeForaContinuaDeFora() {
+    @DisplayName("A trilha e as tabelas referenciais ficam FORA da cobertura, e isso é deliberado")
+    void deveComprovarOQueFicaDeForaContinuaDeFora_quandoExecutaOCenario() {
         var mapeadas = entityManagerFactory.getMetamodel().getEntities().stream()
                 .map( EntityType::getJavaType )
                 .collect( Collectors.toMap( Class::getSimpleName, tipo -> tipo, ( a, b ) -> a ) );
@@ -109,8 +110,8 @@ class AuditoriaCoberturaIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @DisplayName( "nenhuma entidade mapeada escapa sem classificação" )
-    void nenhumaEntidadeMapeadaFicaSemClassificacao() {
+    @DisplayName("nenhuma entidade mapeada escapa sem classificação")
+    void deveComprovarNenhumaEntidadeMapeadaFicaSemClassificacao_quandoExecutaOCenario() {
         var semClassificacao = entityManagerFactory.getMetamodel().getEntities().stream()
                 .map( EntityType::getJavaType )
                 .filter( tipo -> !EntidadeAuditavel.class.isAssignableFrom( tipo ) )
@@ -166,7 +167,8 @@ class AuditoriaCoberturaIntegrationTest extends AbstractIntegrationTest {
         } catch ( ReflectiveOperationException e ) {
             throw new IllegalStateException(
                     "não foi possível instanciar " + tipo.getSimpleName()
-                            + " — toda entidade precisa de construtor sem argumentos", e );
+                            + " — toda entidade precisa de construtor sem argumentos",
+                    e );
         }
     }
 }

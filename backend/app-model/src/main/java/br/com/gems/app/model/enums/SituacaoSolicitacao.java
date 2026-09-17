@@ -8,12 +8,14 @@ import java.util.Set;
 /**
  * A máquina de estados da solicitação.
  *
- * <p><b>A situação nunca entra pelo corpo da requisição</b> (Princípio V). Cada transição é um
+ * <p>
+ * <b>A situação nunca entra pelo corpo da requisição</b> (Princípio V). Cada transição é um
  * endpoint de ação dedicado, com a sua própria ação de {@code AcaoSistema}. Se a situação viesse
  * num {@code PUT} genérico, quem pudesse editar o cadastro poderia concluir qualquer solicitação —
  * a máquina viraria sugestão e a autorização por transição, ficção.
  *
- * <p>As transições permitidas vivem <b>aqui</b>, e não espalhadas em {@code if} pelo service: uma
+ * <p>
+ * As transições permitidas vivem <b>aqui</b>, e não espalhadas em {@code if} pelo service: uma
  * transição nova é uma linha nesta tabela, e o teste que percorre o enum a cobre sem alteração.
  *
  * <pre>
@@ -27,19 +29,19 @@ import java.util.Set;
 public enum SituacaoSolicitacao {
 
     /** Recém-criada, ainda editável e invisível para quem executa. */
-    RASCUNHO( "Rascunho" ),
+    RASCUNHO("Rascunho"),
 
     /** Publicada, aguardando quem a assuma. */
-    ABERTA( "Aberta" ),
+    ABERTA("Aberta"),
 
     /** Alguém assumiu a execução. É a única situação em que as etapas avançam. */
-    EM_ANDAMENTO( "Em andamento" ),
+    EM_ANDAMENTO("Em andamento"),
 
     /** Terminal. Publica o evento consumido pelo domínio {@code parceiro}. */
-    CONCLUIDA( "Concluída" ),
+    CONCLUIDA("Concluída"),
 
     /** Terminal. Exige motivo — cancelar sem dizer por quê é perda de informação. */
-    CANCELADA( "Cancelada" );
+    CANCELADA("Cancelada");
 
     private final String descricao;
 

@@ -18,12 +18,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Prova as três propriedades do bootstrap que não são visíveis em nenhum outro lugar.
  *
- * <p>Nenhuma delas é sobre "chamou o método certo": são sobre <b>ordem</b>, <b>totalidade</b> e
+ * <p>
+ * Nenhuma delas é sobre "chamou o método certo": são sobre <b>ordem</b>, <b>totalidade</b> e
  * <b>resiliência</b>, e cada uma falha em silêncio se quebrar.
  */
 class AutorizacaoBootstrapTest {
@@ -43,8 +50,8 @@ class AutorizacaoBootstrapTest {
     }
 
     @Test
-    @DisplayName( "a ordem é ações, depois compostas, depois grupos — inverter quebra num realm limpo" )
-    void ordemDosTresPassos() {
+    @DisplayName("a ordem é ações, depois compostas, depois grupos — inverter quebra num realm limpo")
+    void deveComprovarOrdemDosTresPassos_quandoExecutaOCenario() {
         bootstrap.sincronizarAutorizacao();
 
         // addComposites e mapearRoleNoGrupo resolvem a role pelo NOME e falham se ela não existir.
@@ -56,8 +63,8 @@ class AutorizacaoBootstrapTest {
     }
 
     @Test
-    @DisplayName( "toda ação do enum vira realm role — sem lista paralela" )
-    void todaAcaoViraRole() {
+    @DisplayName("toda ação do enum vira realm role — sem lista paralela")
+    void deveComprovarTodaAcaoViraRole_quandoExecutaOCenario() {
         bootstrap.sincronizarAutorizacao();
 
         var nomes = ArgumentCaptor.forClass( String.class );
@@ -71,9 +78,9 @@ class AutorizacaoBootstrapTest {
     }
 
     @Test
-    @DisplayName( "a composta ADMIN contém todas as ações, e não uma lista mantida à mão" )
-    @SuppressWarnings( "unchecked" )
-    void adminContemTudo() {
+    @DisplayName("a composta ADMIN contém todas as ações, e não uma lista mantida à mão")
+    @SuppressWarnings("unchecked")
+    void deveComprovarAdminContemTudo_quandoExecutaOCenario() {
         bootstrap.sincronizarAutorizacao();
 
         var filhos = ArgumentCaptor.forClass( Set.class );
@@ -84,8 +91,8 @@ class AutorizacaoBootstrapTest {
     }
 
     @Test
-    @DisplayName( "o administrador não ganha uma composta PERFIL_*: o grupo dele mapeia ADMIN" )
-    void administradorMapeiaAdminDiretamente() {
+    @DisplayName("o administrador não ganha uma composta PERFIL_*: o grupo dele mapeia ADMIN")
+    void deveComprovarAdministradorMapeiaAdminDiretamente_quandoExecutaOCenario() {
         bootstrap.sincronizarAutorizacao();
 
         verify( roleService, never() ).garantirComposta(
@@ -94,8 +101,8 @@ class AutorizacaoBootstrapTest {
     }
 
     @Test
-    @DisplayName( "todo perfil ganha grupo e composta mapeada" )
-    void todoPerfilGanhaGrupo() {
+    @DisplayName("todo perfil ganha grupo e composta mapeada")
+    void deveComprovarTodoPerfilGanhaGrupo_quandoExecutaOCenario() {
         bootstrap.sincronizarAutorizacao();
 
         for ( var perfil : PerfilAtuacao.values() ) {
@@ -106,8 +113,8 @@ class AutorizacaoBootstrapTest {
     }
 
     @Test
-    @DisplayName( "falha do Keycloak não derruba a aplicação — o resto continua sendo garantido" )
-    void falhaNaoPropaga() {
+    @DisplayName("falha do Keycloak não derruba a aplicação — o resto continua sendo garantido")
+    void deveComprovarFalhaNaoPropaga_quandoExecutaOCenario() {
         // Uma exceção que escape de um listener de ApplicationReadyEvent aborta o
         // SpringApplication.run. Ficar sem um perfil é ruim; não subir é pior.
         when( roleService.garantirRole( anyString(), anyString() ) )
@@ -120,8 +127,8 @@ class AutorizacaoBootstrapTest {
     }
 
     @Test
-    @DisplayName( "grupo preexistente tem a composta reconferida, não pulada" )
-    void grupoPreexistenteEhReconferido() {
+    @DisplayName("grupo preexistente tem a composta reconferida, não pulada")
+    void deveComprovarGrupoPreexistenteEhReconferido_quandoExecutaOCenario() {
         var representacao = mock( org.keycloak.representations.idm.GroupRepresentation.class );
         when( representacao.getId() ).thenReturn( "id-existente" );
         when( groupService.buscarGrupo( anyString() ) ).thenReturn( Optional.of( representacao ) );

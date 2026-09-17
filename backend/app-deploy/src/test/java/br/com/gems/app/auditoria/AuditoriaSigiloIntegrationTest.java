@@ -46,8 +46,8 @@ class AuditoriaSigiloIntegrationTest extends AbstractIntegrationTest {
     private final String sufixo = "Sigilo-" + UUID.randomUUID();
 
     @Test
-    @DisplayName( "o valor da comissão não aparece em nenhuma coluna da trilha" )
-    void valorDaComissaoNuncaEhGravadoNaTrilha() {
+    @DisplayName("o valor da comissão não aparece em nenhuma coluna da trilha")
+    void deveComprovarValorDaComissaoNuncaEhGravadoNaTrilha_quandoExecutaOCenario() {
         var parceiroId = transactionTemplate.execute( status -> criarParceiro().getId() );
 
         transactionTemplate.executeWithoutResult( status -> {
@@ -57,10 +57,10 @@ class AuditoriaSigiloIntegrationTest extends AbstractIntegrationTest {
 
         // 1. A alteração FOI registrada: o sigilo esconde o valor, não o fato.
         var camposDaAlteracao = entityManager.createQuery(
-                        "SELECT c FROM CampoAlterado c WHERE c.registroAuditoria.entidade = 'Parceiro' "
-                                + "AND c.registroAuditoria.registroAfetado = :id "
-                                + "AND c.campo = 'comissao'",
-                        br.com.gems.app.model.entity.auditoria.CampoAlterado.class )
+                "SELECT c FROM CampoAlterado c WHERE c.registroAuditoria.entidade = 'Parceiro' "
+                        + "AND c.registroAuditoria.registroAfetado = :id "
+                        + "AND c.campo = 'comissao'",
+                br.com.gems.app.model.entity.auditoria.CampoAlterado.class )
                 .setParameter( "id", parceiroId )
                 .getResultList();
 
@@ -76,9 +76,10 @@ class AuditoriaSigiloIntegrationTest extends AbstractIntegrationTest {
 
         // 2. E o número não aparece em lugar nenhum da tabela — nem neste registro, nem em outro.
         var ocorrencias = entityManager.createQuery(
-                        "SELECT COUNT(c) FROM CampoAlterado c WHERE "
-                                + "c.valorAnterior LIKE :inicial OR c.valorNovo LIKE :inicial OR "
-                                + "c.valorAnterior LIKE :nova OR c.valorNovo LIKE :nova", Long.class )
+                "SELECT COUNT(c) FROM CampoAlterado c WHERE "
+                        + "c.valorAnterior LIKE :inicial OR c.valorNovo LIKE :inicial OR "
+                        + "c.valorAnterior LIKE :nova OR c.valorNovo LIKE :nova",
+                Long.class )
                 .setParameter( "inicial", "%13.57%" )
                 .setParameter( "nova", "%24.68%" )
                 .getSingleResult();
@@ -92,7 +93,7 @@ class AuditoriaSigiloIntegrationTest extends AbstractIntegrationTest {
 
     private Parceiro criarParceiro() {
         var brasil = entityManager.createQuery(
-                        "SELECT p FROM Pais p WHERE p.nome = 'Brasil'", Pais.class )
+                "SELECT p FROM Pais p WHERE p.nome = 'Brasil'", Pais.class )
                 .getSingleResult();
 
         var pessoa = Pessoa.builder()

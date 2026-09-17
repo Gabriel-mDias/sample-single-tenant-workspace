@@ -80,7 +80,7 @@ class ParceiroServiceTest {
 
         @Test
         @DisplayName("quem tem a ação enxerga o valor na leitura")
-        void leituraComAcao() {
+        void deveComprovarLeituraComAcao_quandoExecutaOCenario() {
             comAcao( true );
             when( repository.findById( id ) ).thenReturn( Optional.of( parceiroComComissao() ) );
 
@@ -89,7 +89,7 @@ class ParceiroServiceTest {
 
         @Test
         @DisplayName("quem não tem a ação recebe null na leitura")
-        void leituraSemAcao() {
+        void deveComprovarLeituraSemAcao_quandoExecutaOCenario() {
             comAcao( false );
             when( repository.findById( id ) ).thenReturn( Optional.of( parceiroComComissao() ) );
 
@@ -98,7 +98,7 @@ class ParceiroServiceTest {
 
         @Test
         @DisplayName("a busca também apaga o valor — filtrar só no findById deixaria a listagem vazando")
-        void buscaSemAcao() {
+        void deveComprovarBuscaSemAcao_quandoExecutaOCenario() {
             comAcao( false );
             var linha = new ParceiroResponseDTO( id, "Parceiro", "12345678909", "a@b.c", "SP",
                     new BigDecimal( "12.50" ), 3 );
@@ -114,7 +114,7 @@ class ParceiroServiceTest {
 
         @Test
         @DisplayName("a gravação NÃO sobrescreve a comissão de quem não pode lê-la")
-        void gravacaoSemAcaoNaoApaga() {
+        void deveComprovarGravacaoSemAcaoNaoApaga_quandoExecutaOCenario() {
             comAcao( false );
             var existente = parceiroComComissao();
             when( repository.findById( id ) ).thenReturn( Optional.of( existente ) );
@@ -138,7 +138,7 @@ class ParceiroServiceTest {
 
         @Test
         @DisplayName("é acumulada: todas as violações saem de uma vez")
-        void acumulaViolacoes() {
+        void deveComprovarAcumulaViolacoes_quandoExecutaOCenario() {
             comAcao( true );
             var dto = new ParceiroDTO();
             dto.setNome( null );
@@ -156,7 +156,7 @@ class ParceiroServiceTest {
 
         @Test
         @DisplayName("recusa nome duplicado")
-        void recusaNomeDuplicado() {
+        void deveComprovarRecusaNomeDuplicado_quandoExecutaOCenario() {
             comAcao( true );
             when( repository.existsByNomeIgnoreCase( "Parceiro" ) ).thenReturn( true );
 
@@ -170,7 +170,7 @@ class ParceiroServiceTest {
 
     @Test
     @DisplayName("parceiro inexistente é erro de negócio, não NullPointerException")
-    void inexistenteEhErroDeNegocio() {
+    void deveComprovarInexistenteEhErroDeNegocio_quandoExecutaOCenario() {
         when( repository.findById( id ) ).thenReturn( Optional.empty() );
 
         assertThatThrownBy( () -> service.findById( id ) )

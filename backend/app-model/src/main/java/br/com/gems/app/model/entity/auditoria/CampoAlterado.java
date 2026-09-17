@@ -20,7 +20,7 @@ import java.util.UUID;
 
 /**
  * Um campo que mudou numa operação de {@link br.com.gems.app.model.enums.OperacaoAuditoria#ALTERACAO}
- *.
+ * .
  *
  * <h2>Tabela filha, e não campo JSON no pai</h2>
  * "Quem mexeu no telefone deste parceiro" é consulta previsível, e sobre JSON custaria varredura; e
@@ -43,45 +43,47 @@ import java.util.UUID;
 @Setter
 @ToString
 @Entity
-@Table( name = "CAMPO_ALTERADO", schema = "auditoria" )
+@Table(name = "CAMPO_ALTERADO", schema = "auditoria")
 public class CampoAlterado {
 
     @Id
-    @GeneratedValue( strategy = GenerationType.UUID )
-    @Column( name = "ID_CAMPO_ALTERADO" )
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "ID_CAMPO_ALTERADO")
     private UUID id;
 
     @ToString.Exclude
-    @ManyToOne( fetch = FetchType.LAZY, optional = false )
-    @JoinColumn( name = "ID_REGISTRO_AUDITORIA", nullable = false )
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "ID_REGISTRO_AUDITORIA", nullable = false)
     private RegistroAuditoria registroAuditoria;
 
-    @Column( name = "NM_CAMPO", nullable = false, length = 100 )
+    @Column(name = "NM_CAMPO", nullable = false, length = 100)
     private String campo;
 
     /**
      * Nulo quando o campo era vazio, ou quando {@code sigiloso} é verdadeiro.
      *
-     * <p><b>Sem {@code columnDefinition = "TEXT"}, de propósito.</b> Estas são as duas primeiras
+     * <p>
+     * <b>Sem {@code columnDefinition = "TEXT"}, de propósito.</b> Estas são as duas primeiras
      * colunas {@code TEXT} do projeto, e a primeira versão deste arquivo as declarava também na
      * entidade. É inerte: com {@code ddl-auto: validate} o Hibernate nunca gera DDL, e quem declara
      * o tipo é o changeset Liquibase — Princípio II. Medido: o {@code contextLoads}, que é o gate de
      * paridade JPA ↔ Liquibase, passa igual com e sem o atributo.
      *
-     * <p>Removê-lo evita cravar sintaxe de PostgreSQL dentro do {@code app-model}, num projeto
+     * <p>
+     * Removê-lo evita cravar sintaxe de PostgreSQL dentro do {@code app-model}, num projeto
      * onde {@code columnDefinition} não aparece em nenhuma outra entidade. O comprimento não é
      * limitado aqui pelo mesmo motivo: um valor anterior pode ser qualquer campo de qualquer
      * entidade auditada.
      */
-    @Column( name = "DS_VALOR_ANTERIOR" )
+    @Column(name = "DS_VALOR_ANTERIOR")
     private String valorAnterior;
 
     /** Nulo quando o campo passou a vazio, ou quando {@code sigiloso} é verdadeiro. */
-    @Column( name = "DS_VALOR_NOVO" )
+    @Column(name = "DS_VALOR_NOVO")
     private String valorNovo;
 
     /** Quando verdadeiro, os dois valores acima são nulos e a tela mostra "valor não registrado". */
-    @Column( name = "FL_SIGILOSO", nullable = false )
+    @Column(name = "FL_SIGILOSO", nullable = false)
     private boolean sigiloso;
 
 }

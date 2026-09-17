@@ -50,7 +50,8 @@ public class UsuarioKeycloakListener {
     /**
      * Provisiona a conta e a coloca no grupo do perfil.
      *
-     * <p>O identificador devolvido pelo Keycloak é gravado na instância ainda transiente do evento —
+     * <p>
+     * O identificador devolvido pelo Keycloak é gravado na instância ainda transiente do evento —
      * quem persiste é o {@code UsuarioService}, logo depois. Assim a coluna {@code CD_KEYCLOAK_ID}
      * nunca precisa aceitar nulo.
      */
@@ -76,7 +77,8 @@ public class UsuarioKeycloakListener {
     /**
      * Sincroniza dados cadastrais e filiação a grupo.
      *
-     * <p>O snapshot é lido <b>antes</b> de qualquer alteração: é ele que a compensação usa para
+     * <p>
+     * O snapshot é lido <b>antes</b> de qualquer alteração: é ele que a compensação usa para
      * devolver a conta ao estado anterior.
      */
     @EventListener
@@ -135,7 +137,8 @@ public class UsuarioKeycloakListener {
     /**
      * Move o usuário para o grupo do perfil informado, saindo de qualquer outro grupo de perfil.
      *
-     * <p>Um usuário pertence a exatamente um grupo de perfil por vez — é isso que torna a
+     * <p>
+     * Um usuário pertence a exatamente um grupo de perfil por vez — é isso que torna a
      * permissão efetiva previsível.
      */
     private void entrarNoGrupoDoPerfil( String keycloakId, PerfilAtuacao perfil ) {
@@ -176,12 +179,14 @@ public class UsuarioKeycloakListener {
     /**
      * Agenda o desfazimento para o caso de a transação terminar em rollback.
      *
-     * <p>{@code afterCompletion} é o único gancho que enxerga o desfecho real — ele roda depois do
+     * <p>
+     * {@code afterCompletion} é o único gancho que enxerga o desfecho real — ele roda depois do
      * commit ou do rollback físico. E ele <b>nunca pode lançar</b>: uma exceção ali seria engolida
      * pelo gerenciador de transação e mascararia a causa original da falha. Um órfão registrado em
      * log é um problema muito menor do que um erro invisível.
      *
-     * <p>Fora de transação não há o que compensar — é o caso dos testes que exercitam o listener
+     * <p>
+     * Fora de transação não há o que compensar — é o caso dos testes que exercitam o listener
      * isoladamente sem abrir sincronização.
      */
     private void registrarCompensacao( Runnable desfazer ) {

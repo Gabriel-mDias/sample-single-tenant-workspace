@@ -44,13 +44,14 @@ import static org.mockito.Mockito.when;
  * Cobertura da sincronização com o Keycloak e, sobretudo, da <b>compensação transacional</b> — a
  * garantia de que não sobram usuários órfãos no realm nem usuárioes sem acesso no banco.
  *
- * <p>Não sobe contexto Spring: {@code TransactionSynchronizationManager} é estático e perfeitamente
+ * <p>
+ * Não sobe contexto Spring: {@code TransactionSynchronizationManager} é estático e perfeitamente
  * pilotável à mão. {@code initSynchronization()} no {@code @BeforeEach} é o que faz
  * {@code isSynchronizationActive()} responder {@code true} sem transação real, e disparar
  * {@code afterCompletion} manualmente é o que simula commit e rollback.
  */
-@ExtendWith( MockitoExtension.class )
-@MockitoSettings( strictness = Strictness.LENIENT )
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class UsuarioKeycloakListenerTest {
 
     private static final String KEYCLOAK_ID = "kc-0001";
@@ -72,8 +73,10 @@ class UsuarioKeycloakListenerTest {
 
         when( keycloakUserService.createUser( any( CreateUserDTO.class ) ) ).thenReturn( KEYCLOAK_ID );
         when( keycloakUserService.getGrupos( KEYCLOAK_ID ) ).thenReturn( List.of() );
-        when( keycloakGroupService.buscarGrupo( "OPERADOR" ) ).thenReturn( Optional.of( grupo( GRUPO_ID_OPERADOR, "OPERADOR" ) ) );
-        when( keycloakGroupService.buscarGrupo( "CONSULTA" ) ).thenReturn( Optional.of( grupo( GRUPO_ID_CONSULTA, "CONSULTA" ) ) );
+        when( keycloakGroupService.buscarGrupo( "OPERADOR" ) )
+                .thenReturn( Optional.of( grupo( GRUPO_ID_OPERADOR, "OPERADOR" ) ) );
+        when( keycloakGroupService.buscarGrupo( "CONSULTA" ) )
+                .thenReturn( Optional.of( grupo( GRUPO_ID_CONSULTA, "CONSULTA" ) ) );
     }
 
     @AfterEach
@@ -84,8 +87,8 @@ class UsuarioKeycloakListenerTest {
     }
 
     @Test
-    @DisplayName( "criação: o id do Keycloak é escrito na instância que ainda será persistida" )
-    void criacaoGravaKeycloakIdNaInstancia() {
+    @DisplayName("criação: o id do Keycloak é escrito na instância que ainda será persistida")
+    void deveComprovarCriacaoGravaKeycloakIdNaInstancia_quandoExecutaOCenario() {
         var usuario = usuarioTransiente();
 
         listener.aoCriar( eventoCriacao( usuario, PerfilAtuacao.OPERADOR ) );
@@ -95,16 +98,16 @@ class UsuarioKeycloakListenerTest {
     }
 
     @Test
-    @DisplayName( "criação: o usuário entra no grupo do seu perfil, e nenhuma role é atribuída a ele" )
-    void criacaoColocaNoGrupoDoPerfil() {
+    @DisplayName("criação: o usuário entra no grupo do seu perfil, e nenhuma role é atribuída a ele")
+    void deveComprovarCriacaoColocaNoGrupoDoPerfil_quandoExecutaOCenario() {
         listener.aoCriar( eventoCriacao( usuarioTransiente(), PerfilAtuacao.OPERADOR ) );
 
         verify( keycloakUserService ).entrarNoGrupo( KEYCLOAK_ID, GRUPO_ID_OPERADOR );
     }
 
     @Test
-    @DisplayName( "criação: rollback da transação apaga a conta criada no Keycloak" )
-    void criacaoCompensaNoRollback() {
+    @DisplayName("criação: rollback da transação apaga a conta criada no Keycloak")
+    void deveComprovarCriacaoCompensaNoRollback_quandoExecutaOCenario() {
         listener.aoCriar( eventoCriacao( usuarioTransiente(), PerfilAtuacao.OPERADOR ) );
 
         dispararDesfecho( TransactionSynchronization.STATUS_ROLLED_BACK );
@@ -113,8 +116,8 @@ class UsuarioKeycloakListenerTest {
     }
 
     @Test
-    @DisplayName( "criação: commit não dispara compensação nenhuma" )
-    void criacaoNaoCompensaNoCommit() {
+    @DisplayName("criação: commit não dispara compensação nenhuma")
+    void deveComprovarCriacaoNaoCompensaNoCommit_quandoExecutaOCenario() {
         listener.aoCriar( eventoCriacao( usuarioTransiente(), PerfilAtuacao.OPERADOR ) );
 
         dispararDesfecho( TransactionSynchronization.STATUS_COMMITTED );
@@ -123,8 +126,8 @@ class UsuarioKeycloakListenerTest {
     }
 
     @Test
-    @DisplayName( "criação: falha do Keycloak propaga, para que a transação inteira caia" )
-    void falhaDoKeycloakPropaga() {
+    @DisplayName("criação: falha do Keycloak propaga, para que a transação inteira caia")
+    void deveComprovarFalhaDoKeycloakPropaga_quandoExecutaOCenario() {
         when( keycloakUserService.createUser( any( CreateUserDTO.class ) ) )
                 .thenThrow( new SecurityException( "Falha ao criar o usuário junto a API de Autenticação." ) );
 
@@ -137,8 +140,8 @@ class UsuarioKeycloakListenerTest {
     }
 
     @Test
-    @DisplayName( "criação: grupo inexistente no realm é erro explícito, não filiação silenciosa" )
-    void grupoInexistenteFalhaExplicitamente() {
+    @DisplayName("criação: grupo inexistente no realm é erro explícito, não filiação silenciosa")
+    void deveComprovarGrupoInexistenteFalhaExplicitamente_quandoExecutaOCenario() {
         when( keycloakGroupService.buscarGrupo( "OPERADOR" ) ).thenReturn( Optional.empty() );
 
         var evento = eventoCriacao( usuarioTransiente(), PerfilAtuacao.OPERADOR );
@@ -149,8 +152,8 @@ class UsuarioKeycloakListenerTest {
     }
 
     @Test
-    @DisplayName( "atualização: trocar de perfil move o usuário de grupo" )
-    void atualizacaoTrocaDeGrupo() {
+    @DisplayName("atualização: trocar de perfil move o usuário de grupo")
+    void deveComprovarAtualizacaoTrocaDeGrupo_quandoExecutaOCenario() {
         when( keycloakUserService.getUser( KEYCLOAK_ID ) ).thenReturn( representacao() );
         when( keycloakUserService.getGrupos( KEYCLOAK_ID ) ).thenReturn( List.of( "OPERADOR" ) );
 
@@ -162,8 +165,8 @@ class UsuarioKeycloakListenerTest {
     }
 
     @Test
-    @DisplayName( "atualização: os dados cadastrais são propagados ao Keycloak" )
-    void atualizacaoPropagaDadosCadastrais() {
+    @DisplayName("atualização: os dados cadastrais são propagados ao Keycloak")
+    void deveComprovarAtualizacaoPropagaDadosCadastrais_quandoExecutaOCenario() {
         when( keycloakUserService.getUser( KEYCLOAK_ID ) ).thenReturn( representacao() );
 
         listener.aoAtualizar( new UsuarioAtualizadoEvent(
@@ -181,13 +184,13 @@ class UsuarioKeycloakListenerTest {
     }
 
     @Test
-    @DisplayName( "atualização: rollback restaura o snapshot anterior e devolve o grupo de origem" )
-    void atualizacaoCompensaNoRollback() {
+    @DisplayName("atualização: rollback restaura o snapshot anterior e devolve o grupo de origem")
+    void deveComprovarAtualizacaoCompensaNoRollback_quandoExecutaOCenario() {
         var anterior = representacao();
         when( keycloakUserService.getUser( KEYCLOAK_ID ) ).thenReturn( anterior );
         when( keycloakUserService.getGrupos( KEYCLOAK_ID ) )
-                .thenReturn( List.of( "OPERADOR" ) )   // snapshot, antes da troca
-                .thenReturn( List.of( "OPERADOR" ) )   // leitura interna da troca de grupo
+                .thenReturn( List.of( "OPERADOR" ) ) // snapshot, antes da troca
+                .thenReturn( List.of( "OPERADOR" ) ) // leitura interna da troca de grupo
                 .thenReturn( List.of( "CONSULTA" ) ); // estado no momento da compensação
 
         listener.aoAtualizar( new UsuarioAtualizadoEvent(
@@ -201,8 +204,8 @@ class UsuarioKeycloakListenerTest {
     }
 
     @Test
-    @DisplayName( "encerramento: a conta é desabilitada, nunca excluída" )
-    void desativacaoDesabilitaSemExcluir() {
+    @DisplayName("encerramento: a conta é desabilitada, nunca excluída")
+    void deveComprovarDesativacaoDesabilitaSemExcluir_quandoExecutaOCenario() {
         listener.aoDesativar( new UsuarioDesativadoEvent( usuarioPersistido() ) );
 
         verify( keycloakUserService ).disableUser( KEYCLOAK_ID );
@@ -210,8 +213,8 @@ class UsuarioKeycloakListenerTest {
     }
 
     @Test
-    @DisplayName( "encerramento: rollback reabilita a conta" )
-    void desativacaoCompensaNoRollback() {
+    @DisplayName("encerramento: rollback reabilita a conta")
+    void deveComprovarDesativacaoCompensaNoRollback_quandoExecutaOCenario() {
         listener.aoDesativar( new UsuarioDesativadoEvent( usuarioPersistido() ) );
 
         dispararDesfecho( TransactionSynchronization.STATUS_ROLLED_BACK );
@@ -220,8 +223,8 @@ class UsuarioKeycloakListenerTest {
     }
 
     @Test
-    @DisplayName( "retorno à equipe: a conta é reabilitada e recolocada no grupo, sem senha nova" )
-    void reativacaoReabilitaSemSenhaNova() {
+    @DisplayName("retorno à equipe: a conta é reabilitada e recolocada no grupo, sem senha nova")
+    void deveComprovarReativacaoReabilitaSemSenhaNova_quandoExecutaOCenario() {
         listener.aoReativar( new UsuarioReativadoEvent( usuarioPersistido(), PerfilAtuacao.CONSULTA ) );
 
         verify( keycloakUserService ).setUserEnabled( KEYCLOAK_ID, true );
@@ -230,8 +233,8 @@ class UsuarioKeycloakListenerTest {
     }
 
     @Test
-    @DisplayName( "retorno à equipe: rollback volta a desabilitar a conta" )
-    void reativacaoCompensaNoRollback() {
+    @DisplayName("retorno à equipe: rollback volta a desabilitar a conta")
+    void deveComprovarReativacaoCompensaNoRollback_quandoExecutaOCenario() {
         listener.aoReativar( new UsuarioReativadoEvent( usuarioPersistido(), PerfilAtuacao.CONSULTA ) );
 
         dispararDesfecho( TransactionSynchronization.STATUS_ROLLED_BACK );
@@ -240,8 +243,8 @@ class UsuarioKeycloakListenerTest {
     }
 
     @Test
-    @DisplayName( "falha DENTRO da compensação é registrada e engolida — afterCompletion nunca lança" )
-    void falhaNaCompensacaoNaoPropaga() {
+    @DisplayName("falha DENTRO da compensação é registrada e engolida — afterCompletion nunca lança")
+    void deveComprovarFalhaNaCompensacaoNaoPropaga_quandoExecutaOCenario() {
         doThrow( new IllegalStateException( "Keycloak fora do ar" ) )
                 .when( keycloakUserService ).deleteUser( KEYCLOAK_ID );
 
@@ -252,8 +255,8 @@ class UsuarioKeycloakListenerTest {
     }
 
     @Test
-    @DisplayName( "sem transação ativa não há compensação a registrar, e nada quebra" )
-    void semTransacaoAtivaNaoRegistraCompensacao() {
+    @DisplayName("sem transação ativa não há compensação a registrar, e nada quebra")
+    void deveComprovarSemTransacaoAtivaNaoRegistraCompensacao_quandoExecutaOCenario() {
         TransactionSynchronizationManager.clearSynchronization();
 
         listener.aoCriar( eventoCriacao( usuarioTransiente(), PerfilAtuacao.OPERADOR ) );

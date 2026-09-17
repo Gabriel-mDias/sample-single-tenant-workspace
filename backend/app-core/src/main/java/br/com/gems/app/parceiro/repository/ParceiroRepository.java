@@ -28,7 +28,7 @@ import java.util.UUID;
 public interface ParceiroRepository extends JpaRepository<Parceiro, UUID>, BaseCustomJpaRepository<Parceiro> {
 
     @Override
-    @EntityGraph( value = "parceiro-entity-graph" )
+    @EntityGraph(value = "parceiro-entity-graph")
     Optional<Parceiro> findById( UUID id );
 
     /**
@@ -90,7 +90,8 @@ public interface ParceiroRepository extends JpaRepository<Parceiro, UUID>, BaseC
      * mas de forma <b>literal</b> — pega cada {@code Sort.Order#getProperty()} e concatena direto em
      * {@code "ORDER BY <property> <DIRECTION>"}, validando só com uma regex anti-injeção.
      *
-     * <p><b>Ele não traduz</b> nomes de propriedade do DTO de projeção para os aliases HQL desta
+     * <p>
+     * <b>Ele não traduz</b> nomes de propriedade do DTO de projeção para os aliases HQL desta
      * query. Se o {@code Pageable} chegar com {@code "cpf"} ou {@code "estadoSigla"} sem tradução, o
      * HQL gerado referencia identificadores que não existem no escopo do FROM/JOIN e a query quebra
      * em runtime. Por isso a tradução acontece aqui, antes de delegar: propriedade reconhecida vira

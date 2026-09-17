@@ -11,7 +11,8 @@ import org.springframework.transaction.event.TransactionalEventListener;
 /**
  * A outra ponta da fronteira do Princípio I.
  *
- * <p>O domínio {@code solicitacao} publicou que algo aconteceu; quem decide o que fazer com isso é
+ * <p>
+ * O domínio {@code solicitacao} publicou que algo aconteceu; quem decide o que fazer com isso é
  * <b>este</b> domínio, aqui, junto do dado que ele altera. O {@code SolicitacaoService} não conhece
  * o {@code ParceiroService}, e o contrário também vale.
  *
@@ -25,7 +26,8 @@ import org.springframework.transaction.event.TransactionalEventListener;
  * {@code AFTER_COMMIT} haveria uma janela em que a solicitação está concluída e o contador não subiu,
  * e uma falha nessa janela deixaria os dois permanentemente divergentes — sem nada que reconciliasse.
  *
- * <p>⚠️ A entrega é <b>em memória</b>: não há registro persistido de publicações. Uma queda do
+ * <p>
+ * ⚠️ A entrega é <b>em memória</b>: não há registro persistido de publicações. Uma queda do
  * processo entre a publicação e este método perde o evento. É aceitável aqui porque o contador é
  * recalculável a partir das solicitações; não seria, se o efeito fosse irreversível.
  */
@@ -36,7 +38,7 @@ public class SolicitacaoConcluidaListener {
 
     private final ParceiroRepository parceiroRepository;
 
-    @TransactionalEventListener( phase = TransactionPhase.BEFORE_COMMIT )
+    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     public void aoConcluirSolicitacao( SolicitacaoConcluidaEvent evento ) {
         parceiroRepository.findById( evento.parceiroId() ).ifPresentOrElse(
                 parceiro -> {
@@ -47,9 +49,8 @@ public class SolicitacaoConcluidaListener {
                 // contador dele deixou de importar. Registrar é o que permite descobrir depois que
                 // isso acontece com frequência, se acontecer.
                 () -> log.warn( "Solicitação {} concluída para parceiro {} que já não está ativo; "
-                                + "contador não atualizado.",
-                        evento.solicitacaoId(), evento.parceiroId() )
-        );
+                        + "contador não atualizado.",
+                        evento.solicitacaoId(), evento.parceiroId() ) );
     }
 
 }

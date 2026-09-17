@@ -27,12 +27,14 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Varredura de cobertura: todo endpoint de todo {@code @RestController} do sistema precisa declarar
  * {@code @PreAuthorize} — direto, ou por meio de {@code @PublicEndpoint} quando não exigir ação.
  *
- * <p><b>Por que este teste existe.</b> Sem ele, a única falha silenciosa possível nesta rodada é uma
+ * <p>
+ * <b>Por que este teste existe.</b> Sem ele, a única falha silenciosa possível nesta rodada é uma
  * anotação esquecida: o endpoint não quebra em lugar nenhum, apenas cai em
  * {@code anyRequest().authenticated()} do {@code SecurityConfig} e fica aberto a qualquer autenticado,
  * sem que nenhum teste de negócio o note (FR-015).
  *
- * <p><b>Não há lista de isenção por classe.</b> {@code LocalidadeController} e {@code CepController}
+ * <p>
+ * <b>Não há lista de isenção por classe.</b> {@code LocalidadeController} e {@code CepController}
  * são dado de referência consumido por todo formulário do sistema, mas ainda assim carregam
  * {@code @PreAuthorize("isAuthenticated()")} em cada método — então nada precisa ser isento: exigir a
  * anotação em <b>todo</b> método mapeado é mais simples de manter do que uma lista que precisaria ser
@@ -46,16 +48,18 @@ import static org.assertj.core.api.Assertions.assertThat;
  * controllers vêm de <b>jar de terceiro</b>, e não há como acrescentar {@code @PreAuthorize} a eles
  * sem forkar a biblioteca.
  *
- * <p>Eles não estão desprotegidos — são tratados por <b>regra de caminho</b> no {@code SecurityConfig},
+ * <p>
+ * Eles não estão desprotegidos — são tratados por <b>regra de caminho</b> no {@code SecurityConfig},
  * que é o único lugar de onde se pode alcançá-los:
  * <ul>
- *   <li>{@code /api/aws/s3/**} tem {@code denyAll()}, e quem prova isso é o
- *       {@code S3EndpointsSecurityIntegrationTest} — com 403 verificado nos três endpoints;</li>
- *   <li>{@code /v3/api-docs/**} e {@code /swagger-ui/**} são deliberadamente públicos, declarados
- *       entre os padrões fixos de {@code getPublicEndpoints()}.</li>
+ * <li>{@code /api/aws/s3/**} tem {@code denyAll()}, e quem prova isso é o
+ * {@code S3EndpointsSecurityIntegrationTest} — com 403 verificado nos três endpoints;</li>
+ * <li>{@code /v3/api-docs/**} e {@code /swagger-ui/**} são deliberadamente públicos, declarados
+ * entre os padrões fixos de {@code getPublicEndpoints()}.</li>
  * </ul>
  *
- * <p>Restringir ao pacote {@code br.com.gems.app} mantém o teste respondendo à pergunta que ele
+ * <p>
+ * Restringir ao pacote {@code br.com.gems.app} mantém o teste respondendo à pergunta que ele
  * consegue responder — "algum endpoint <b>nosso</b> ficou sem regra?" —, em vez de exigir de terceiros
  * uma anotação que eles nunca terão e que só produziria uma lista de exceções crescendo a cada
  * dependência nova.
@@ -73,12 +77,11 @@ class CoberturaPreAuthorizeTest extends AbstractIntegrationTest {
 
     private static final List<Class<? extends Annotation>> ANOTACOES_DE_MAPEAMENTO = List.of(
             GetMapping.class, PostMapping.class, PutMapping.class, DeleteMapping.class,
-            PatchMapping.class, RequestMapping.class
-    );
+            PatchMapping.class, RequestMapping.class );
 
     @Test
-    @DisplayName( "todo método mapeado de todo @RestController tem @PreAuthorize, salvo @PublicEndpoint" )
-    void todoEndpointTemPreAuthorizeOuEhPublico() {
+    @DisplayName("todo método mapeado de todo @RestController tem @PreAuthorize, salvo @PublicEndpoint")
+    void deveComprovarTodoEndpointTemPreAuthorizeOuEhPublico_quandoExecutaOCenario() {
         var semAnotacao = new ArrayList<String>();
 
         for ( var bean : context.getBeansWithAnnotation( RestController.class ).values() ) {
@@ -113,8 +116,8 @@ class CoberturaPreAuthorizeTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @DisplayName( "a varredura de fato encontra os 13 controllers do projeto — senão ela passaria vazia" )
-    void aVarreduraNaoPassaVazia() {
+    @DisplayName("a varredura de fato encontra os 13 controllers do projeto — senão ela passaria vazia")
+    void deveComprovarAVarreduraNaoPassaVazia_quandoExecutaOCenario() {
         var controllersDoProjeto = context.getBeansWithAnnotation( RestController.class ).values()
                 .stream()
                 .map( AopUtils::getTargetClass )

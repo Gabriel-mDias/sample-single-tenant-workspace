@@ -138,7 +138,6 @@
 				<artifactId>spotless-maven-plugin</artifactId>
 				<version>3.10.2</version>
 				<configuration>
-                    <ratchetFrom>411156d</ratchetFrom>
 					<java>
 						<includes>
 							<include>src/main/java/**/*.java</include>

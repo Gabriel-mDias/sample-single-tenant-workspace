@@ -14,7 +14,8 @@ import java.lang.annotation.Target;
  * {@code DS_VALOR_ANTERIOR} e {@code DS_VALOR_NOVO} nulos, com {@code FL_SIGILOSO} verdadeiro. A tela
  * mostra "valor não registrado".
  *
- * <p>Ela <b>não</b> controla quem enxerga o campo na API: isso continua sendo trabalho do serviço,
+ * <p>
+ * Ela <b>não</b> controla quem enxerga o campo na API: isso continua sendo trabalho do serviço,
  * que consulta {@code UsuarioAutenticadoService.possuiAcao()} e omite o valor na leitura e na
  * gravação. As duas coisas são complementares, e é por isso que esta anotação existe.
  *
@@ -24,7 +25,8 @@ import java.lang.annotation.Target;
  * para abri-la. A anotação viaja junto do campo — some com ele, é renomeada com ele, e aparece na
  * revisão do mesmo diff.
  *
- * <p>É a mesma lição que o projeto pagou com o {@code routes-coverage.spec.ts}, que enumerava as
+ * <p>
+ * É a mesma lição que o projeto pagou com o {@code routes-coverage.spec.ts}, que enumerava as
  * tabelas de rota à mão e ignorou uma feature inteira por ela nunca ter entrado na lista.
  *
  * <h2>Por que o valor não é gravado nem cifrado</h2>
@@ -35,7 +37,7 @@ import java.lang.annotation.Target;
  * @see br.com.gems.app.model.entity.auditoria.CampoAlterado
  */
 @Documented
-@Retention( RetentionPolicy.RUNTIME )
-@Target( ElementType.FIELD )
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.FIELD)
 public @interface CampoSigiloso {
 }

@@ -23,7 +23,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 /**
- * O mecanismo da trilha de auditoria (o requisito a o requisito). 
+ * O mecanismo da trilha de auditoria (o requisito a o requisito).
  *
  * <h2>Nenhum serviço de domínio o chama — e esse é o requisito</h2>
  * O requisito exige que o registro seja produzido pela camada de persistência, nunca por uma linha
@@ -37,19 +37,20 @@ import java.util.UUID;
  * dependência — declarar a classe por propriedade de configuração daria uma instância criada pelo
  * Hibernate, sem acesso a nada.
  *
- * <p><b>Consequência: a instância é única e compartilhada por todas as threads.</b> Por isso o
+ * <p>
+ * <b>Consequência: a instância é única e compartilhada por todas as threads.</b> Por isso o
  * acúmulo é {@link ThreadLocal} — e por isso ele é sempre limpo em {@code afterCompletion}, inclusive
  * quando a transação falha. Um {@code ThreadLocal} não limpo em pool de threads vaza dado de uma
  * requisição para a seguinte, que aqui significaria atribuir a alteração de alguém a outra pessoa.
  *
  * <h2>As três armadilhas, e o que fecha cada uma</h2>
  * <ol>
- *   <li><b>Recursão.</b> Gravar a trilha é, ele próprio, um {@code persist}. Sem guarda, a trilha
- *       geraria trilha da trilha, sem fim. Fecha em {@link #deveAuditar(Object)}, com teste.</li>
- *   <li><b>Transação.</b> A gravação acontece no {@code beforeCommit}, ainda dentro da transação do
- *       dado. É o rollback do dado é rollback da trilha, e há teste que o prova.</li>
- *   <li><b>Estado anterior.</b> Só o {@code onFlushDirty} do Hibernate entrega
- *       {@code previousState}. Fora dele, "o que mudou" é uma pergunta sem resposta barata.</li>
+ * <li><b>Recursão.</b> Gravar a trilha é, ele próprio, um {@code persist}. Sem guarda, a trilha
+ * geraria trilha da trilha, sem fim. Fecha em {@link #deveAuditar(Object)}, com teste.</li>
+ * <li><b>Transação.</b> A gravação acontece no {@code beforeCommit}, ainda dentro da transação do
+ * dado. É o rollback do dado é rollback da trilha, e há teste que o prova.</li>
+ * <li><b>Estado anterior.</b> Só o {@code onFlushDirty} do Hibernate entrega
+ * {@code previousState}. Fora dele, "o que mudou" é uma pergunta sem resposta barata.</li>
  * </ol>
  *
  * <h2>O que NÃO é auditado, e por quê</h2>
@@ -76,8 +77,7 @@ public class AuditoriaInterceptor implements Interceptor, HibernatePropertiesCus
     /** O autor de toda operação sem JWT no contexto: o bootstrap, um teste, uma rotina. */
     private static final String AUTOR_SISTEMA = "sistema";
 
-    private static final ThreadLocal<List<RegistroPendente>> PENDENTES =
-            ThreadLocal.withInitial( ArrayList::new );
+    private static final ThreadLocal<List<RegistroPendente>> PENDENTES = ThreadLocal.withInitial( ArrayList::new );
 
     private final ObjectProvider<AuditoriaGravador> gravador;
     private final ObjectProvider<UsuarioAutenticadoService> usuarioAutenticado;
@@ -88,7 +88,7 @@ public class AuditoriaInterceptor implements Interceptor, HibernatePropertiesCus
      * {@code EntityManager} — de forma ansiosa fecharia um ciclo na inicialização do contexto.
      */
     public AuditoriaInterceptor( ObjectProvider<AuditoriaGravador> gravador,
-                                 ObjectProvider<UsuarioAutenticadoService> usuarioAutenticado ) {
+            ObjectProvider<UsuarioAutenticadoService> usuarioAutenticado ) {
         this.gravador = gravador;
         this.usuarioAutenticado = usuarioAutenticado;
     }
@@ -101,18 +101,21 @@ public class AuditoriaInterceptor implements Interceptor, HibernatePropertiesCus
     /**
      * <b>A gravação acontece aqui, e o caminho até esta escolha custou um teste vermelho.</b>
      *
-     * <p>A primeira versão gravava no {@code beforeCommit} de uma {@code TransactionSynchronization}
+     * <p>
+     * A primeira versão gravava no {@code beforeCommit} de uma {@code TransactionSynchronization}
      * do Spring. Funcionava para inserção e exclusão, e <b>perdia toda alteração</b>. A razão é de
      * ordem de execução: {@code onPersist} e {@code onRemove} disparam no instante da chamada, ainda
      * no corpo da transação, mas {@code onFlushDirty} só dispara no <b>flush</b> — e o flush do
      * commit acontece <i>depois</i> de o Spring já ter disparado o {@code beforeCommit}. Numa
      * transação que apenas altera, o acúmulo nascia tarde demais e era descartado.
      *
-     * <p>Registrar a sincronização em {@code afterTransactionBegin} também não resolve: medido, o
+     * <p>
+     * Registrar a sincronização em {@code afterTransactionBegin} também não resolve: medido, o
      * {@code TransactionSynchronizationManager} ainda <b>não está ativo</b> naquele ponto, porque o
      * {@code JpaTransactionManager} inicia a transação antes de preparar a sincronização.
      *
-     * <p>Este callback do próprio Hibernate é o ponto certo: ele roda <b>depois</b> do flush final e
+     * <p>
+     * Este callback do próprio Hibernate é o ponto certo: ele roda <b>depois</b> do flush final e
      * <b>antes</b> do commit físico, ainda dentro da transação. É onde o Hibernate Envers grava a
      * trilha dele, pelos mesmos motivos. E é o que faz o requisito valer sem depender de nada do Spring.
      */
@@ -143,7 +146,7 @@ public class AuditoriaInterceptor implements Interceptor, HibernatePropertiesCus
 
     @Override
     public boolean onPersist( Object entity, Object id, Object[] state, String[] propertyNames,
-                              Type[] types ) {
+            Type[] types ) {
         if ( deveAuditar( entity ) ) {
             acumular( entity, id, OperacaoAuditoria.INSERCAO, List.of() );
         }
@@ -154,7 +157,7 @@ public class AuditoriaInterceptor implements Interceptor, HibernatePropertiesCus
 
     @Override
     public boolean onFlushDirty( Object entity, Object id, Object[] currentState,
-                                 Object[] previousState, String[] propertyNames, Type[] types ) {
+            Object[] previousState, String[] propertyNames, Type[] types ) {
         if ( !deveAuditar( entity ) || previousState == null ) {
             return false;
         }
@@ -172,7 +175,7 @@ public class AuditoriaInterceptor implements Interceptor, HibernatePropertiesCus
 
     @Override
     public void onRemove( Object entity, Object id, Object[] state, String[] propertyNames,
-                          Type[] types ) {
+            Type[] types ) {
         if ( deveAuditar( entity ) ) {
             // Chega aqui inclusive na exclusão LÓGICA: o @SQLDelete troca o SQL da operação, não a
             // natureza dela — para o Hibernate continua sendo uma remoção.
@@ -186,13 +189,15 @@ public class AuditoriaInterceptor implements Interceptor, HibernatePropertiesCus
      * <b>Entidade de negócio é toda subclasse de {@link EntidadeAuditavel}</b>, e essa fronteira
      * resolve três coisas de uma vez.
      *
-     * <p>Primeiro, dá ao requisito uma fronteira que não é lista escrita à mão: uma entidade nova nasce
+     * <p>
+     * Primeiro, dá ao requisito uma fronteira que não é lista escrita à mão: uma entidade nova nasce
      * auditada por estender a base, que é o que ela já faz por convenção. Segundo, exclui
      * automaticamente {@code Pais} e {@code Estado} — as duas tabelas puramente referenciais, que o
      * Princípio II já isenta e cuja carga por seed encheria a trilha de ruído. Terceiro, exclui a
      * própria trilha, que deliberadamente não estende a base.
      *
-     * <p><b>Visibilidade de pacote, e não privada, de propósito.</b> A guarda de recursão precisa de
+     * <p>
+     * <b>Visibilidade de pacote, e não privada, de propósito.</b> A guarda de recursão precisa de
      * um teste que a exercite <i>diretamente</i>. O teste de integração que conta "trilha da trilha"
      * não serve sozinho: uma prova por mutação mostrou que ele passa mesmo com esta guarda desligada,
      * porque o gravador consome uma cópia do acúmulo numa passada só, e os registros da trilha
@@ -200,7 +205,7 @@ public class AuditoriaInterceptor implements Interceptor, HibernatePropertiesCus
      * casos não é rede — é a mesma lição do {@code routes-coverage.spec.ts}.
      */
     boolean deveAuditar( Object entity ) {
-        if ( !( entity instanceof EntidadeAuditavel ) ) {
+        if ( !(entity instanceof EntidadeAuditavel) ) {
             return false;
         }
 
@@ -208,23 +213,23 @@ public class AuditoriaInterceptor implements Interceptor, HibernatePropertiesCus
     }
 
     private List<RegistroPendente.CampoPendente> camposAlterados( Object entity,
-                                                                  Object[] currentState,
-                                                                  Object[] previousState,
-                                                                  String[] propertyNames,
-                                                                  Type[] types ) {
+            Object[] currentState,
+            Object[] previousState,
+            String[] propertyNames,
+            Type[] types ) {
         var campos = new ArrayList<RegistroPendente.CampoPendente>();
 
         for ( int i = 0; i < propertyNames.length; i++ ) {
-            if ( types[ i ].isAssociationType() || Objects.equals( previousState[ i ], currentState[ i ] ) ) {
+            if ( types[i].isAssociationType() || Objects.equals( previousState[i], currentState[i] ) ) {
                 continue;
             }
 
-            var sigiloso = ehSigiloso( Hibernate.getClass( entity ), propertyNames[ i ] );
+            var sigiloso = ehSigiloso( Hibernate.getClass( entity ), propertyNames[i] );
 
             campos.add( new RegistroPendente.CampoPendente(
-                    propertyNames[ i ],
-                    sigiloso ? null : texto( previousState[ i ] ),
-                    sigiloso ? null : texto( currentState[ i ] ),
+                    propertyNames[i],
+                    sigiloso ? null : texto( previousState[i] ),
+                    sigiloso ? null : texto( currentState[i] ),
                     sigiloso ) );
         }
 
@@ -255,8 +260,8 @@ public class AuditoriaInterceptor implements Interceptor, HibernatePropertiesCus
     // ------------------------------------------------------------- acumulação
 
     private void acumular( Object entity, Object id, OperacaoAuditoria operacao,
-                           List<RegistroPendente.CampoPendente> campos ) {
-        if ( !( id instanceof UUID identificador ) ) {
+            List<RegistroPendente.CampoPendente> campos ) {
+        if ( !(id instanceof UUID identificador) ) {
             // Toda entidade do projeto tem chave UUID. Um id de outro tipo significa mapeamento que
             // esta trilha não sabe endereçar, e registrar lixo é pior que não registrar.
             return;

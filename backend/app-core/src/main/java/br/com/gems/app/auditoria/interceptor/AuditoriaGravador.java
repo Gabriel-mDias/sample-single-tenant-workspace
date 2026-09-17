@@ -33,7 +33,8 @@ public class AuditoriaGravador {
     /**
      * Força a detecção de sujeira antes de a trilha ser lida.
      *
-     * <p>Sem ele, uma transação que apenas <b>altera</b> uma entidade pode não ter passado por flush
+     * <p>
+     * Sem ele, uma transação que apenas <b>altera</b> uma entidade pode não ter passado por flush
      * nenhum até o {@code beforeTransactionCompletion}, e o {@code onFlushDirty} — o único callback
      * que entrega o estado anterior — ainda não teria disparado. Em transação sem nada sujo é uma
      * operação sem custo.
@@ -45,7 +46,8 @@ public class AuditoriaGravador {
     /**
      * Persiste tudo o que a transação acumulou.
      *
-     * <p>O {@code flush} ao final é deliberado: ele reentra no interceptador para as entidades da
+     * <p>
+     * O {@code flush} ao final é deliberado: ele reentra no interceptador para as entidades da
      * própria trilha, que são recusadas ali. Fazer isso <b>agora</b>, e não deixar para o commit, é o
      * que mantém o erro — se um dia houver um — dentro da transação, onde ele derruba a operação
      * inteira em vez de deixar dado de negócio gravado sem rastro.

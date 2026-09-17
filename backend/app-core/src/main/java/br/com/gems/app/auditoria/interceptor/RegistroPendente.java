@@ -14,16 +14,19 @@ import java.util.UUID;
  * varredura que o Hibernate está fazendo do próprio contexto de persistência, é a receita para
  * {@code ConcurrentModificationException} e para ordem de INSERT imprevisível.
  *
- * <p>Então o interceptador só <b>anota</b>, e quem grava é o {@link AuditoriaGravador}, no
+ * <p>
+ * Então o interceptador só <b>anota</b>, e quem grava é o {@link AuditoriaGravador}, no
  * {@code beforeCommit} — que ainda está dentro da transação, e é o que faz o requisito valer: se o dado
  * sofrer rollback, a trilha vai junto.
  *
- * <p>O autor, a correlação e o instante são capturados <b>no momento da operação</b>, não no da
+ * <p>
+ * O autor, a correlação e o instante são capturados <b>no momento da operação</b>, não no da
  * gravação. Os dois momentos estão na mesma thread e quase sempre no mesmo instante, mas capturar
  * cedo é o que mantém o registro fiel se algo entre um e outro mexer no contexto de segurança.
  *
- * @param campos vazia em {@code INSERCAO} e {@code EXCLUSAO} — o requisito pede a lista apenas na
- *               alteração.
+ * @param campos
+ *            vazia em {@code INSERCAO} e {@code EXCLUSAO} — o requisito pede a lista apenas na
+ *            alteração.
  */
 record RegistroPendente(
         String entidade,
@@ -33,10 +36,9 @@ record RegistroPendente(
         String autorNome,
         String correlacaoId,
         LocalDateTime dataOperacao,
-        List<CampoPendente> campos
-) {
+        List<CampoPendente> campos) {
 
     /** Um campo que mudou. Valores nulos quando {@code sigiloso} — é exigência da trilha. */
-    record CampoPendente( String campo, String valorAnterior, String valorNovo, boolean sigiloso ) {
+    record CampoPendente(String campo, String valorAnterior, String valorNovo, boolean sigiloso) {
     }
 }

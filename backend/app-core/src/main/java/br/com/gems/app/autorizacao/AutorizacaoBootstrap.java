@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
  * Converge o modelo de autorização no Keycloak, a cada subida da aplicação.
  *
  * <h2>O modelo, em uma figura</h2>
+ *
  * <pre>
  *   USUÁRIO ──entra no──▶ GRUPO OPERADOR ──mapeia──▶ PERFIL_OPERADOR (composta)
  *                                                          │
@@ -28,14 +29,15 @@ import java.util.stream.Collectors;
  *                                                          ├─▶ INSERIR_SOLICITACAO
  *                                                          └─▶ CONCLUIR_SOLICITACAO
  * </pre>
+ *
  * O usuário <b>nunca</b> recebe role diretamente. O Keycloak expande a composta ao emitir o token, e
  * {@code hasRole('CONSULTAR_PARCEIRO')} enxerga cada ação a partir de <b>um</b> mapeamento.
  *
  * <h2>A ordem dos três passos é obrigatória</h2>
  * <ol>
- *   <li>{@link #garantirAcoes()} — cria as realm roles que faltarem;</li>
- *   <li>{@link #garantirCompostas()} — cria/atualiza {@code PERFIL_*} e {@code ADMIN};</li>
- *   <li>{@link #garantirGrupos()} — mapeia a composta no grupo.</li>
+ * <li>{@link #garantirAcoes()} — cria as realm roles que faltarem;</li>
+ * <li>{@link #garantirCompostas()} — cria/atualiza {@code PERFIL_*} e {@code ADMIN};</li>
+ * <li>{@link #garantirGrupos()} — mapeia a composta no grupo.</li>
  * </ol>
  * Não é estilo: {@code mapearRoleNoGrupo} e {@code addComposites} resolvem a role pelo nome, com
  * {@code realm.roles().get(nome).toRepresentation()}, que <b>falha se ela não existir</b>. Inverter a
@@ -61,22 +63,18 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@ConditionalOnProperty(
-        name = "app.security.keycloak.bootstrap-grupos.enabled",
-        havingValue = "true",
-        matchIfMissing = true )
+@ConditionalOnProperty(name = "app.security.keycloak.bootstrap-grupos.enabled", havingValue = "true", matchIfMissing = true)
 public class AutorizacaoBootstrap {
 
     /** Prefixo das roles compostas de perfil. O administrador é a exceção: usa {@code ADMIN}. */
     private static final String PREFIXO_COMPOSTA = "PERFIL_";
 
-    private static final String DESCRICAO_ADMIN =
-            "Composta de todas as ações do sistema. Mapeada no grupo do administrador.";
+    private static final String DESCRICAO_ADMIN = "Composta de todas as ações do sistema. Mapeada no grupo do administrador.";
 
     private final KeycloakRoleService keycloakRoleService;
     private final KeycloakGroupService keycloakGroupService;
 
-    @EventListener( ApplicationReadyEvent.class )
+    @EventListener(ApplicationReadyEvent.class)
     public void sincronizarAutorizacao() {
         var acoesCriadas = garantirAcoes();
         var compostasAjustadas = garantirCompostas();
@@ -89,12 +87,12 @@ public class AutorizacaoBootstrap {
 
         if ( gruposGarantidos == totalPerfis ) {
             log.info( "Autorização sincronizada no Keycloak: {} ações no catálogo ({} criadas agora), "
-                            + "{} filhos acrescentados às compostas, {}/{} grupos mapeados.",
+                    + "{} filhos acrescentados às compostas, {}/{} grupos mapeados.",
                     AcaoSistema.values().length, acoesCriadas, compostasAjustadas,
                     gruposGarantidos, totalPerfis );
         } else {
             log.warn( "Autorização sincronizada PARCIALMENTE: {}/{} grupos mapeados. Usuários dos "
-                            + "perfis restantes podem logar sem permissão alguma.",
+                    + "perfis restantes podem logar sem permissão alguma.",
                     gruposGarantidos, totalPerfis );
         }
     }
@@ -126,7 +124,8 @@ public class AutorizacaoBootstrap {
     /**
      * Passo 2 — cria ou atualiza {@code ADMIN} e as compostas {@code PERFIL_*}.
      *
-     * <p>{@code ADMIN} recebe <b>todas</b> as ações do enum, não uma lista mantida à mão: é o que faz
+     * <p>
+     * {@code ADMIN} recebe <b>todas</b> as ações do enum, não uma lista mantida à mão: é o que faz
      * o administrador alcançar uma ação nova sem que ninguém precise lembrar de concedê-la.
      *
      * @return quantos filhos foram acrescentados no total.
@@ -182,7 +181,7 @@ public class AutorizacaoBootstrap {
                 // Exception genérica e por perfil, de propósito: um grupo problemático não pode
                 // impedir os outros, e nada aqui pode escapar.
                 log.error( "Falha ao garantir o grupo '{}' no Keycloak. A aplicação segue no ar; "
-                                + "crie-o manualmente ou reinicie com o Keycloak disponível.",
+                        + "crie-o manualmente ou reinicie com o Keycloak disponível.",
                         perfil.getNomeGrupo(), e );
             }
         }

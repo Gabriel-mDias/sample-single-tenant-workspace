@@ -8,7 +8,8 @@ import lombok.Setter;
 /**
  * Um campo que mudou, dentro do histórico de um registro de auditoria.
  *
- * <p>{@code valorAnterior} e {@code valorNovo} vêm nulos quando {@code sigiloso} é verdadeiro
+ * <p>
+ * {@code valorAnterior} e {@code valorNovo} vêm nulos quando {@code sigiloso} é verdadeiro
  * — a tela mostra "valor não registrado".
  */
 @Getter

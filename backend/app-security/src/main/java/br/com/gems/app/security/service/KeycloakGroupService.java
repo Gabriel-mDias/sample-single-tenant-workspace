@@ -15,14 +15,16 @@ import java.util.Optional;
 /**
  * Operações de grupo no realm do Keycloak.
  *
- * <p>Grupos são o eixo de permissão do sistema: cada perfil de atuação é um grupo, e é o grupo que
+ * <p>
+ * Grupos são o eixo de permissão do sistema: cada perfil de atuação é um grupo, e é o grupo que
  * carrega a realm role. Essa role é a <b>composta</b> do perfil
  * ({@code PERFIL_OPERADOR}, {@code PERFIL_CONSULTA}, …), que por sua vez contém as ações daquele
  * cargo. Nenhuma role é atribuída diretamente a usuário — o
  * o usuário apenas entra no grupo e herda o que ele carrega. Isso mantém a regra "perfil X concede
  * permissão Y" declarada no provedor de identidade, e não codificada em Java.
  *
- * <p>Este serviço é deliberadamente primitivo: ele não conhece {@code PerfilAtuacao} (que vive em
+ * <p>
+ * Este serviço é deliberadamente primitivo: ele não conhece {@code PerfilAtuacao} (que vive em
  * {@code app-model}, módulo do qual {@code app-security} não depende). Quem casa as duas metades
  * é o bootstrap, em {@code app-core}.
  */
@@ -39,7 +41,8 @@ public class KeycloakGroupService {
     /**
      * Procura um grupo de primeiro nível pelo nome exato.
      *
-     * @param nome nome do grupo no realm.
+     * @param nome
+     *            nome do grupo no realm.
      * @return o grupo, ou {@code Optional.empty()} se não existir.
      */
     public Optional<GroupRepresentation> buscarGrupo( String nome ) {
@@ -58,10 +61,12 @@ public class KeycloakGroupService {
     /**
      * Cria um grupo de primeiro nível.
      *
-     * <p>Trata 409 como sucesso: duas instâncias subindo em paralelo tentariam criar o mesmo grupo,
+     * <p>
+     * Trata 409 como sucesso: duas instâncias subindo em paralelo tentariam criar o mesmo grupo,
      * e "já existe" é exatamente o estado desejado.
      *
-     * @param nome nome do grupo a criar.
+     * @param nome
+     *            nome do grupo a criar.
      * @return o identificador do grupo — recém-criado ou já existente.
      */
     public String criarGrupo( String nome ) {
@@ -73,12 +78,14 @@ public class KeycloakGroupService {
                 return buscarGrupo( nome )
                         .map( GroupRepresentation::getId )
                         .orElseThrow( () -> new SecurityException(
-                                "O grupo '" + nome + "' acusou conflito na criação mas não foi encontrado no realm." ) );
+                                "O grupo '" + nome
+                                        + "' acusou conflito na criação mas não foi encontrado no realm." ) );
             }
 
             if ( STATUS_SUCESSO.stream().noneMatch( status -> status.equals( response.getStatus() ) ) ) {
                 throw new SecurityException(
-                        "Falha ao criar o grupo '" + nome + "' junto a API de Autenticação. Status: " + response.getStatus() );
+                        "Falha ao criar o grupo '" + nome + "' junto a API de Autenticação. Status: "
+                                + response.getStatus() );
             }
 
             return CreatedResponseUtil.getCreatedId( response );
@@ -88,12 +95,15 @@ public class KeycloakGroupService {
     /**
      * Mapeia uma realm role no grupo, se ela ainda não estiver mapeada.
      *
-     * <p><b>Não remove</b> mapeamentos que já existam: um administrador pode ter concedido
+     * <p>
+     * <b>Não remove</b> mapeamentos que já existam: um administrador pode ter concedido
      * permissões extras a um grupo pelo console, e o bootstrap não pode desfazer isso a cada
      * reinício da aplicação.
      *
-     * @param groupId identificador do grupo.
-     * @param nomeRole nome da realm role (por exemplo {@code ADMIN} ou {@code USER}).
+     * @param groupId
+     *            identificador do grupo.
+     * @param nomeRole
+     *            nome da realm role (por exemplo {@code ADMIN} ou {@code USER}).
      */
     public void mapearRoleNoGrupo( String groupId, String nomeRole ) {
         var realm = keycloak.realm( keycloakProperties.getRealm() );
@@ -114,7 +124,8 @@ public class KeycloakGroupService {
     /**
      * Remove uma realm role mapeada <b>diretamente</b> no grupo.
      *
-     * <p><b>Este método é a exceção deliberada ao contrato do {@link #mapearRoleNoGrupo}</b>, que
+     * <p>
+     * <b>Este método é a exceção deliberada ao contrato do {@link #mapearRoleNoGrupo}</b>, que
      * promete nunca remover mapeamento. Ele existe para um único propósito: aposentar a role
      * uma role legada dos grupos de perfil. Sem ele, a aposentadoria seria
      * apenas nominal — {@code USER} continuaria mapeada em todo grupo, para sempre, porque nada mais
@@ -124,21 +135,26 @@ public class KeycloakGroupService {
      * O método vizinho {@link #mapearRoleNoGrupo} usa {@code listEffective()}, e a assimetria é
      * proposital — não é descuido de quem escreveu depois.
      *
-     * <p>{@code listEffective()} devolve o mapeamento <b>efetivo</b>, que <b>inclui os filhos das
+     * <p>
+     * {@code listEffective()} devolve o mapeamento <b>efetivo</b>, que <b>inclui os filhos das
      * roles compostas</b>. Isso foi medido no spike de 2026-08-26: para um grupo mapeado a uma única
      * composta de 30 ações, o mapeamento direto devolveu <b>1</b> role e o efetivo devolveu
      * <b>31</b>. Para <i>mapear</i>, o efetivo é o que se quer — não faz sentido acrescentar
      * diretamente uma role que o grupo já possui por herança.
      *
-     * <p>Para <i>remover</i>, o efetivo é a resposta errada. A API do Keycloak só remove o que está
+     * <p>
+     * Para <i>remover</i>, o efetivo é a resposta errada. A API do Keycloak só remove o que está
      * mapeado diretamente; pedir a remoção de uma role que o grupo possui apenas por herança da
      * composta não faz nada — ou pior, dá a impressão de ter funcionado. Por isso aqui se consulta
      * {@code listAll()}, o mapeamento <b>direto</b>.
      *
-     * <p>É idempotente: role não mapeada diretamente é ignorada em silêncio.
+     * <p>
+     * É idempotente: role não mapeada diretamente é ignorada em silêncio.
      *
-     * @param groupId identificador do grupo.
-     * @param nomeRole nome da realm role a remover do mapeamento direto.
+     * @param groupId
+     *            identificador do grupo.
+     * @param nomeRole
+     *            nome da realm role a remover do mapeamento direto.
      */
     public void desmapearRoleNoGrupo( String groupId, String nomeRole ) {
         var realm = keycloak.realm( keycloakProperties.getRealm() );

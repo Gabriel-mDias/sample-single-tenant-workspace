@@ -7,9 +7,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum Sexo {
 
-    MASCULINO( "Masculino" ),
-    FEMININO( "Feminino" ),
-    NAO_INFORMADO( "Não informado" );
+    MASCULINO("Masculino"), FEMININO("Feminino"), NAO_INFORMADO("Não informado");
 
     private final String descricao;
 

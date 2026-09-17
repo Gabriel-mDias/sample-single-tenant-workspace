@@ -85,7 +85,7 @@ class AutorizacaoPorAcaoIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("(a) Operador tenta excluir parceiro -> 403, e o parceiro CONTINUA existindo")
-    void operadorNaoExcluiParceiro() throws Exception {
+    void deveComprovarOperadorNaoExcluiParceiro_quandoExecutaOCenario() throws Exception {
         parceiroId = criarParceiroDeTeste();
 
         mockMvc.perform( delete( "/api/parceiros/{id}", parceiroId )
@@ -101,7 +101,7 @@ class AutorizacaoPorAcaoIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("(b) Consulta tenta cadastrar parceiro -> 403 (não possui INSERIR_PARCEIRO)")
-    void consultaNaoCadastra() throws Exception {
+    void deveComprovarConsultaNaoCadastra_quandoExecutaOCenario() throws Exception {
         mockMvc.perform( post( "/api/parceiros" )
                 .with( jwt().authorities( authoritiesDoPerfil( PerfilAtuacao.CONSULTA ) ) )
                 .contentType( MediaType.APPLICATION_JSON )
@@ -116,7 +116,7 @@ class AutorizacaoPorAcaoIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("(c) Consulta PESQUISA parceiros -> 200 (possui CONSULTAR_PARCEIRO)")
-    void consultaPesquisa() throws Exception {
+    void deveComprovarConsultaPesquisa_quandoExecutaOCenario() throws Exception {
         mockMvc.perform( post( "/api/parceiros/search" )
                 .with( jwt().authorities( authoritiesDoPerfil( PerfilAtuacao.CONSULTA ) ) )
                 .contentType( MediaType.APPLICATION_JSON )
@@ -126,7 +126,7 @@ class AutorizacaoPorAcaoIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("(d) Operador conclui solicitação -> não é 403 (possui CONCLUIR_SOLICITACAO)")
-    void operadorPodeConcluir() throws Exception {
+    void deveComprovarOperadorPodeConcluir_quandoExecutaOCenario() throws Exception {
         // Id inexistente de propósito: aqui interessa que NÃO seja 403. Um 400 de negócio prova que
         // a requisição atravessou a camada de segurança e chegou ao service — que é o ponto.
         mockMvc.perform( post( "/api/solicitacoes/{id}/concluir", UUID.randomUUID() )
@@ -136,7 +136,7 @@ class AutorizacaoPorAcaoIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("(e) Consulta tenta concluir solicitação -> 403 (transição é ação própria)")
-    void consultaNaoConclui() throws Exception {
+    void deveComprovarConsultaNaoConclui_quandoExecutaOCenario() throws Exception {
         // O núcleo do desenho: a situação não vem do corpo, e cada transição tem a sua ação. Sem
         // isso, quem pudesse editar concluiria.
         mockMvc.perform( post( "/api/solicitacoes/{id}/concluir", UUID.randomUUID() )
@@ -146,7 +146,7 @@ class AutorizacaoPorAcaoIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("(f) Token sem ação nenhuma -> 403 em tudo. O guard falha FECHADO.")
-    void tokenVazioNaoAlcancaNada() throws Exception {
+    void deveComprovarTokenVazioNaoAlcancaNada_quandoExecutaOCenario() throws Exception {
         mockMvc.perform( post( "/api/parceiros/search" )
                 .with( jwt().authorities( List.of() ) )
                 .contentType( MediaType.APPLICATION_JSON )

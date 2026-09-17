@@ -81,7 +81,7 @@ class SolicitacaoServiceTest {
 
         @Test
         @DisplayName("rascunho abre")
-        void rascunhoAbre() {
+        void deveComprovarRascunhoAbre_quandoExecutaOCenario() {
             dado( SituacaoSolicitacao.RASCUNHO );
 
             var resultado = service.abrir( id );
@@ -91,7 +91,7 @@ class SolicitacaoServiceTest {
 
         @Test
         @DisplayName("rascunho NÃO conclui direto — pular a execução é o defeito que a máquina impede")
-        void rascunhoNaoConcluiDireto() {
+        void deveComprovarRascunhoNaoConcluiDireto_quandoExecutaOCenario() {
             dado( SituacaoSolicitacao.RASCUNHO );
 
             assertThatThrownBy( () -> service.concluir( id ) )
@@ -101,7 +101,7 @@ class SolicitacaoServiceTest {
 
         @Test
         @DisplayName("solicitação concluída não volta atrás")
-        void concluidaEhTerminal() {
+        void deveComprovarConcluidaEhTerminal_quandoExecutaOCenario() {
             dado( SituacaoSolicitacao.CONCLUIDA );
 
             assertThatThrownBy( () -> service.iniciar( id ) )
@@ -110,7 +110,7 @@ class SolicitacaoServiceTest {
 
         @Test
         @DisplayName("solicitação cancelada não é reaberta")
-        void canceladaEhTerminal() {
+        void deveComprovarCanceladaEhTerminal_quandoExecutaOCenario() {
             dado( SituacaoSolicitacao.CANCELADA );
 
             assertThatThrownBy( () -> service.abrir( id ) )
@@ -124,7 +124,7 @@ class SolicitacaoServiceTest {
 
         @Test
         @DisplayName("publica o evento com o parceiro, para que o listener não precise consultar de volta")
-        void publicaEvento() {
+        void deveComprovarPublicaEvento_quandoExecutaOCenario() {
             dado( SituacaoSolicitacao.EM_ANDAMENTO );
             when( etapaRepository.existsBySolicitacaoIdAndConcluidaFalse( id ) ).thenReturn( false );
 
@@ -138,7 +138,7 @@ class SolicitacaoServiceTest {
 
         @Test
         @DisplayName("é recusada com etapa pendente, e o evento NÃO é publicado")
-        void recusaComEtapaPendente() {
+        void deveComprovarRecusaComEtapaPendente_quandoExecutaOCenario() {
             dado( SituacaoSolicitacao.EM_ANDAMENTO );
             when( etapaRepository.existsBySolicitacaoIdAndConcluidaFalse( id ) ).thenReturn( true );
 
@@ -158,7 +158,7 @@ class SolicitacaoServiceTest {
 
         @Test
         @DisplayName("exige motivo")
-        void exigeMotivo() {
+        void deveComprovarExigeMotivo_quandoExecutaOCenario() {
             assertThatThrownBy( () -> service.cancelar( id, "  " ) )
                     .isInstanceOf( BusinessException.class )
                     .hasMessageContaining( "motivo" );
@@ -166,7 +166,7 @@ class SolicitacaoServiceTest {
 
         @Test
         @DisplayName("grava o motivo informado")
-        void gravaMotivo() {
+        void deveComprovarGravaMotivo_quandoExecutaOCenario() {
             dado( SituacaoSolicitacao.ABERTA );
 
             var resultado = service.cancelar( id, "cliente desistiu" );
@@ -182,7 +182,7 @@ class SolicitacaoServiceTest {
 
         @Test
         @DisplayName("um PUT que declare CONCLUIDA não altera a situação")
-        void putIgnoraSituacao() {
+        void deveComprovarPutIgnoraSituacao_quandoExecutaOCenario() {
             dado( SituacaoSolicitacao.RASCUNHO );
 
             var dto = new br.com.gems.app.model.dto.SolicitacaoDTO();

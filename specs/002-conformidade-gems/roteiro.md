@@ -218,7 +218,7 @@ admite paralelismo interno nem checkpoint parcial.
 | 4 | `/speckit-tasks` | revisado | 79 tasks em 8 fases |
 | 5 | `/speckit-analyze` | revisado | 0 CRITICAL documental; achados incorporados |
 | 6 | **`roteiro.md`** | aprovado em 2026-09-14 | portão assinado pelo product owner |
-| 7 | `/speckit-implement` | C00–C04 verdes; próxima retomada C05 | T005–T007 revalidadas; T009–T012 e T037–T055 concluídas; T008 preservada com gate Docker pendente para C10 |
+| 7 | `/speckit-implement` | C00–C05 verdes; próxima retomada C06 | T005–T007 revalidadas; T009–T012 e T037–T059 concluídas; T008 preservada com gate Docker pendente para C10 |
 
 ### Resultado C01 — 2026-09-15
 
@@ -291,6 +291,20 @@ A mutação real retirou temporariamente a herança SDK de `ProvedorExternoExcep
 voltou a verde. O portão final do C04 terminou exit 0/BUILD SUCCESS, 28 testes, zero
 falhas/erros/skips; medições nominais: repository 0, controller 0, ordem 0. D-P01/D-P02 permanecem e
 nenhum baseline, frontend, ambiente ou adoção de auditoria/Keycloak foi tocado.
+
+### Resultado C05 — 2026-09-16
+
+T056–T059 concluídas: as 177 identidades de teste foram renomeadas, as 314 ocorrências Checkstyle
+foram corrigidas, e os baselines de arquitetura/Checkstyle e as supressões terminaram com zero
+entrada de dívida. O `spotless:apply` formatou exatamente 29 + 56 = 85 Java nominais, sem 86º
+arquivo, e `ratchetFrom` saiu do POM pai.
+
+O primeiro portão revelou uma divergência factual em C04/T055: `possuiAuthority` ainda aparecia
+antes do público `loginDoUsuarioAutenticado`. C05-R1 moveu somente esse método privado para depois
+dos públicos e removeu seis espaços finais já identificados em quatro Javadocs. A repetição literal
+do portão terminou exit 0: `ConvencoesFonteTest` com 9 testes e zero falhas/erros/skips, `validate`
+com zero violações Checkstyle nos seis módulos, `spotless:check` integral verde e `git diff --check`
+exit 0. Nenhum arquivo fora da lista fechada foi tocado; o executor não fez commit, push ou PR.
 
 ### Resultado dos checklists
 

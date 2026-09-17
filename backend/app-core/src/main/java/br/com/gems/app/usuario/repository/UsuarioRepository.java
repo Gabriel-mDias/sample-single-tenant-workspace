@@ -10,7 +10,8 @@ import java.util.UUID;
 /**
  * Acesso às credenciais dos usuárioes (tabela {@code security.USUARIO}).
  *
- * <p>Sem busca paginada: não há tela de gestão de acesso nesta entrega — o usuário existe sempre
+ * <p>
+ * Sem busca paginada: não há tela de gestão de acesso nesta entrega — o usuário existe sempre
  * como parte do agregado do usuário.
  */
 @Repository

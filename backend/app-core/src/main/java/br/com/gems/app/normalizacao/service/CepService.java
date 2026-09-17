@@ -23,20 +23,23 @@ import java.util.Optional;
 /**
  * Consulta de endereço por CEP.
  *
- * <p><b>Por que no backend, e não na SPA.</b> O de-para entre a sigla da UF que o provedor devolve e
+ * <p>
+ * <b>Por que no backend, e não na SPA.</b> O de-para entre a sigla da UF que o provedor devolve e
  * o {@code ID_ESTADO} do cadastro de referência precisa acontecer em algum lugar. Aqui acontece uma
  * vez; no frontend, aconteceria em cada tela que coleta endereço — hoje três.
  *
- * <p><b>A consulta é uma conveniência, nunca um bloqueio</b>. Não há retry: insistir só
+ * <p>
+ * <b>A consulta é uma conveniência, nunca um bloqueio</b>. Não há retry: insistir só
  * faria o operador esperar mais para chegar ao mesmo lugar, e o preenchimento manual continua
  * disponível em qualquer cenário de falha.
  *
- * <p>Os três modos de falha são deliberadamente distintos:
+ * <p>
+ * Os três modos de falha são deliberadamente distintos:
  * <ul>
- *   <li><b>400</b> — CEP fora do formato. Nem chega ao provedor.</li>
- *   <li><b>400</b> — CEP inexistente. Segue a convenção do projeto, em que "não encontrado" é
- *       {@link BusinessException} (ver o {@code buscarAtivo} do {@code ParceiroService}).</li>
- *   <li><b>502</b> — provedor fora do ar, lento ou com erro. {@link ProvedorExternoException}.</li>
+ * <li><b>400</b> — CEP fora do formato. Nem chega ao provedor.</li>
+ * <li><b>400</b> — CEP inexistente. Segue a convenção do projeto, em que "não encontrado" é
+ * {@link BusinessException} (ver o {@code buscarAtivo} do {@code ParceiroService}).</li>
+ * <li><b>502</b> — provedor fora do ar, lento ou com erro. {@link ProvedorExternoException}.</li>
  * </ul>
  */
 @Slf4j
@@ -56,15 +59,16 @@ public class CepService {
      * dele derrubava a subida da aplicação. Montá-lo internamente também mantém a configuração de
      * timeout ao lado de quem a usa.
      *
-     * <p>{@code @Autowired} explícito porque a classe tem <b>dois</b> construtores — sem ele o Spring
+     * <p>
+     * {@code @Autowired} explícito porque a classe tem <b>dois</b> construtores — sem ele o Spring
      * procura o construtor padrão e falha. Ambos os defeitos foram pegos pelo {@code contextLoads},
      * que sobe a aplicação de verdade.
      */
     @Autowired
     public CepService( EstadoRepository estadoRepository,
-                       PaisRepository paisRepository,
-                       @Value( "${app.cep.viacep.url}" ) String url,
-                       @Value( "${app.cep.viacep.timeout}" ) Duration timeout ) {
+            PaisRepository paisRepository,
+            @Value("${app.cep.viacep.url}") String url,
+            @Value("${app.cep.viacep.timeout}") Duration timeout ) {
         this.restClient = RestClient.builder()
                 .baseUrl( url )
                 .requestFactory( requestFactory( timeout ) )

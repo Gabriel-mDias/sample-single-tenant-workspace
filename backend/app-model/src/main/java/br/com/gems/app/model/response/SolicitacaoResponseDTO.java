@@ -21,7 +21,7 @@ public class SolicitacaoResponseDTO {
     private LocalDateTime dataConclusao;
 
     public SolicitacaoResponseDTO( UUID id, String titulo, SituacaoSolicitacao situacao, UUID parceiroId,
-                                   String parceiroNome, LocalDateTime dataCriacao, LocalDateTime dataConclusao ) {
+            String parceiroNome, LocalDateTime dataCriacao, LocalDateTime dataConclusao ) {
         this.id = id;
         this.titulo = titulo;
         this.situacao = situacao;
