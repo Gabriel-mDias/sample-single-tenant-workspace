@@ -10,9 +10,8 @@ import { FieldErrorComponent } from './field-error.component';
  *
  * A borda vermelha do campo inválido é CSS puro e nunca quebrou. A mensagem, sim — e o modo como
  * ela quebrava era silencioso: nenhum erro no console, nenhum teste falhando, apenas um formulário
- * que recusa salvar sem explicar por quê. O último `it` mantém o defeito da SDK documentado por
- * execução, não por comentário: se um dia ele passar a falhar, é sinal de que a SDK corrigiu o
- * componente dela e o daqui pode ser aposentado.
+ * que recusa salvar sem explicar por quê. O último `it` registra que a SDK 2.1.0 corrigiu o defeito
+ * caracterizado na 1.1.0; essa equivalência permite que T067 aposente o componente local.
  */
 @Component({
   imports: [ReactiveFormsModule, FieldErrorComponent],
@@ -100,7 +99,7 @@ describe('FieldErrorComponent', () => {
     expect(texto(fixture)).toBe('Informe o sobrenome.');
   });
 
-  it('caracterização: o gems-field-error da SDK 1.1.0 continua sem exibir a mensagem', () => {
+  it('deveExibirMensagemCustomizada_quandoSdkRecebeControleTocado', () => {
     const fixture = TestBed.createComponent(HospedeiroSdkComponent);
     fixture.detectChanges();
 
@@ -111,6 +110,6 @@ describe('FieldErrorComponent', () => {
       fixture.nativeElement.querySelector('.gems-field-error')?.textContent ?? ''
     ).trim();
 
-    expect(exibido).toBe('');
+    expect(exibido).toBe('Informe o sobrenome.');
   });
 });

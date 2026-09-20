@@ -1,5 +1,5 @@
 import { GemsSideMenuItem } from '@gabriel-mdias/angular-gems-sdk';
-import { Acoes } from '../auth/acoes';
+import { Acoes, globalAuthorization } from '../auth/acoes';
 import { MenuAuthContext } from '../auth/auth.service';
 
 /**
@@ -19,13 +19,13 @@ import { MenuAuthContext } from '../auth/auth.service';
 export function buildMenu(auth: MenuAuthContext): GemsSideMenuItem[] {
   const items: GemsSideMenuItem[] = [];
 
-  if (auth.hasRole(Acoes.CONSULTAR_PARCEIRO)) {
+  if (auth.isAuthorized(globalAuthorization(Acoes.CONSULTAR_PARCEIRO))) {
     items.push({ label: 'Parceiros', icon: 'fa-solid fa-handshake', route: '/parceiros' });
   }
-  if (auth.hasRole(Acoes.CONSULTAR_SOLICITACAO)) {
+  if (auth.isAuthorized(globalAuthorization(Acoes.CONSULTAR_SOLICITACAO))) {
     items.push({ label: 'Solicitações', icon: 'fa-solid fa-list-check', route: '/solicitacoes' });
   }
-  if (auth.hasRole(Acoes.CONSULTAR_AUDITORIA)) {
+  if (auth.isAuthorized(globalAuthorization(Acoes.CONSULTAR_AUDITORIA))) {
     items.push({ label: 'Auditoria', icon: 'fa-solid fa-clock-rotate-left', route: '/auditoria' });
   }
 

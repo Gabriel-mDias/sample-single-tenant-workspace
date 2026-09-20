@@ -218,7 +218,7 @@ admite paralelismo interno nem checkpoint parcial.
 | 4 | `/speckit-tasks` | revisado | 79 tasks em 8 fases |
 | 5 | `/speckit-analyze` | revisado | 0 CRITICAL documental; achados incorporados |
 | 6 | **`roteiro.md`** | aprovado em 2026-09-14 | portão assinado pelo product owner |
-| 7 | `/speckit-implement` | C00–C06 verdes; próxima retomada C07 | T005–T007 revalidadas; T009–T012 e T037–T061 concluídas; T008 preservada com gate Docker pendente para C10 |
+| 7 | `/speckit-implement` | C00–C07 verdes; próxima retomada C08 | T005–T007 revalidadas; T009–T012 e T037–T065 concluídas; antecipações autorizadas de T067/T071 registradas; T008 preservada com gate Docker pendente para C10 |
 
 ### Resultado C01 — 2026-09-15
 
@@ -318,6 +318,22 @@ baseline de arquitetura (1 entrada contra 0), uma supressão Checkstyle e a remo
 `_quando` da regra de nomes. O reator completo `mvnw.cmd clean install` terminou verde nos seis
 módulos, com 216 testes em 30 relatórios, zero falhas/erros/skips, Checkstyle zero e Spotless verde.
 Próxima retomada: C07; C11/C12 continuam bloqueados pelas releases compatíveis das SDKs.
+
+### Resultado C07 — 2026-09-20
+
+T062–T065 concluídas. Guard, menu, fachada, auditoria e consumidores usam `isAuthorized` com requisito
+global explícito; os 12 alvos ficaram com zero `hasRole`/`hasAnyRole`. Sete arquivos de teste
+focados passaram com 20 casos. A mutação que retirou `isAuthorized` produziu erros de compilação nos
+consumidores e foi restaurada por patch inverso.
+
+`provideGemsKeycloak`, interceptor DI e silent check-sso já estavam conformes na âncora `b807233`;
+`app.spec.ts` passou a provar as opções sem gerar alteração gratuita nos providers. O product owner
+autorizou antecipar exclusivamente a caracterização de `field-error` de T067 e a formatação de
+`verify-conventions.mjs` de T071 para destravar o gate; a segunda não gerou diff material.
+
+Gate final: 25 arquivos / 123 testes verdes; 13 regras em 126 arquivos, zero violações; Prettier
+integral verde; build verde, bundle inicial 726,67 kB, com apenas o aviso de budget conhecido;
+`git diff --check` verde. Próxima retomada: C08.
 
 ### Resultado dos checklists
 

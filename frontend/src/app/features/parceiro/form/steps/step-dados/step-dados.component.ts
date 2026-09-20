@@ -7,7 +7,7 @@ import {
   GemsInputTextComponent,
   GemsTextareaComponent,
 } from '@gabriel-mdias/angular-gems-sdk';
-import { Acoes } from '../../../../../core/auth/acoes';
+import { Acoes, globalAuthorization } from '../../../../../core/auth/acoes';
 import { AuthService } from '../../../../../core/auth/auth.service';
 import { DadosPessoaisFieldsComponent } from '../../../../../shared/forms/dados-pessoais/dados-pessoais-fields.component';
 import { createDadosPessoaisForm } from '../../../../../shared/forms/dados-pessoais/dados-pessoais-form';
@@ -56,7 +56,9 @@ export class StepDadosComponent extends GemsBaseStepComponent<StepDadosPayload> 
    * tem a ação, e ignora o campo na gravação. Se esta linha sumisse, o pior que aconteceria seria
    * exibir um campo permanentemente vazio — nunca vazamento.
    */
-  protected readonly podeVerComissao = this.auth.hasRole(Acoes.VISUALIZAR_COMISSAO);
+  protected readonly podeVerComissao = this.auth.isAuthorized(
+    globalAuthorization(Acoes.VISUALIZAR_COMISSAO),
+  );
 
   protected readonly erroNome = { required: 'O nome do parceiro é obrigatório.' };
   protected readonly erroComissao = { min: 'A comissão não pode ser negativa.' };

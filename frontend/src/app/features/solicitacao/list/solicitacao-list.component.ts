@@ -15,7 +15,7 @@ import {
 } from '@gabriel-mdias/angular-gems-sdk';
 import { GEMS_TABLE_LABELS_PT_BR } from '../../../commons/gems-table-labels';
 import { parseTableSort } from '../../../commons/table-sort';
-import { Acoes } from '../../../core/auth/acoes';
+import { Acoes, globalAuthorization } from '../../../core/auth/acoes';
 import { AuthService } from '../../../core/auth/auth.service';
 import { EnterBuscaDirective } from '../../../shared/forms/enter-busca/enter-busca.directive';
 import {
@@ -57,9 +57,15 @@ export class SolicitacaoListComponent implements OnInit {
   protected readonly sortField = signal<string | undefined>(SORT_PADRAO.field);
   protected readonly sortDirection = signal<'asc' | 'desc'>(SORT_PADRAO.direction);
 
-  protected readonly podeInserir = signal(this.auth.hasRole(Acoes.INSERIR_SOLICITACAO));
-  protected readonly podeAlterar = signal(this.auth.hasRole(Acoes.ALTERAR_SOLICITACAO));
-  protected readonly podeExcluir = signal(this.auth.hasRole(Acoes.EXCLUIR_SOLICITACAO));
+  protected readonly podeInserir = signal(
+    this.auth.isAuthorized(globalAuthorization(Acoes.INSERIR_SOLICITACAO)),
+  );
+  protected readonly podeAlterar = signal(
+    this.auth.isAuthorized(globalAuthorization(Acoes.ALTERAR_SOLICITACAO)),
+  );
+  protected readonly podeExcluir = signal(
+    this.auth.isAuthorized(globalAuthorization(Acoes.EXCLUIR_SOLICITACAO)),
+  );
 
   /** As situações vêm da lista local, não de um endpoint: são enum, não cadastro. */
   protected readonly situacoes: GemsSelectOption<string>[] = Object.entries(SITUACAO_LABELS).map(

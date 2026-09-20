@@ -1,5 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { KeycloakService } from 'keycloak-angular';
+import { AuthorizationRequirement } from './acoes';
 
 /**
  * Fachada fina sobre o {@link KeycloakService} para o restante da aplicação (casca, menu.builder,
@@ -49,13 +50,9 @@ export class AuthService {
     return this.keycloak.getUserRoles(true) ?? [];
   }
 
-  hasRole(role: string): boolean {
-    return this.roles().includes(role);
-  }
-
-  hasAnyRole(roles: string[]): boolean {
+  isAuthorized(requirement: AuthorizationRequirement): boolean {
     const owned = this.roles();
-    return roles.some((r) => owned.includes(r));
+    return requirement.actions.every((action) => owned.includes(action));
   }
 
   username(): string {
@@ -88,6 +85,5 @@ export class AuthService {
  * do menu com um stub simples, sem depender do Keycloak.
  */
 export interface MenuAuthContext {
-  hasRole(role: string): boolean;
-  hasAnyRole(roles: string[]): boolean;
+  isAuthorized(requirement: AuthorizationRequirement): boolean;
 }

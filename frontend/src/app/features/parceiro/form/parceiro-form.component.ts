@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GemsAlertService, GemsWizardComponent } from '@gabriel-mdias/angular-gems-sdk';
-import { Acoes } from '../../../core/auth/acoes';
+import { Acoes, globalAuthorization } from '../../../core/auth/acoes';
 import { AuthService } from '../../../core/auth/auth.service';
 import { BotaoHistoricoComponent } from '../../../shared/auditoria/botao-historico/botao-historico.component';
 import {
@@ -135,7 +135,7 @@ export class ParceiroFormComponent implements OnInit, OnDestroy {
   }
 
   private podeVerComissao(): boolean {
-    return this.auth.hasRole(Acoes.VISUALIZAR_COMISSAO);
+    return this.auth.isAuthorized(globalAuthorization(Acoes.VISUALIZAR_COMISSAO));
   }
 
   private carregar(id: string): void {

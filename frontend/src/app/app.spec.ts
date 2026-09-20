@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { App } from './app';
 import { Acoes } from './core/auth/acoes';
+import { keycloakOptions } from './core/auth/keycloak.init';
 
 /**
  * Testa a casca real (`App`) via TestBed, exercitando os `computed` do próprio componente
@@ -37,22 +38,22 @@ function createApp(stub: Partial<KeycloakService>): App {
 describe('App (casca)', () => {
   afterEach(() => TestBed.resetTestingModule());
 
-  it('cria o componente', () => {
+  it('deveCriarComponente_quandoInicializar', () => {
     const app = createApp(keycloakStub({ loggedIn: false }));
     expect(app).toBeTruthy();
   });
 
-  it('oculta a casca quando não autenticado', () => {
+  it('deveOcultarCasca_quandoNaoAutenticado', () => {
     const app = createApp(keycloakStub({ loggedIn: false }));
     expect(app.showShell()).toBe(false);
   });
 
-  it('mostra a casca quando autenticado (rota inicial)', () => {
+  it('deveMostrarCasca_quandoAutenticadoNaRotaInicial', () => {
     const app = createApp(keycloakStub({ loggedIn: true }));
     expect(app.showShell()).toBe(true);
   });
 
-  it('com as ações de consulta → menu com os recursos correspondentes', () => {
+  it('deveMontarMenuComRecursos_quandoAcoesDeConsultaAutorizadas', () => {
     const app = createApp(
       keycloakStub({
         loggedIn: true,
@@ -62,8 +63,20 @@ describe('App (casca)', () => {
     expect(app.menuConfig().items.map((i) => i.route)).toEqual(['/parceiros', '/solicitacoes']);
   });
 
-  it('sem ação de consulta nenhuma → menu vazio', () => {
+  it('deveMontarMenuVazio_quandoNenhumaAcaoDeConsultaAutorizada', () => {
     const app = createApp(keycloakStub({ loggedIn: true, roles: [] }));
     expect(app.menuConfig().items.map((i) => i.route)).toEqual([]);
+  });
+
+  it('devePreservarCheckSsoSilencioso_quandoConfigurarKeycloak', () => {
+    const options = keycloakOptions();
+
+    expect(options.initOptions).toMatchObject({
+      onLoad: 'check-sso',
+      pkceMethod: 'S256',
+      checkLoginIframe: false,
+      silentCheckSsoRedirectUri: `${window.location.origin}/silent-check-sso.html`,
+    });
+    expect(options.enableBearerInterceptor).toBe(true);
   });
 });

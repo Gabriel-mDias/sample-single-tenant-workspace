@@ -10,7 +10,7 @@ import {
   GemsTextareaComponent,
 } from '@gabriel-mdias/angular-gems-sdk';
 import { Observable } from 'rxjs';
-import { Acoes } from '../../../core/auth/acoes';
+import { Acoes, globalAuthorization } from '../../../core/auth/acoes';
 import { AuthService } from '../../../core/auth/auth.service';
 import { BotaoHistoricoComponent } from '../../../shared/auditoria/botao-historico/botao-historico.component';
 import { FieldErrorComponent } from '../../../shared/forms/field-error/field-error.component';
@@ -77,20 +77,28 @@ export class SolicitacaoFormComponent implements OnInit {
 
   // Cada botão de transição: possível a partir da situação atual E permitido para este usuário.
   protected readonly podeAbrir = computed(
-    () => this.solicitacao()?.situacao === 'RASCUNHO' && this.auth.hasRole(Acoes.ABRIR_SOLICITACAO),
+    () =>
+      this.solicitacao()?.situacao === 'RASCUNHO' &&
+      this.auth.isAuthorized(globalAuthorization(Acoes.ABRIR_SOLICITACAO)),
   );
   protected readonly podeIniciar = computed(
-    () => this.solicitacao()?.situacao === 'ABERTA' && this.auth.hasRole(Acoes.INICIAR_SOLICITACAO),
+    () =>
+      this.solicitacao()?.situacao === 'ABERTA' &&
+      this.auth.isAuthorized(globalAuthorization(Acoes.INICIAR_SOLICITACAO)),
   );
   protected readonly podeConcluir = computed(
     () =>
       this.solicitacao()?.situacao === 'EM_ANDAMENTO' &&
-      this.auth.hasRole(Acoes.CONCLUIR_SOLICITACAO),
+      this.auth.isAuthorized(globalAuthorization(Acoes.CONCLUIR_SOLICITACAO)),
   );
   protected readonly podeCancelar = computed(() => {
     const situacao = this.solicitacao()?.situacao;
     const terminal = situacao === 'CONCLUIDA' || situacao === 'CANCELADA';
-    return !!situacao && !terminal && this.auth.hasRole(Acoes.CANCELAR_SOLICITACAO);
+    return (
+      !!situacao &&
+      !terminal &&
+      this.auth.isAuthorized(globalAuthorization(Acoes.CANCELAR_SOLICITACAO))
+    );
   });
 
   protected readonly erroTitulo = { required: 'O título é obrigatório.' };
