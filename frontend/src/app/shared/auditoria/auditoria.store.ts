@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { GemsBaseStore, GemsPageable } from '@gabriel-mdias/angular-gems-sdk';
 import { Observable } from 'rxjs';
-import { PageResponse } from '../../commons/page-response';
+import { PageResponse } from '../models/page-response';
 import { EntidadeAuditada, RegistroAuditoriaModel } from './auditoria.model';
 
 /**

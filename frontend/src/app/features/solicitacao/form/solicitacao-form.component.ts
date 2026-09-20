@@ -1,10 +1,12 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import {
   GemsAlertService,
+  GemsFieldErrorComponent,
   GemsFormCardComponent,
   GemsInputTextComponent,
+  GemsNavigationService,
   GemsSelectComponent,
   GemsSelectOption,
   GemsTextareaComponent,
@@ -13,7 +15,6 @@ import { Observable } from 'rxjs';
 import { Acoes, globalAuthorization } from '../../../core/auth/acoes';
 import { AuthService } from '../../../core/auth/auth.service';
 import { BotaoHistoricoComponent } from '../../../shared/auditoria/botao-historico/botao-historico.component';
-import { FieldErrorComponent } from '../../../shared/forms/field-error/field-error.component';
 import { ParceiroStore } from '../../parceiro/services/parceiro.store';
 import { SITUACAO_CLASSES, SITUACAO_LABELS, SolicitacaoModel } from '../models/solicitacao.model';
 import { SolicitacaoStore } from '../services/solicitacao.store';
@@ -41,7 +42,7 @@ type Modo = 'create' | 'edit' | 'view';
     GemsInputTextComponent,
     GemsTextareaComponent,
     GemsSelectComponent,
-    FieldErrorComponent,
+    GemsFieldErrorComponent,
   ],
   templateUrl: './solicitacao-form.component.html',
   styleUrl: './solicitacao-form.component.css',
@@ -49,7 +50,7 @@ type Modo = 'create' | 'edit' | 'view';
 export class SolicitacaoFormComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
+  private readonly navigationService = inject(GemsNavigationService);
   private readonly store = inject(SolicitacaoStore);
   private readonly parceiroStore = inject(ParceiroStore);
   private readonly auth = inject(AuthService);
@@ -138,7 +139,7 @@ export class SolicitacaoFormComponent implements OnInit {
   }
 
   protected sair(): void {
-    this.router.navigate(['/solicitacoes']);
+    this.navigationService.navigate(['/solicitacoes/list']);
   }
 
   protected salvar(): void {
@@ -168,7 +169,7 @@ export class SolicitacaoFormComponent implements OnInit {
           id ? 'Solicitação atualizada' : 'Solicitação aberta',
           'Os dados foram gravados com sucesso.',
         );
-        this.router.navigate(['/solicitacoes']);
+        this.navigationService.navigate(['/solicitacoes/list']);
       },
       error: (err) => {
         this.alertService.errorFromApi(err);
@@ -258,7 +259,7 @@ export class SolicitacaoFormComponent implements OnInit {
       error: (err) => {
         this.alertService.errorFromApi(err);
         this.isCarregando.set(false);
-        this.router.navigate(['/solicitacoes']);
+        this.navigationService.navigate(['/solicitacoes/list']);
       },
     });
   }

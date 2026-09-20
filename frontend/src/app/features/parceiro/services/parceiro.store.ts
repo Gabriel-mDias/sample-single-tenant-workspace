@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { GemsBaseStore, GemsPageable } from '@gabriel-mdias/angular-gems-sdk';
 import { Observable } from 'rxjs';
-import { PageResponse } from '../../../commons/page-response';
+import { PageResponse } from '../../../shared/models/page-response';
 import { ParceiroFilterModel } from '../models/parceiro-filter.model';
 import { ParceiroResponseModel } from '../models/parceiro-response.model';
 import { ParceiroModel } from '../models/parceiro.model';

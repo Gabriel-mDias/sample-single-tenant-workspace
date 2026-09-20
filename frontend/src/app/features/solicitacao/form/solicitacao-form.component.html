@@ -33,7 +33,10 @@
             placeholder="O que precisa ser feito"
             [maxlength]="255"
           ></gems-input-text>
-          <app-field-error [control]="form.get('titulo')" [messages]="erroTitulo"></app-field-error>
+          <gems-field-error
+            [control]="form.get('titulo')"
+            [messages]="erroTitulo"
+          ></gems-field-error>
         </div>
 
         <div class="form-group full-width">
@@ -43,10 +46,10 @@
             placeholder="Selecione o parceiro"
             [options]="parceiros()"
           ></gems-select>
-          <app-field-error
+          <gems-field-error
             [control]="form.get('parceiroId')"
             [messages]="erroParceiro"
-          ></app-field-error>
+          ></gems-field-error>
         </div>
 
         <div class="form-group full-width">

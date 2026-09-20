@@ -1,8 +1,9 @@
+// Prova do utilitário compartilhado em `shared/utils`.
 import { describe, expect, it } from 'vitest';
 import { parseTableSort } from './table-sort';
 
 describe('parseTableSort', () => {
-  it('lê campo e direção do formato do Spring Data', () => {
+  it('deveLerCampoEDirecao_quandoReceberFormatoSpringData', () => {
     expect(parseTableSort(['nome,asc'])).toEqual({ field: 'nome', direction: 'asc' });
     expect(parseTableSort(['paisRepresentadoNome,desc'])).toEqual({
       field: 'paisRepresentadoNome',
@@ -10,7 +11,7 @@ describe('parseTableSort', () => {
     });
   });
 
-  it('devolve o padrão quando a tabela emite sem ordenação', () => {
+  it('deveRetornarPadrao_quandoOrdenacaoEstiverAusente', () => {
     const padrao = { field: 'nome', direction: 'asc' as const };
 
     expect(parseTableSort(undefined, padrao)).toEqual(padrao);
@@ -18,13 +19,13 @@ describe('parseTableSort', () => {
     expect(parseTableSort([''], padrao)).toEqual(padrao);
   });
 
-  it('trata qualquer direção que não seja "desc" como ascendente', () => {
+  it('deveUsarAscendente_quandoDirecaoNaoForDescendente', () => {
     expect(parseTableSort(['nome'])).toEqual({ field: 'nome', direction: 'asc' });
     expect(parseTableSort(['nome,'])).toEqual({ field: 'nome', direction: 'asc' });
     expect(parseTableSort(['nome,qualquer'])).toEqual({ field: 'nome', direction: 'asc' });
   });
 
-  it('sem padrão explícito, devolve campo indefinido e direção ascendente', () => {
+  it('deveRetornarCampoIndefinido_quandoPadraoNaoForInformado', () => {
     expect(parseTableSort(undefined)).toEqual({ field: undefined, direction: 'asc' });
   });
 });

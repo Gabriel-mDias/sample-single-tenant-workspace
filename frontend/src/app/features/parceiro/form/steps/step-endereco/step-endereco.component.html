@@ -11,7 +11,10 @@
         placeholder="Selecione o país"
         [options]="paises()"
       ></gems-select>
-      <app-field-error [control]="formGroup.get('paisId')" [messages]="erroPais"></app-field-error>
+      <gems-field-error
+        [control]="formGroup.get('paisId')"
+        [messages]="erroPais"
+      ></gems-field-error>
     </div>
 
     @if (exigeUfECep()) {
@@ -22,45 +25,45 @@
           placeholder="Selecione o estado"
           [options]="estados()"
         ></gems-select>
-        <app-field-error
+        <gems-field-error
           [control]="formGroup.get('estadoId')"
           [messages]="erroEstado"
-        ></app-field-error>
+        ></gems-field-error>
       </div>
 
       <div class="form-group">
         <label class="required fw-bold">CEP</label>
         <gems-input-mask formControlName="cep" maskType="cep" placeholder="00000-000">
         </gems-input-mask>
-        <app-field-error [control]="formGroup.get('cep')" [messages]="erroCep"></app-field-error>
+        <gems-field-error [control]="formGroup.get('cep')" [messages]="erroCep"></gems-field-error>
       </div>
     }
 
     <div class="form-group">
       <label class="required fw-bold">Cidade</label>
       <gems-input-text formControlName="cidade" [maxlength]="255"></gems-input-text>
-      <app-field-error
+      <gems-field-error
         [control]="formGroup.get('cidade')"
         [messages]="erroCidade"
-      ></app-field-error>
+      ></gems-field-error>
     </div>
 
     <div class="form-group">
       <label class="required fw-bold">Bairro</label>
       <gems-input-text formControlName="bairro" [maxlength]="255"></gems-input-text>
-      <app-field-error
+      <gems-field-error
         [control]="formGroup.get('bairro')"
         [messages]="erroBairro"
-      ></app-field-error>
+      ></gems-field-error>
     </div>
 
     <div class="form-group full-width">
       <label class="required fw-bold">Logradouro</label>
       <gems-input-text formControlName="logradouro" [maxlength]="255"></gems-input-text>
-      <app-field-error
+      <gems-field-error
         [control]="formGroup.get('logradouro')"
         [messages]="erroLogradouro"
-      ></app-field-error>
+      ></gems-field-error>
     </div>
 
     <div class="form-group">

@@ -1,7 +1,7 @@
 /**
  * Conversão entre o texto que o operador digita e o número que o backend recebe.
  *
- * <p>Vive em `commons/` porque é função pura, e porque valor monetário não é exclusividade do
+ * <p>Vive em `shared/utils/` porque é função pura, e porque valor monetário não é exclusividade do
  * toda tela que exibe dinheiro. O primeiro cadastro com valor monetário já existe, e o próximo
  * com preço encontraria a regra pronta. A SDK **não tem** máscara de moeda (`GemsMaskType` cobre
  * só `cep`/`phone`/`rg`/`email`), então a conversão é responsabilidade do projeto.

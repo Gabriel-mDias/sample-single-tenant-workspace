@@ -97,3 +97,30 @@ transição são imutáveis neste lote.
 
 O escopo é elegível para Opus por arquitetura, migração, autenticação e ambiente. Não foi chamado:
 o pacote proíbe executores adicionais e não concede autorização específica.
+
+## R-12 — Rodada produtora única da Java GEMS SDK
+
+A fonte publicada 3.1.0 confirma duas lacunas exatas. Em `gems-auditing`, `AuditActor` contém apenas
+nome/tipo e `TransactionalAuditWriter` grava `NM_ACTOR`/`CD_ACTOR_TYPE`, sem identidade estável nem
+correlação. Em `gems-keycloak-admin`, o gateway cobre criação e busca por e-mail, organizações,
+grupos/membros e associação de role já existente, mas não cobre snapshot/alteração/enable/disable/
+delete de usuário, consulta de seus grupos, compensação da senha, criação de role nem composição.
+
+A evolução será uma rodada SDD produtora no repositório `Java-GEMS-SDK`, com dois blocos
+independentes e uma release conjunta:
+
+- **SDK-AUD**: novos providers/tipos aditivos para identidade estável e correlação; os providers
+  antigos e defaults continuam válidos; o writer acrescenta os dois valores sem derivar identidade
+  do nome;
+- **SDK-KC**: subinterfaces/tipos públicos aditivos para o ciclo completo, snapshots e roles; o
+  `KeycloakAdminGateway` 3.1.0 permanece compilável e o cliente REST implementa a superfície nova;
+- **SDK-REL**: compatibilidade, reator, revisão, BOM, release notes, PR, merge, workflow de publicação
+  e resolução limpa no GitHub Packages.
+
+SemVer: a forma aditiva torna a próxima release **3.2.0 MINOR**. Alterar/remover assinatura pública,
+inclusive acrescentar método abstrato obrigatório ao gateway existente, é quebra e interrompe o
+bloco para novo portão MAJOR; não se ajusta o número depois em silêncio.
+
+Os módulos de produção afetados são `gems-auditing` e `gems-keycloak-admin`.
+`gems-security-authorization` recebe apenas prova de integração entre catálogo e composição de roles,
+sem mudança pública prevista; `gems-bom`, POM pai, guias e release notes mudam no bloco de release.

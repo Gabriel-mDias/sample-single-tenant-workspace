@@ -6,9 +6,9 @@
  * ao montar a linha no componente — e ali não há pipe. Como as telas de acervo também exibem data
  * fora de tabela, uma função pura serve aos dois casos.
  *
- * ## Por que em `commons/`
+ * ## Por que em `shared/utils/`
  * Esta função já existiu em três cópias privadas, uma por tela que formatava data.
- * `commons/` é onde vive constante
+ * `shared/utils/` é onde vive constante
  * e função pura — e três cópias é o número a partir do qual elas começam a divergir.
  *
  * ## Sobre o corte da string

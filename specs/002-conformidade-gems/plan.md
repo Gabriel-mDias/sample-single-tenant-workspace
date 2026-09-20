@@ -18,6 +18,10 @@ recomendação é preservar comportamento por evolução/publicação prévia da
 **Constraints**: single tenant; zero dívida Java; frontend residual só com aceite humano; nenhuma API presumida
 **Baseline**: 204 testes backend; 21 arquivos/118 testes frontend; 314/22, 189 e 174 ocorrências
 
+**Release produtora**: Java GEMS SDK **3.2.0 MINOR**, decidida por SemVer nesta revisão porque o
+desenho é estritamente aditivo sobre 3.1.0. Qualquer quebra pública descoberta invalida a decisão e
+exige novo portão para MAJOR.
+
 ## Constitution Check
 
 ### Gate antes do desenho
@@ -44,6 +48,11 @@ recomendação é preservar comportamento por evolução/publicação prévia da
 | `gems-keycloak-admin` | sim, 3.1.0 | fonte aferida | **não** para ciclo/roles | bloqueado D-P02 |
 | Angular GEMS | sim, 2.1.0 | peers aferidos | a provar por componente | apto condicional |
 
+Antes de C11/C12, uma rodada produtora única na Java GEMS SDK entrega dois blocos independentes:
+SDK-AUD (`gems-auditing`) e SDK-KC (`gems-keycloak-admin`, com teste de composição junto de
+`gems-security-authorization`). A publicação conjunta também altera `gems-bom`, POM pai, guias e
+release notes. Nenhum arquivo de produção do sample é editado por esses checkpoints.
+
 O portão não supera os bloqueios materiais: `gems-auditing` e `gems-keycloak-admin` só entram após
 releases compatíveis publicadas e aferidas. D-P04 continua no portão posterior à medição.
 
@@ -62,8 +71,60 @@ testes/mappers entram no módulo nominal indicado em `tasks.md`; nenhuma nova ca
 6. Plataforma e features Angular; medir residual e submeter D-P04.
 7. Remover supressões/baselines/ratchet; gates completos e analyze final.
 
+### Fila produtora e consumidora
+
+| Checkpoint | Repositório/arquivos permitidos | Saída objetiva |
+| :--- | :--- | :--- |
+| SDK-P00 | `Java-GEMS-SDK/specs/<rodada>/**` e metadados da branch | ciclo SDD até analyze, 28 tarefas internas, SemVer 3.2.0 e portão humano; zero código |
+| SDK-AUD | `gems-auditing/**` e documentação nominal do módulo | identidade estável/correlação, compatibilidade 3.1.0, mutações e gate focado |
+| SDK-KC | `gems-keycloak-admin/**` e testes de integração em `gems-security-authorization/**` | ciclo completo/compensações/roles, mutações e gate focado |
+| SDK-REL | POM pai, `gems-bom/**`, README/guia/llms/release notes e workflows somente se necessários | reator, revisão, BOM, PR, merge, publish e confirmação no registry |
+| C11 | somente arquivos já listados em T013–T024 no sample | depende de SDK-KC publicado; ciclo Keycloak preservado |
+| C12 | somente arquivos já listados em T025–T036 no sample | depende de C11 e SDK-AUD publicado; auditoria atômica preservada |
+| C13 | sample, T074–T076 | depende de C11 e C12 verdes, além dos gates já declarados |
+
+SDK-AUD e SDK-KC podem avançar em paralelo entre si e com C06–C10 porque os conjuntos de escrita são
+disjuntos. “Paralelo” é no nível do programa: cada invocação continua executando exatamente um
+checkpoint e fechando seu próprio estado. C05 permanece integralmente inalterado e tem prioridade de
+recuperação. O caminho crítico passa a ser `SDK-P00 → max(SDK-AUD, SDK-KC) → SDK-REL → C11 → C12 → C13`;
+C06–C10 só entram no caminho crítico se terminarem depois de SDK-REL.
+
+### Contratos, compatibilidade e rollback da produtora
+
+- Auditoria preserva nome/tipo, transação do chamador, sigilo e destino; acrescenta id estável e
+  correlação por providers opcionais. Default ausente mantém o comportamento 3.1.0, sem fabricar id.
+- Keycloak preserva o gateway 3.1.0 e acrescenta subinterfaces/tipos. A compensação de criação
+  remove o usuário se a senha falhar; snapshots permitem ao listener consumidor restaurar usuário,
+  enable e grupos após rollback.
+- Mutações mínimas: ignorar/trocar id por nome; zerar correlação; gerar correlação diferente por
+  entidade; omitir delete após falha de senha; tornar enable/delete no-op; omitir snapshot/grupos;
+  não criar role; não compor filhos; confundir role direta com efetiva.
+- Ponto seguro após cada checkpoint: branch/árvore limpa, estado persistido e gate focado verde.
+  Antes do merge, rollback é abandonar/reverter somente a branch produtora. Depois da publicação,
+  artefato não é sobrescrito: consumidor continua em 3.1.0, corrige-se numa nova versão SemVer e C11/
+  C12 permanecem bloqueados.
+- A release é consumível somente com CI da PR e de `main` verdes, merge identificado, publish verde,
+  quatro coordenadas resolvendo em cache Maven limpo e um consumer smoke usando apenas o BOM.
+
+### Contagem sem misturar granularidades
+
+- Rodada 010: **72 tarefas (T001–T072)**. As 28 tarefas internas da rodada produtora da Java GEMS
+  SDK pertencem à SDK e não aumentam esse denominador.
+- Sample 002: **79 tarefas internas**, sem aumento; apenas dependências/estados de T013–T036 mudam.
+- Java GEMS SDK: **28 tarefas internas novas** — SDK-AUD 10, SDK-KC 12, SDK-REL 6 — materializadas
+  em SDK-P00. Elas não são somadas às 79 do sample nem contadas duas vezes como implementação da 010.
+
 Auditoria não possui checkpoint intermediário publicável. O commit do orquestrador só pode ocorrer
 depois de migration + reader + provider + writer SDK + remoções locais + testes verdes.
+
+## Retomada compacta — 2026-09-16
+
+Os C00–C06 permanecem como evidência histórica. A partir de C07, o baseline canônico é
+`BL-S-CODEX-20260916@b807233`; cada pacote delta fecha READ/EDIT/CREATE/TEST, rollback, SHA inicial e
+gate focalizado. Hash divergente, alteração do baseline ou diff fora da fronteira invalida o pacote.
+C09 incorpora o build Docker de T008. C10-SDK, no repositório Java GEMS SDK, produz 3.2.0 aditiva e
+tem os únicos estados `aberto`, `em-curso`, `verde`, `bloqueado-release`, `aguardando-decisão-major`
+e `falhou-gate`; só `verde` libera C11.
 
 ## Complexity Tracking
 

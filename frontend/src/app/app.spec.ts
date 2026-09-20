@@ -60,7 +60,10 @@ describe('App (casca)', () => {
         roles: [Acoes.CONSULTAR_PARCEIRO, Acoes.CONSULTAR_SOLICITACAO],
       }),
     );
-    expect(app.menuConfig().items.map((i) => i.route)).toEqual(['/parceiros', '/solicitacoes']);
+    expect(app.menuConfig().items.map((i) => i.route)).toEqual([
+      '/parceiros/list',
+      '/solicitacoes/list',
+    ]);
   });
 
   it('deveMontarMenuVazio_quandoNenhumaAcaoDeConsultaAutorizada', () => {

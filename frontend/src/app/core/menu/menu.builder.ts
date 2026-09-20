@@ -20,10 +20,14 @@ export function buildMenu(auth: MenuAuthContext): GemsSideMenuItem[] {
   const items: GemsSideMenuItem[] = [];
 
   if (auth.isAuthorized(globalAuthorization(Acoes.CONSULTAR_PARCEIRO))) {
-    items.push({ label: 'Parceiros', icon: 'fa-solid fa-handshake', route: '/parceiros' });
+    items.push({ label: 'Parceiros', icon: 'fa-solid fa-handshake', route: '/parceiros/list' });
   }
   if (auth.isAuthorized(globalAuthorization(Acoes.CONSULTAR_SOLICITACAO))) {
-    items.push({ label: 'Solicitações', icon: 'fa-solid fa-list-check', route: '/solicitacoes' });
+    items.push({
+      label: 'Solicitações',
+      icon: 'fa-solid fa-list-check',
+      route: '/solicitacoes/list',
+    });
   }
   if (auth.isAuthorized(globalAuthorization(Acoes.CONSULTAR_AUDITORIA))) {
     items.push({ label: 'Auditoria', icon: 'fa-solid fa-clock-rotate-left', route: '/auditoria' });

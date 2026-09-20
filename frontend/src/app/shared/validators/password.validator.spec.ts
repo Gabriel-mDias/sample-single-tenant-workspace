@@ -1,51 +1,52 @@
+// Prova do validador compartilhado em `shared/validators`.
 import { describe, expect, it } from 'vitest';
 import { PASSWORD_PATTERN, passwordValidator } from './password.validator';
 
 const mockControl = (value: unknown) => ({ value }) as any;
 
 describe('passwordValidator', () => {
-  it('permite valores nulos ou vazios (deixando obrigatoriedade para Validators.required)', () => {
+  it('devePermitirValorAusente_quandoObrigatoriedadeForExterna', () => {
     expect(passwordValidator(mockControl(''))).toBeNull();
     expect(passwordValidator(mockControl(null))).toBeNull();
     expect(passwordValidator(mockControl(undefined))).toBeNull();
   });
 
-  it('valida com sucesso senhas que atendem a todos os critérios', () => {
+  it('deveValidar_quandoSenhaAtenderTodosOsCriterios', () => {
     expect(passwordValidator(mockControl('Senha@Forte123'))).toBeNull();
     expect(passwordValidator(mockControl('Admin#2026abc'))).toBeNull();
     expect(passwordValidator(mockControl('P@sswordLonga!'))).toBeNull();
     expect(passwordValidator(mockControl('aB1!aaaaaaaa'))).toBeNull();
   });
 
-  it('rejeita senhas com menos de 12 caracteres', () => {
+  it('deveRejeitar_quandoSenhaTiverMenosDeDozeCaracteres', () => {
     expect(passwordValidator(mockControl('Aa@1234'))).toEqual({ passwordPattern: true });
     // 11 caracteres, forte em todo o resto: aqui o que recusa é só o comprimento mínimo.
     expect(passwordValidator(mockControl('Aa@1234567b'))).toEqual({ passwordPattern: true });
   });
 
-  it('rejeita senhas sem letras maiúsculas', () => {
+  it('deveRejeitar_quandoSenhaNaoTiverMaiuscula', () => {
     expect(passwordValidator(mockControl('senha@forte123'))).toEqual({ passwordPattern: true });
   });
 
-  it('rejeita senhas sem letras minúsculas', () => {
+  it('deveRejeitar_quandoSenhaNaoTiverMinuscula', () => {
     expect(passwordValidator(mockControl('SENHA@FORTE123'))).toEqual({ passwordPattern: true });
   });
 
-  it('rejeita senhas sem caracteres especiais', () => {
+  it('deveRejeitar_quandoSenhaNaoTiverCaractereEspecial', () => {
     expect(passwordValidator(mockControl('SenhaSemEspecial'))).toEqual({ passwordPattern: true });
   });
 
-  it('rejeita senhas com espaços em branco', () => {
+  it('deveRejeitar_quandoSenhaTiverEspaco', () => {
     expect(passwordValidator(mockControl('Senha @Forte123'))).toEqual({ passwordPattern: true });
   });
 
-  it('funciona quando chamado como factory de ValidatorFn', () => {
+  it('deveCriarValidator_quandoChamadoComoFactory', () => {
     const fn = passwordValidator();
     expect(fn(mockControl('Senha@Forte123'))).toBeNull();
     expect(fn(mockControl('fraca'))).toEqual({ passwordPattern: true });
   });
 
-  it('exporta regex PASSWORD_PATTERN correspondente ao backend', () => {
+  it('deveEspelharBackend_quandoUsarPasswordPattern', () => {
     expect(PASSWORD_PATTERN.test('Senha@Forte123')).toBe(true);
     expect(PASSWORD_PATTERN.test('invalida')).toBe(false);
   });

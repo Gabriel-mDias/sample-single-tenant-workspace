@@ -62,7 +62,7 @@ describe('cobertura de rotas — data.roles', () => {
     // (uma feature inteira ignorada, um `loadChildren` que deixou de resolver), não para ser
     // atualizado a cada rota nova. Suba-o quando o projeto crescer o bastante para que o número
     // atual pare de significar alguma coisa.
-    expect(GUARDADAS.length).toBeGreaterThanOrEqual(6);
+    expect(GUARDADAS).toHaveLength(8);
   });
 
   for (const { caminho, route } of GUARDADAS) {

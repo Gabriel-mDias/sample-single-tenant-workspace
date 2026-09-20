@@ -218,7 +218,7 @@ admite paralelismo interno nem checkpoint parcial.
 | 4 | `/speckit-tasks` | revisado | 79 tasks em 8 fases |
 | 5 | `/speckit-analyze` | revisado | 0 CRITICAL documental; achados incorporados |
 | 6 | **`roteiro.md`** | aprovado em 2026-09-14 | portão assinado pelo product owner |
-| 7 | `/speckit-implement` | C00–C07 verdes; próxima retomada C08 | T005–T007 revalidadas; T009–T012 e T037–T065 concluídas; antecipações autorizadas de T067/T071 registradas; T008 preservada com gate Docker pendente para C10 |
+| 7 | `/speckit-implement` | C00–C08 verdes; próxima retomada C09 | T005–T007 revalidadas; T009–T012 e T037–T069 concluídas; antecipações autorizadas de T067/T071 registradas; T008 preservada com gate Docker pendente para C09 |
 
 ### Resultado C01 — 2026-09-15
 
@@ -228,7 +228,7 @@ pacote sem ocorrências da flag (rg exit 1). `dependency:tree` retornou exit 0/B
 módulos, mantendo GEMS 3.1.0, ModelMapper 3.2.4 temporário e MapStruct 1.6.3 conforme POMs e C00;
 os POMs não receberam alterações. `git diff --check` verde (exit 0).
 As três referências imutáveis informadas pelo pacote estão separadas no estado C01, sem nova
-leitura fora de READ. T008 e Docker build seguem em C10; o próximo checkpoint cabe ao orquestrador.
+leitura fora de READ. T008 e Docker build seguem em C09; o próximo checkpoint cabe ao orquestrador.
 
 ### Resultado C02 — 2026-09-15
 
@@ -334,6 +334,19 @@ autorizou antecipar exclusivamente a caracterização de `field-error` de T067 e
 Gate final: 25 arquivos / 123 testes verdes; 13 regras em 126 arquivos, zero violações; Prettier
 integral verde; build verde, bundle inicial 726,67 kB, com apenas o aviso de budget conhecido;
 `git diff --check` verde. Próxima retomada: C08.
+
+### Resultado C08 — 2026-09-20
+
+T066–T069 concluídas. Parceiro e solicitação expõem `list`, `form`, `form/:id` e `view/:id`,
+com redirect da base, menu e navegação alinhados. A cópia local de `field-error` saiu depois de
+6 casos de equivalência verdes. Os dez artefatos de `commons/` migraram para `shared/`; os 32 nomes
+de teste que passaram a entrar no alcance de `testing.md#7` foram conformados sem alterar os corpos.
+
+T072 passou com 6 arquivos/30 testes e T073 com 7 arquivos/18 testes; os quatro specs movidos
+passaram com 32 testes. O verificador terminou com 13 regras, 124 arquivos e zero violações. Duas
+mutações ficaram vermelhas e foram restauradas: rota `view/:id`→`:id` e navegação
+`/parceiros/form`→`/parceiros/novo`. `app.ts` manteve `Router` somente para observar eventos; zero
+transporte operacional de domínio por sessão. Próxima retomada: C09.
 
 ### Resultado dos checklists
 

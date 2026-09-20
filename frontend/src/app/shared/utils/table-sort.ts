@@ -1,4 +1,4 @@
-/** Estado de ordenação que a `gems-table` espera receber de volta nos inputs. */
+/** Estado de ordenação compartilhado que a `gems-table` espera receber de volta nos inputs. */
 export interface TableSortState {
   field?: string;
   direction: 'asc' | 'desc';

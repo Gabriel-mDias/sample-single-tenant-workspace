@@ -1,3 +1,4 @@
+// Validador compartilhado entre formulários; não pertence a uma feature.
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 
 /**

@@ -4,8 +4,8 @@ import { Routes } from '@angular/router';
  * Rotas de topo (a casca/side-menu vive no AppComponent, por fora).
  *
  * - `''` : home vazia de boas-vindas (`HOME_ROUTES`), qualquer usuário autenticado.
- * - `parceiros` : módulo de feature próprio (`PARCEIRO_ROUTES`), com suas rotas filhas e guards.
- * - `solicitacoes` : módulo de feature próprio (`SOLICITACAO_ROUTES`), idem.
+ * - `parceiros` : módulo com `list`, `form`, `form/:id` e `view/:id`.
+ * - `solicitacoes` : módulo com as mesmas quatro rotas canônicas.
  * - `acesso-negado` : sem guard (destino da negação de ação; casca oculta nesta rota).
  * - `**` : qualquer rota desconhecida volta para a home.
  *

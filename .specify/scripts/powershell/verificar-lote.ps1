@@ -235,8 +235,19 @@ $real = @($achadosArvore | Select-Object -Unique)
 
 # --- descontos: a ancora e o proprio par do protocolo
 $descontar = New-Object 'System.Collections.Generic.HashSet[string]'
-[void]$descontar.Add((ConvertTo-CaminhoNormal $Pacote))
-[void]$descontar.Add((ConvertTo-CaminhoNormal $Estado))
+function ConvertTo-CaminhoDaArvore {
+    param([string]$Caminho)
+    $absoluto = (Resolve-Path -LiteralPath $Caminho).Path
+    if (-not $Worktree) { return (ConvertTo-CaminhoNormal $absoluto) }
+
+    $raiz = (Resolve-Path -LiteralPath $Worktree).Path.TrimEnd([char]'\', [char]'/')
+    if (-not $absoluto.StartsWith($raiz, [System.StringComparison]::OrdinalIgnoreCase)) {
+        Stop-Ruidoso -Arquivo $Caminho -Mensagem 'pacote/estado fora do worktree informado; nao e seguro descontar um caminho de outro repositorio.'
+    }
+    return (ConvertTo-CaminhoNormal $absoluto.Substring($raiz.Length).TrimStart([char]'\', [char]'/'))
+}
+[void]$descontar.Add((ConvertTo-CaminhoDaArvore $Pacote))
+[void]$descontar.Add((ConvertTo-CaminhoDaArvore $Estado))
 if ($Ancora) {
     if (-not (Test-Path -LiteralPath $Ancora -PathType Leaf)) {
         Stop-Ruidoso -Arquivo $Ancora -Mensagem 'arquivo de ancora nao encontrado (parametro -Ancora).'

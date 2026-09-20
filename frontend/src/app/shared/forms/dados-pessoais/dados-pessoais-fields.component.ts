@@ -4,10 +4,10 @@ import {
   GemsInputDateComponent,
   GemsInputDocumentComponent,
   GemsInputTextComponent,
+  GemsFieldErrorComponent,
   GemsSelectComponent,
   GemsSelectOption,
 } from '@gabriel-mdias/angular-gems-sdk';
-import { FieldErrorComponent } from '../field-error/field-error.component';
 import {
   ERRO_CPF,
   ERRO_DATA_NASCIMENTO,
@@ -32,7 +32,7 @@ import { RgMaskDirective } from '../rg/rg-mask.directive';
     RgMaskDirective,
     EnterBuscaDirective,
 
-    FieldErrorComponent,
+    GemsFieldErrorComponent,
   ],
   templateUrl: './dados-pessoais-fields.component.html',
   styleUrl: './dados-pessoais-fields.component.css',

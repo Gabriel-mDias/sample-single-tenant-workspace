@@ -27,7 +27,7 @@ describe('buildMenu', () => {
 
   it('deveApontarParaRotaDeParceiros_quandoAcaoDeConsultaAutorizada', () => {
     const [item] = buildMenu(contextoCom(Acoes.CONSULTAR_PARCEIRO));
-    expect(item.route).toBe('/parceiros');
+    expect(item.route).toBe('/parceiros/list');
     expect(item.label).toBe('Parceiros');
   });
 

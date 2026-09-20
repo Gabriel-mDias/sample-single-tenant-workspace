@@ -1,6 +1,10 @@
 import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { GemsAlertService, GemsWizardComponent } from '@gabriel-mdias/angular-gems-sdk';
+import { ActivatedRoute } from '@angular/router';
+import {
+  GemsAlertService,
+  GemsNavigationService,
+  GemsWizardComponent,
+} from '@gabriel-mdias/angular-gems-sdk';
 import { Acoes, globalAuthorization } from '../../../core/auth/acoes';
 import { AuthService } from '../../../core/auth/auth.service';
 import { BotaoHistoricoComponent } from '../../../shared/auditoria/botao-historico/botao-historico.component';
@@ -40,7 +44,7 @@ import { StepResumoComponent } from './steps/step-resumo/step-resumo.component';
 })
 export class ParceiroFormComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
+  private readonly navigationService = inject(GemsNavigationService);
   private readonly store = inject(ParceiroStore);
   private readonly auth = inject(AuthService);
   private readonly alertService = inject(GemsAlertService);
@@ -106,7 +110,7 @@ export class ParceiroFormComponent implements OnInit, OnDestroy {
 
   /** Seta de retorno do cabeçalho e botão Cancelar levam ao mesmo lugar: a listagem. */
   protected sair(): void {
-    this.router.navigate(['/parceiros']);
+    this.navigationService.navigate(['/parceiros/list']);
   }
 
   protected confirmar(): void {
@@ -125,7 +129,7 @@ export class ParceiroFormComponent implements OnInit, OnDestroy {
           'Os dados foram gravados com sucesso.',
         );
         this.state.clearState();
-        this.router.navigate(['/parceiros']);
+        this.navigationService.navigate(['/parceiros/list']);
       },
       error: (err) => {
         this.alertService.errorFromApi(err);
@@ -149,7 +153,7 @@ export class ParceiroFormComponent implements OnInit, OnDestroy {
       error: (err) => {
         this.alertService.errorFromApi(err);
         this.isCarregando.set(false);
-        this.router.navigate(['/parceiros']);
+        this.navigationService.navigate(['/parceiros/list']);
       },
     });
   }

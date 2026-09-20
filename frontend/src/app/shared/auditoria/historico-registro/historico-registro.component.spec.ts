@@ -3,7 +3,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { PageResponse } from '../../../commons/page-response';
+import { PageResponse } from '../../models/page-response';
 import { RegistroAuditoriaModel } from '../auditoria.model';
 import { AuditoriaStore } from '../auditoria.store';
 import { HistoricoRegistroComponent } from './historico-registro.component';

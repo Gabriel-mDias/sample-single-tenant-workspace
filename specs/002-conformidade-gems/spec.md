@@ -125,6 +125,22 @@ Como product owner, quero evidência reproduzível de que a rodada zerou a dívi
 - **FR-028**: Frontend MUST chegar ao mínimo medido; cada residual MUST ter arquivo, regra, motivo, alternativa e aceite humano.
 - **FR-029**: O agente MUST manter decisões residuais pendentes; não assina exceção, baseline ou aceite.
 - **FR-030**: O fechamento MUST manter verdes 204 testes backend e 21 arquivos/118 testes frontend aplicáveis, mais novas provas.
+- **FR-031**: D-P01 e D-P02 MUST ser atendidas por uma release publicada da Java GEMS SDK; branch,
+  snapshot, clone local e adapter no sample não liberam a adoção.
+- **FR-032**: A release produtora MUST preservar a API pública 3.1.0 por evolução aditiva. O plano
+  classifica a entrega como **3.2.0 MINOR**; qualquer quebra descoberta reabre o portão para decisão
+  MAJOR antes de código adicional.
+- **FR-033**: `gems-auditing` MUST aceitar identidade estável do autor e correlação por pontos de
+  extensão públicos, mantendo nome/tipo e o comportamento técnico atual quando os novos providers
+  não existirem.
+- **FR-034**: `gems-keycloak-admin` MUST expor, sem remover o gateway atual, leitura/snapshot,
+  atualização, habilitação, suspensão, exclusão, compensação de falha na criação, consulta e
+  restauração de grupos, criação idempotente e composição de realm roles.
+- **FR-035**: C11 só pode iniciar após a publicação compatível de FR-034; C12 depende de C11 verde e
+  da publicação compatível de FR-033; C13 continua dependendo de C11 e C12 verdes.
+- **FR-036**: A release só é consumível quando PR/CI/merge/publicação estiverem verdes, o BOM e todos
+  os POMs apontarem para 3.2.0, e `gems-bom`, `gems-auditing`, `gems-keycloak-admin` e
+  `gems-security-authorization` resolverem do GitHub Packages em consumidor limpo.
 
 ### Key Entities
 
@@ -146,6 +162,10 @@ Como product owner, quero evidência reproduzível de que a rodada zerou a dívi
 - **SC-007**: Frontend no mínimo medido; 100% dos residuais nominalmente justificados e aceitos ou pendentes de humano.
 - **SC-008**: Oito rotas passam nos cenários permitido, negado e modo correto.
 - **SC-009**: Gates mantêm pelo menos 204 testes backend e 21/118 frontend aplicáveis, mais novas provas, verdes.
+- **SC-010**: A Java GEMS SDK 3.2.0 publicada preserva compilação do contrato 3.1.0, passa no reator
+  inteiro e reprova as mutações de identidade/correlação, ciclo de usuários, compensação e roles.
+- **SC-011**: O sample não contém adapter de auditoria ou Keycloak criado para cobrir lacuna da SDK;
+  as classes locais só saem nos commits consumidores atômicos de C11 e C12.
 
 ## Clarifications decididas no portão de 2026-09-14
 

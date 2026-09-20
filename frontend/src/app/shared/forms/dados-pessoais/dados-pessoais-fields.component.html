@@ -7,10 +7,10 @@
       icon="fa-solid fa-user"
       [maxlength]="255"
     ></gems-input-text>
-    <app-field-error
+    <gems-field-error
       [control]="form().get('primeiroNome')"
       [messages]="erroPrimeiroNome"
-    ></app-field-error>
+    ></gems-field-error>
   </div>
 
   <div class="form-group">
@@ -21,10 +21,10 @@
       icon="fa-solid fa-user"
       [maxlength]="255"
     ></gems-input-text>
-    <app-field-error
+    <gems-field-error
       [control]="form().get('sobrenome')"
       [messages]="erroSobrenome"
-    ></app-field-error>
+    ></gems-field-error>
   </div>
 
   <div class="form-group">
@@ -58,7 +58,7 @@
         </div>
       }
     </div>
-    <app-field-error [control]="form().get('cpf')" [messages]="cpfErrors()"></app-field-error>
+    <gems-field-error [control]="form().get('cpf')" [messages]="cpfErrors()"></gems-field-error>
     @if (cpfHint()) {
       <p class="field-hint">{{ cpfHint() }}</p>
     }
@@ -83,7 +83,7 @@
       [required]="true"
       [options]="sexoOptions"
     ></gems-select>
-    <app-field-error [control]="form().get('sexo')" [messages]="erroSexo"></app-field-error>
+    <gems-field-error [control]="form().get('sexo')" [messages]="erroSexo"></gems-field-error>
   </div>
 
   @if (comDataNascimento()) {
@@ -94,10 +94,10 @@
         formControlName="dataNascimento"
         format="dayMonthYear"
       ></gems-input-date>
-      <app-field-error
+      <gems-field-error
         [control]="form().get('dataNascimento')"
         [messages]="erroDataNascimento"
-      ></app-field-error>
+      ></gems-field-error>
     </div>
   }
 </div>
