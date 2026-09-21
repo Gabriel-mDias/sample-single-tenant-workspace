@@ -63,9 +63,8 @@ jobs:
           # é o fallback: um gate que só funciona depois de um passo manual de configuração nasce
           # quebrado. Os secrets continuam tendo precedência quando existirem — é o caminho
           # necessário se o pacote passar a ser publicado por outra conta.
-          build-args: |
-            GEMS_REGISTRY_USER=${{ secrets.GEMS_REGISTRY_USER || github.actor }}
-            GEMS_REGISTRY_TOKEN=${{ secrets.GEMS_REGISTRY_TOKEN || secrets.GITHUB_TOKEN }}
+          secrets: |
+            gems_registry_token=${{ secrets.GEMS_REGISTRY_TOKEN || secrets.GITHUB_TOKEN }}
           cache-from: type=gha,scope=backend
           cache-to: type=gha,mode=max,scope=backend
 
@@ -111,8 +110,7 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          build-args: |
-            GEMS_REGISTRY_USER=${{ secrets.GEMS_REGISTRY_USER || github.actor }}
-            GEMS_REGISTRY_TOKEN=${{ secrets.GEMS_REGISTRY_TOKEN || secrets.GITHUB_TOKEN }}
+          secrets: |
+            gems_registry_token=${{ secrets.GEMS_REGISTRY_TOKEN || secrets.GITHUB_TOKEN }}
           cache-from: type=gha,scope=frontend
           cache-to: type=gha,mode=max,scope=frontend

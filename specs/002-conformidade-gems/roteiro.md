@@ -348,6 +348,16 @@ mutações ficaram vermelhas e foram restauradas: rota `view/:id`→`:id` e nave
 `/parceiros/form`→`/parceiros/novo`. `app.ts` manteve `Router` somente para observar eventos; zero
 transporte operacional de domínio por sessão. Próxima retomada: C09.
 
+### Resultado C09 — 2026-09-21
+
+T008 e T070–T073 foram concluídas. O Docker stage `build` passou com `npm ci` e build de produção,
+usando exclusivamente o secret BuildKit previsto para o registry privado. O gate de ações confirmou
+21 ações em paridade com `AcaoSistema`; convenções terminou com 13 regras, 124 arquivos e zero
+violações. Os gates focados T072 (6 arquivos/30 testes) e T073 (7 arquivos/18 testes), o `npm test`
+completo (26 arquivos/123 testes), build, Prettier e `git diff --check` ficaram verdes. O bundle
+inicial foi 735,79 kB, mantendo somente o aviso de budget conhecido. D-P04 segue sem aceite humano.
+Próxima retomada: C10-SDK; C11 e C12 continuam bloqueados até a release compatível.
+
 ### Resultado dos checklists
 
 Requirements, technical e security registram **PASS DE PORTÃO**. D-P01 e D-P02 foram resolvidas pela

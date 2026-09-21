@@ -16,9 +16,9 @@
   justify-content: center;
 
   /* A secundária do tema, um passo mais escura que o token base para
-     contraste suficiente com o texto branco. */
+     contraste suficiente com o texto. */
   background: var(--gems-secondary-600);
-  color: #fff;
+  color: var(--gems-secondary-contrast);
 
   font-size: 12px;
   letter-spacing: 0.02em;
