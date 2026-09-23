@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { GemsBaseStepComponent, GemsFormCardComponent } from '@gabriel-mdias/angular-gems-sdk';
 import { ContatoFieldsComponent } from '../../../../../shared/forms/contato/contato-fields.component';
 import { createContatoForm } from '../../../../../shared/forms/contato/contato-form';
-import { ParceiroFormStateService } from '../../../services/parceiro-form-state.service';
+import { ParceiroFormStateService } from '../../parceiro-state.service';
 import { STEP_CONTATO, STEP_DADOS, STEP_ENDERECO } from '../../parceiro.config';
 
 interface StepContatoPayload {

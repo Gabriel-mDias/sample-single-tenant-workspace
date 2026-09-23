@@ -8,10 +8,7 @@ import {
 import { Acoes, globalAuthorization } from '../../../core/auth/acoes';
 import { AuthService } from '../../../core/auth/auth.service';
 import { BotaoHistoricoComponent } from '../../../shared/auditoria/botao-historico/botao-historico.component';
-import {
-  ParceiroFormMode,
-  ParceiroFormStateService,
-} from '../services/parceiro-form-state.service';
+import { ParceiroFormMode, ParceiroFormStateService } from './parceiro-state.service';
 import { ParceiroStore } from '../services/parceiro.store';
 import { PARCEIRO_FORM_STEPS, STEP_CONTATO, STEP_DADOS, STEP_ENDERECO } from './parceiro.config';
 import { StepContatoComponent } from './steps/step-contato/step-contato.component';

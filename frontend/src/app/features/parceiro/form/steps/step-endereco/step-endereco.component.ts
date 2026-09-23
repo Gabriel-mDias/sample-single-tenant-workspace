@@ -21,7 +21,7 @@ import {
   aplicarObrigatoriedadeDeUfECep,
   createEnderecoForm,
 } from '../../../../../shared/forms/endereco/endereco-form';
-import { ParceiroFormStateService } from '../../../services/parceiro-form-state.service';
+import { ParceiroFormStateService } from '../../parceiro-state.service';
 import { STEP_CONTATO, STEP_ENDERECO, STEP_RESUMO } from '../../parceiro.config';
 
 /**

@@ -70,7 +70,7 @@ describe('HistoricoRegistroComponent', () => {
     }).compileComponents();
   });
 
-  it('renderiza as operações do histórico, com autor e data', () => {
+  it('deveRenderizarOperacoesComAutorEData_quandoHistoricoCarregar', () => {
     const { fixture } = montar([ALTERACAO_COM_SIGILOSO, INSERCAO]);
     const texto = fixture.nativeElement.textContent;
 
@@ -86,7 +86,7 @@ describe('HistoricoRegistroComponent', () => {
    * O ponto do sigilo. Se a tela deixasse em branco, o operador leria "o campo ficou vazio" — que é
    * uma informação diferente e falsa. O valor sigiloso **nunca foi gravado**.
    */
-  it('campo sigiloso exibe "valor não registrado", e não vazio', () => {
+  it('deveExibirValorNaoRegistrado_quandoCampoForSigiloso', () => {
     const { fixture } = montar([ALTERACAO_COM_SIGILOSO]);
     const texto = fixture.nativeElement.textContent;
 
@@ -94,7 +94,7 @@ describe('HistoricoRegistroComponent', () => {
     expect(texto).toContain('valor não registrado');
   });
 
-  it('campo não sigiloso mostra o valor anterior e o novo', () => {
+  it('deveExibirValoresAnteriorENovo_quandoCampoNaoForSigiloso', () => {
     const { fixture } = montar([ALTERACAO_COM_SIGILOSO]);
     const texto = fixture.nativeElement.textContent;
 
@@ -107,7 +107,7 @@ describe('HistoricoRegistroComponent', () => {
    * histórico do cadastro soma os agregados. Sem o rótulo de origem, `telefone` apareceria sem
    * dizer de onde — e dois agregados do mesmo cadastro podem ter campo de mesmo nome.
    */
-  it('registro vindo de um agregado mostra de qual parte do cadastro veio', () => {
+  it('deveExibirOrigem_quandoRegistroVierDeAgregado', () => {
     const doContato: RegistroAuditoriaModel = {
       ...ALTERACAO_COM_SIGILOSO,
       id: 'r3',
@@ -122,7 +122,7 @@ describe('HistoricoRegistroComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Contato');
   });
 
-  it('registro da própria raiz não repete o nome da entidade como origem', () => {
+  it('naoDeveRepetirEntidadeComoOrigem_quandoRegistroForDaRaiz', () => {
     const daRaiz: RegistroAuditoriaModel = {
       ...ALTERACAO_COM_SIGILOSO,
       id: 'r4',
@@ -135,7 +135,7 @@ describe('HistoricoRegistroComponent', () => {
     expect(origem).toBeNull();
   });
 
-  it('registro sem alterações não quebra e mostra a mensagem de vazio', () => {
+  it('deveExibirMensagemVazia_quandoRegistroNaoTiverAlteracoes', () => {
     const { fixture } = montar([]);
 
     expect(fixture.nativeElement.textContent).toContain('não tem alterações registradas');
@@ -145,7 +145,7 @@ describe('HistoricoRegistroComponent', () => {
    * Sem isto, a abertura seguinte mostraria o histórico do registro anterior enquanto a requisição
    * não volta — e o operador leria o dado de outra pessoa como se fosse deste cadastro.
    */
-  it('não busca nada enquanto o modal está fechado', () => {
+  it('naoDeveBuscarHistorico_quandoModalEstiverFechado', () => {
     const historico = vi.fn().mockReturnValue(of(pagina([INSERCAO])));
     TestBed.overrideProvider(AuditoriaStore, { useValue: { historico } });
 
@@ -158,7 +158,7 @@ describe('HistoricoRegistroComponent', () => {
     expect(historico).not.toHaveBeenCalled();
   });
 
-  it('emite o fechamento quando o modal é fechado', () => {
+  it('deveEmitirFechamento_quandoModalForFechado', () => {
     const { fixture } = montar([INSERCAO]);
     let fechou = false;
     fixture.componentInstance.fechar.subscribe(() => (fechou = true));

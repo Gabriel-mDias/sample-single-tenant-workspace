@@ -17,7 +17,7 @@ import { Acoes, globalAuthorization } from '../../../core/auth/acoes';
 import { AuthService } from '../../../core/auth/auth.service';
 import { EnterBuscaDirective } from '../../../shared/forms/enter-busca/enter-busca.directive';
 import { ParceiroFilterModel } from '../models/parceiro-filter.model';
-import { ParceiroResponseModel } from '../models/parceiro-response.model';
+import { ParceiroResponseModel } from '../models/parceiro.model';
 import { ParceiroStore } from '../services/parceiro.store';
 
 /** Ordenação inicial da listagem. */

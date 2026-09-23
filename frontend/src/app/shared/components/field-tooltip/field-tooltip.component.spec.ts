@@ -7,7 +7,7 @@ describe('FieldTooltipComponent', () => {
     await TestBed.configureTestingModule({ imports: [FieldTooltipComponent] }).compileComponents();
   });
 
-  it('liga o botão ao tooltip e permite abri-lo por clique', () => {
+  it('deveAbrirTooltip_quandoClicarNoBotao', () => {
     const fixture = TestBed.createComponent(FieldTooltipComponent);
     fixture.componentRef.setInput('label', 'Dante causa');
     fixture.componentRef.setInput('text', 'Percentual pago ao parceiro por solicitação concluída.');
@@ -23,7 +23,7 @@ describe('FieldTooltipComponent', () => {
     expect(tooltip.textContent).toContain('Percentual pago ao parceiro');
   });
 
-  it('posiciona o balão em coordenadas de janela para escapar do overflow do card', () => {
+  it('devePosicionarBalaoNaJanela_quandoAbrirDentroDoCard', () => {
     const fixture = TestBed.createComponent(FieldTooltipComponent);
     fixture.componentRef.setInput('label', 'Dante causa');
     fixture.componentRef.setInput('text', 'Percentual pago ao parceiro por solicitação concluída.');

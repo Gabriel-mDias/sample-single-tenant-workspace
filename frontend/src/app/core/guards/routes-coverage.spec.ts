@@ -57,7 +57,7 @@ const TODAS = await coletar(APP_ROUTES, '');
 const GUARDADAS = TODAS.filter((v) => (v.route.canActivate ?? []).includes(roleGuard));
 
 describe('cobertura de rotas — data.roles', () => {
-  it('a varredura alcança as rotas guardadas de todas as features', () => {
+  it('deveAlcancarRotasGuardadas_quandoVarrerTodasAsFeatures', () => {
     // O piso é deliberadamente folgado — existe para acusar uma varredura que parou de enxergar
     // (uma feature inteira ignorada, um `loadChildren` que deixou de resolver), não para ser
     // atualizado a cada rota nova. Suba-o quando o projeto crescer o bastante para que o número

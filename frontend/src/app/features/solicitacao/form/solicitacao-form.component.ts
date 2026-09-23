@@ -15,7 +15,7 @@ import { Observable } from 'rxjs';
 import { Acoes, globalAuthorization } from '../../../core/auth/acoes';
 import { AuthService } from '../../../core/auth/auth.service';
 import { BotaoHistoricoComponent } from '../../../shared/auditoria/botao-historico/botao-historico.component';
-import { ParceiroStore } from '../../parceiro/services/parceiro.store';
+import { ParceiroLookupStore } from '../../../shared/parceiro/parceiro-lookup.store';
 import { SITUACAO_CLASSES, SITUACAO_LABELS, SolicitacaoModel } from '../models/solicitacao.model';
 import { SolicitacaoStore } from '../services/solicitacao.store';
 
@@ -52,7 +52,7 @@ export class SolicitacaoFormComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly navigationService = inject(GemsNavigationService);
   private readonly store = inject(SolicitacaoStore);
-  private readonly parceiroStore = inject(ParceiroStore);
+  private readonly parceiroLookupStore = inject(ParceiroLookupStore);
   private readonly auth = inject(AuthService);
   private readonly alertService = inject(GemsAlertService);
 
@@ -265,7 +265,7 @@ export class SolicitacaoFormComponent implements OnInit {
   }
 
   private carregarParceiros(): void {
-    this.parceiroStore.search({}, { page: 0, size: 100, sort: ['nome,asc'] }).subscribe({
+    this.parceiroLookupStore.search({}, { page: 0, size: 100, sort: ['nome,asc'] }).subscribe({
       next: (pagina) =>
         this.parceiros.set(pagina.content.map((p) => ({ label: p.nome, value: p.id }))),
       error: (err) => this.alertService.errorFromApi(err),

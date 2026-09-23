@@ -12,7 +12,7 @@ import { Acoes, globalAuthorization } from '../../../../../core/auth/acoes';
 import { AuthService } from '../../../../../core/auth/auth.service';
 import { DadosPessoaisFieldsComponent } from '../../../../../shared/forms/dados-pessoais/dados-pessoais-fields.component';
 import { createDadosPessoaisForm } from '../../../../../shared/forms/dados-pessoais/dados-pessoais-form';
-import { ParceiroFormStateService } from '../../../services/parceiro-form-state.service';
+import { ParceiroFormStateService } from '../../parceiro-state.service';
 import { STEP_CONTATO, STEP_DADOS } from '../../parceiro.config';
 
 interface StepDadosPayload {

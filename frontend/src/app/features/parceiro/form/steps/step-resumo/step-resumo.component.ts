@@ -1,7 +1,7 @@
 import { Component, computed, inject, input, output } from '@angular/core';
 import { GemsFormCardComponent } from '@gabriel-mdias/angular-gems-sdk';
 import { sexoLabel } from '../../../../../shared/forms/dados-pessoais/dados-pessoais-form';
-import { ParceiroFormStateService } from '../../../services/parceiro-form-state.service';
+import { ParceiroFormStateService } from '../../parceiro-state.service';
 import { STEP_ENDERECO } from '../../parceiro.config';
 
 /**

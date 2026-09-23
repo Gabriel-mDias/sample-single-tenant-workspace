@@ -10,19 +10,19 @@ import { PERFIL_ATUACAO_OPTIONS, perfilAtuacaoLabel } from './perfil-atuacao';
 describe('PERFIL_ATUACAO_OPTIONS', () => {
   const DO_BACKEND = ['ADMINISTRADOR', 'OPERADOR', 'CONSULTA'];
 
-  it('tem exatamente os perfis do enum do backend, na mesma ordem', () => {
+  it('deveEspelharPerfisDoBackend_quandoListarOpcoes', () => {
     expect(PERFIL_ATUACAO_OPTIONS.map((o) => o.value)).toEqual(DO_BACKEND);
   });
 
-  it('nenhum rótulo é vazio', () => {
+  it('naoDeveTerRotuloVazio_quandoListarOpcoes', () => {
     PERFIL_ATUACAO_OPTIONS.forEach((o) => expect(o.label.trim()).not.toBe(''));
   });
 
-  it('devolve o rótulo do perfil', () => {
+  it('deveRetornarRotulo_quandoPerfilForConhecido', () => {
     expect(perfilAtuacaoLabel('OPERADOR')).toBe('Operador');
   });
 
-  it('perfil ausente ou desconhecido devolve string vazia, nunca undefined', () => {
+  it('deveRetornarTextoVazio_quandoPerfilForAusenteOuDesconhecido', () => {
     expect(perfilAtuacaoLabel(null)).toBe('');
     expect(perfilAtuacaoLabel(undefined)).toBe('');
     expect(perfilAtuacaoLabel('PERFIL_QUE_NAO_EXISTE')).toBe('');

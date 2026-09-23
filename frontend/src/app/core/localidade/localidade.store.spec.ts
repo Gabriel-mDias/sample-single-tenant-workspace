@@ -22,7 +22,7 @@ describe('LocalidadeStore', () => {
 
   afterEach(() => http.verify());
 
-  it('listarPaises faz GET em /api/localidades/paises', () => {
+  it('deveFazerGetEmPaises_quandoListarPaises', () => {
     store.listarPaises().subscribe();
 
     const req = http.expectOne(`${API}/api/localidades/paises`);
@@ -30,7 +30,7 @@ describe('LocalidadeStore', () => {
     req.flush([]);
   });
 
-  it('listarEstados aninha o id do país na rota', () => {
+  it('deveIncluirPaisNaRota_quandoListarEstados', () => {
     store.listarEstados('pais-1').subscribe();
 
     const req = http.expectOne(`${API}/api/localidades/paises/pais-1/estados`);
