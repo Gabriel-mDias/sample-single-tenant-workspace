@@ -5,7 +5,7 @@
 bloqueios de release de D-P01 e D-P02 preservados
 
 > Este documento apresenta escopo, decisões, impactos, testes e ordem da rodada. D-P01–D-P03 e a
-> expansão T004 foram decididas no portão; D-P04 permanece deliberadamente posterior à medição.
+> expansão T004 foram decididas no portão; D-P04 foi decidida após a medição e corrigida no C14-R1.
 
 **Índice**: [1 Objetivo](#1-objetivo-da-rodada) · [2 Decisões](#2-decisões-de-entrada-e-do-portão) ·
 [3 Banco](#3-banco-de-dados) · [4 Backend](#4-backend) · [5 Frontend](#5-frontend) ·
@@ -68,7 +68,7 @@ remoção das 22 supressões de dívida e do Spotless ratchet; medição/decisã
 | D-P02 | Keycloak gateway 3.1.0 não cobre update/enable/disable/delete/compensação/grupos completos nem criar/compor roles. | Release SDK prévia ou emenda de contrato. | **Preservar e bloquear até release compatível publicada.** |
 | D-P03 | Realm declarativo altera ambiente fora do EDIT original. | Não alterar; ou expandir e derivar só roles/compostas. | **Não aplicável: manter o ambiente e o realm atuais.** |
 | T004 | CI, Dependabot e README ainda instruem a flag operacional antiga. | Manter fora do EDIT ou autorizar correção nominal. | **Expansão autorizada para `.github/workflows/ci.yml`, `.github/dependabot.yml` e `README.md`.** |
-| D-P04 | Mínimo frontend só existe depois da correção/medição. | Aceitar ou recusar cada residual. | **Decisão adiada até o inventário final; nenhum aceite antecipado.** |
+| D-P04 | Mínimo frontend só existe depois da correção/medição. | Aceitar ou recusar cada residual. | **Devolvido para correção em 2026-09-23; C14-R1 resolveu 63/63 e zerou o baseline.** |
 
 ---
 
@@ -157,7 +157,7 @@ agente não transforma contagem menor em autorização.
 | Bloco | Prova | Gate |
 | :--- | :--- | :--- |
 | Dependências | árvores antes/depois; host/Docker/CI sem flag | `dependency:tree`, `npm ci`, Docker build |
-| Keycloak/autorização | 21 ações, scan, ciclo completo, compensações | teste focado T024; bloqueado por D-P02 |
+| Keycloak/autorização | 21 ações, scan, ciclo completo, compensações | C11 verde: T024 com 52 testes; SDK 3.3.0 |
 | Auditoria atômica | upgrade, commit/rollback, sigilo, identidade/correlação, consulta | teste focado T035 + mutações T036 |
 | Mapping/transação | seis mappers; proxy/banco/checked sem falso rollback | T050 + mutações T048/T049 |
 | Java zero | quatro repos, dois controllers, seis ordens, 177 nomes, 314/22, ratchet | T052–T061 |
@@ -196,7 +196,7 @@ mappers/transações 15; Java zero 10; frontend 12; fechamento 6.
 | :--- | :--- | :--- | :--- |
 | 0 decisões | T001–T004 | Humano + Sol registra | decisões/expansões explícitas |
 | 1 dependências | T005–T012 | Sol/Codex | resolução publicada e sem flag operacional |
-| 2 auth/Keycloak | T013–T024 | Sol/Codex | contrato completo; bloqueado D-P02 |
+| 2 auth/Keycloak | T013–T024 | Sol/Codex | C11 concluído; contrato completo na SDK 3.3.0 |
 | 3 auditoria | T025–T036 | Sol/Codex | um gate atômico; bloqueado D-P01 |
 | 4 mapping/rollback | T037–T051 | Sol/Codex | seis mappers e dois rollbacks reais |
 | 5 Java zero | T052–T061 | Sol/Codex | zero Java e ratchet removido |
@@ -373,7 +373,7 @@ preservação, D-P03 não se aplica e T004 foi autorizada; D-P04 continua no por
 | identidade/correlação SDK | HIGH | D-P01, preservação recomendada |
 | Keycloak incompleto | MEDIUM | D-P02, preservação recomendada |
 | realm/escopo | MEDIUM | D-P03 condicional, seções derivadas apenas |
-| frontend residual | MEDIUM | D-P04 humano após medição |
+| frontend residual | MEDIUM | D-P04 devolvida; residual zero no C14-R1 |
 | paths/contagens | MEDIUM | 79 tasks nominais e números atuais |
 | linguagem spec | MEDIUM | histórias/SC por contrato |
 
@@ -420,7 +420,7 @@ preservação, D-P03 não se aplica e T004 foi autorizada; D-P04 continua no por
 
 ### Decisão posterior à implementação
 
-- [ ] **D-P04**: cada residual frontend medido foi aceito ou devolvido para correção pelo product owner.
+- [x] **D-P04**: residual devolvido para correção e resolvido integralmente no C14-R1.
 
 ### Para concluir a rodada depois do código
 
@@ -431,16 +431,43 @@ preservação, D-P03 não se aplica e T004 foi autorizada; D-P04 continua no por
 > mensagens de 403 e 404 passam às da SDK 3.1.0, 400 e mensagens funcionais 502 preservadas.
 > T054 liberada com testes HTTP e mutações. D-P01/D-P02 permanecem; não é homologação.
 
-- [ ] Backend `clean install` verde, Java zero, supressões/ratchet removidos.
-- [ ] Frontend `npm ci`, testes, build e Prettier verdes; residual decidido por humano.
-- [ ] Auditoria/Keycloak preservam contratos escolhidos e quickstart passa.
-- [ ] Analyze final sem CRITICAL nem violação constitucional.
+- [x] Backend `clean install` verde, Java zero, supressões/ratchet removidos.
+- [x] Frontend `npm ci`, testes, build e Prettier verdes; residual corrigido e baseline vazio.
+- [x] Auditoria/Keycloak preservam contratos escolhidos e quickstart passa.
+- [x] Analyze final sem CRITICAL nem violação constitucional.
 
 > ✅ **PORTÃO APROVADO pelo product owner em 2026-09-14.** Foram aceitos o escopo, a atomicidade,
 > o alvo Java zero, os testes reais, a execução Sol/Codex, a preservação das garantias de auditoria e
 > Keycloak mediante releases prévias compatíveis, a não aplicação de D-P03 e a expansão T004.
-> D-P04 permanece no portão posterior à medição, como planejado. **O `/speckit-implement` está
-> liberado para os blocos não bloqueados; auditoria e Keycloak aguardam as releases compatíveis.**
+> Registro histórico do portão inicial: D-P04 permaneceu posterior à medição. No fechamento,
+> foi devolvida para correção e resolvida com residual zero no C14-R1.
+
+---
+
+## Retomada C12 — 2026-09-23
+
+C12 concluiu T025–T036 localmente, sem commit/push. `gems-auditing` 3.3.0 substitui o writer local
+num bloco atômico com migração preservadora, read model, providers, ativação e remoções. O primeiro
+vermelho ocorreu por API/provider ausentes; o gate final literal passou com 20 testes selecionados
+(2 security, 2 core e 16 deploy), zero
+falhas/erros/skips, Liquibase e `ddl-auto: validate` verdes. Writer, configuração de contexto,
+schema, filtro inclusivo, identidade e correlação reprovaram por mutação e foram restaurados. A
+prova real de rollback passou no consumidor; o alvo mutável reside no writer package-private da SDK
+já certificado na produtora. C13 concluiu T074 em 7/7 redes e T075 com `clean install` verde: 16
+testes em security, 124 em core e 73 em deploy, total 213, zero falhas/erros/skips. O único ajuste
+adicional foi autorizado nominalmente em `SolicitacaoRollbackIntegrationTest`, alinhando quatro
+operações SQL e duas extrações de identificador ao schema C12 sem alterar produção. T076
+também ficou verde: `npm ci`, 26 arquivos/123 testes, build e Prettier, além dos verificadores de
+SSO, 21 ações e 13 regras/124 arquivos com zero violações. C13 está 3/3 concluído; próximo lote:
+C14. C11/C12/C13 continuam sem commit/push.
+
+C14 concluiu T077: upgrade local 32→33 changesets e segundo boot idempotente, três compose files
+válidos, one-shot 2/2, bootstrap real 21 ações/3 grupos com 21→0 novos filhos e gate das oito
+rotas 9/9. O inventário D-P04 revelou 63 ocorrências e foi devolvido nominalmente para correção.
+C14-R1 corrigiu 57 títulos, duas cores e quatro violações de organização, esvaziou o baseline e
+passou 13 regras/126 arquivos, 27 arquivos/125 testes, build e Prettier. C15 refez o analyze com
+30/30 FR, 9/9 SC, 79/79 tarefas, zero CRITICAL e zero violação constitucional. O Sample fecha sem
+commit/push; o próximo portão humano é a preservação da worktree do Meduc.
 
 ---
 

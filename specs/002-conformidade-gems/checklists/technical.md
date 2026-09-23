@@ -20,9 +20,9 @@
 - [x] D-P01 preserva auditoria e exige release compatível antes da adoção.
 - [x] D-P02 preserva Keycloak e exige release compatível antes da substituição.
 - [x] D-P03 não aplicável; ambiente/realm preservados.
-- [ ] D-P04 aceita cada residual frontend depois da medição.
+- [x] D-P04 devolvida para correção e resolvida com residual frontend zero.
 
 ## Resultado
 
-**PASS DE PORTÃO**. O plano técnico está aprovado; auditoria e Keycloak não podem começar antes das
-releases compatíveis, e D-P04 permanece para a medição final.
+**PASS FINAL**. Auditoria e Keycloak foram adotados após releases compatíveis; D-P04 foi corrigida,
+o baseline frontend está vazio e os gates finais estão verdes.

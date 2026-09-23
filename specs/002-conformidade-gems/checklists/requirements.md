@@ -25,9 +25,9 @@
 - [x] D-P01 autoria estável/correlação preservada; adoção espera release compatível.
 - [x] D-P02 superfície Keycloak completa preservada; substituição espera release compatível.
 - [x] D-P03 não aplicável; ambiente/realm preservados.
-- [ ] D-P04 residuais frontend decididos depois da medição final.
+- [x] D-P04 devolvida para correção; 63/63 ocorrências resolvidas e baseline zerado.
 
 ## Resultado
 
-**PASS DE PORTÃO**: especificação completa e rastreável; D-P04 permanece corretamente adiada para a
-medição final. Os blocos de auditoria e Keycloak continuam condicionados às releases compatíveis.
+**PASS FINAL**: especificação completa e rastreável; D-P01/D-P02 foram satisfeitas pelas releases
+compatíveis, D-P03 não se aplicou e D-P04 terminou corrigida com residual zero.

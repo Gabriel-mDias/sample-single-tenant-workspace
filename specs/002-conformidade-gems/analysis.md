@@ -1,49 +1,47 @@
-# Analyze — Conformidade GEMS
+# Analyze final — Conformidade GEMS
 
-**Data**: 2026-09-14
-**Escopo**: todos os artefatos da fase 2 após revisão do orquestrador.
+**Data**: 2026-09-23
+**Escopo**: artefatos e implementação finais da rodada 002, após C14-R1.
 
 ## Resultado
 
-- CRITICAL documental restante: **0**
-- HIGH: **4**, incorporados; D-P01 preserva a garantia e bloqueia o bloco até release compatível
-- MEDIUM: **5**, incorporados; D-P02 preserva a garantia, D-P03 não se aplica e D-P04 é posterior
-- Constituição: portão aprovado; dois blocos permanecem bloqueados por releases, não por decisão humana
+- CRITICAL: **0**
+- Violações constitucionais: **0**
+- Achados bloqueantes: **0**
+- Tarefas: **79/79 concluídas**
 
-## Achados
+## Achados e resoluções
 
-| ID | Sev. | Achado | Tratamento |
-| :--- | :--- | :--- | :--- |
-| A-01 | HIGH | Java precisa terminar em zero, não apenas reduzir. | FR-012/SC-006/T052–T061: 314, 4 repositories, 2 controllers, 6 ordens, 177 nomes, 22 supressões e ratchet zerados/removidos. |
-| A-02 | HIGH | Separar schema e writer cria estado impossível. | Phase 3 é bloco atômico T025–T036, sem checkpoint/commit intermediário. |
-| A-03 | HIGH | Unitário Mockito não prova `rollbackFor`. | T046/T047 são Spring integrados, proxy + PostgreSQL + checked após escrita, sem `@Transactional` no teste; mutações T048/T049. |
-| A-04 | HIGH | SDK auditing 3.1.0 perde identidade estável/correlação. | D-P01 aprovada pela preservação; bloco espera release SDK compatível. Resolver id por login foi removido. |
-| A-05 | MEDIUM | Gateway Keycloak 3.1.0 não cobre ciclo/roles atuais. | D-P02 aprovada pela preservação; bloco espera release SDK compatível, sem adapter duplicado. |
-| A-06 | MEDIUM | Realm gerado inteiro apagaria configuração e expande escopo. | D-P03 não aplicável; realm e ambientes atuais ficam inalterados. |
-| A-07 | MEDIUM | Frontend não fecha só por redução agregada. | D-P04 mantém residual nominal pendente; agente não concede aceite. |
-| A-08 | MEDIUM | Tasks anteriores usavam paths presumidos/curingas e repositories errados. | Tasks refeitas com CREATE, arquivos nominais, quatro repositories reais e commands/gates por fase. |
-| A-09 | MEDIUM | Spec anterior misturava valor de história com tecnologia. | Histórias/cenários/SCs reescritos por contrato; mecanismo fica em FR/plan/research/contracts. |
+| ID | Sev. original | Resolução final |
+| :--- | :--- | :--- |
+| A-01 | HIGH | Java terminou em zero; baselines, supressões e ratchet foram removidos. |
+| A-02 | HIGH | Migração e writer de auditoria foram entregues no bloco atômico C12. |
+| A-03 | HIGH | Rollback foi provado por Spring/PostgreSQL e mutações reais em C03/C13. |
+| A-04 | HIGH | SDK 3.3.0 preservou identidade estável e correlação; D-P01 resolvida. |
+| A-05 | MEDIUM | SDK 3.3.0 cobriu lifecycle, roles e grupos; D-P02 resolvida. |
+| A-06 | MEDIUM | D-P03 não se aplicou; realm e ambientes não derivados foram preservados. |
+| A-07 | MEDIUM | D-P04 foi devolvida para correção; C14-R1 eliminou 63/63 ocorrências e zerou o baseline. |
+| A-08 | MEDIUM | Tasks e pacotes usam arquivos nominais, comandos e gates por fase. |
+| A-09 | MEDIUM | Histórias e SCs permanecem por contrato, com mecanismos em FR/plan/research/contracts. |
 
 ## Rastreabilidade
 
-- 30/30 FRs cobertas por T001–T079.
-- 9/9 SCs têm prova em gates de fase ou fechamento.
-- 5/5 histórias têm teste independente.
-- 9/9 princípios constitucionais aparecem nominalmente no plan.
-- Contagens atuais usadas: 21 ações, 6 mappers, 4 repositories, 2 controllers, 4 handlers, 177 nomes, 314/22, 189, 174, 204 e 21/118.
-- Histórico 179 não governa nenhuma task.
+- **30/30 FRs** cobertas por T001–T079.
+- **9/9 SCs** com prova em gates de fase ou fechamento.
+- **5/5 histórias** com teste independente.
+- **9/9 princípios constitucionais** avaliados nominalmente e sem violação residual.
+- Frontend: 13 regras em 126 arquivos, zero violação e baseline vazio.
 
-## Consistência de decisões
+## Evidência de fechamento
 
-D-P01 e D-P02 foram decididas pela preservação: a API publicada existe, mas não cobre as garantias
-atuais, então os blocos esperam releases compatíveis. D-P03 não se aplica. D-P04 necessariamente
-espera a medição de implementação. As decisões estão propagadas nos artefatos de portão.
-
-## Opus
-
-Elegível por arquitetura, segurança, migração e ambiente; não chamado por proibição do pacote.
+- Backend C13: `clean install`, 213 testes, zero falhas/erros/skips.
+- Frontend C14-R1: `npm ci`, 27 arquivos/125 testes, build e Prettier verdes.
+- Quickstart C14: upgrade 32→33, segundo boot idempotente, três compose files válidos,
+  Keycloak one-shot 2/2, bootstrap 21 ações/3 grupos e oito rotas 9/9.
+- `git diff --check`: verde.
 
 ## Parecer
 
-Portão humano aprovado em 2026-09-14. A implementação independente está liberada; auditoria e
-Keycloak esperam releases compatíveis, e o residual frontend terá gate humano posterior.
+A rodada 002 do Sample está concluída. Não há achado bloqueante nem violação constitucional.
+O próximo portão humano é a aprovação da estratégia de preservação da worktree do Meduc;
+nenhuma edição no Meduc, commit ou push foi realizada por este fechamento.

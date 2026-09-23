@@ -66,5 +66,8 @@ cd ..\frontend; npm test; npm run build
 Use gates focados durante a iteração e o gate completo uma única vez no fechamento. Nunca execute
 `docker compose down -v`.
 
+Sandbox ampliado é uma permissão temporária por rodada: liga-se somente com decisão registrada e
+volta ao modo padrão no fechamento. A rodada 002 o desligou em 2026-09-23.
+
 ⚠️ **No Windows o Codex executa via `powershell.exe`, e `./mvnw` é script `sh`.** Use
 `cmd /c mvnw.cmd ...` — o script shell falha na invocação mesmo com o código correto.

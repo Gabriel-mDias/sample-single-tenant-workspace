@@ -53,6 +53,8 @@ npm run build
 
 - Iteração backend pode usar `-pl <modulo> -am`; gate final usa o reator inteiro uma vez.
 - `npm install` exige `--legacy-peer-deps`.
+- Sandbox ampliado é uma permissão temporária por rodada: liga-se somente com decisão registrada e
+  volta ao modo padrão no fechamento. A rodada 002 o desligou em 2026-09-23.
 - Ambiente local sobe com `docker compose up -d` em `environments/local`.
 - Nunca execute `docker compose down -v`.
 - Não faça commit como executor delegado.
