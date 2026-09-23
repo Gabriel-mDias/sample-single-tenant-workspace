@@ -1,5 +1,6 @@
 package br.com.gems.app.model.entity.base;
 
+import br.com.gems.auditing.Auditable;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
@@ -29,6 +30,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @MappedSuperclass
+@Auditable
 public abstract class EntidadeAuditavel {
 
     @CreationTimestamp

@@ -5,6 +5,7 @@ import br.com.gems.app.model.entity.normalizacao.Contato;
 import br.com.gems.app.model.entity.normalizacao.Endereco;
 import br.com.gems.app.model.entity.normalizacao.Pessoa;
 import br.com.gems.app.model.entity.parceiro.Parceiro;
+import br.com.gems.app.model.enums.OperacaoAuditoria;
 import br.com.gems.app.support.AbstractIntegrationTest;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
@@ -59,9 +60,11 @@ class AuditoriaSigiloIntegrationTest extends AbstractIntegrationTest {
         var camposDaAlteracao = entityManager.createQuery(
                 "SELECT c FROM CampoAlterado c WHERE c.registroAuditoria.entidade = 'Parceiro' "
                         + "AND c.registroAuditoria.registroAfetado = :id "
+                        + "AND c.registroAuditoria.operacao = :operacao "
                         + "AND c.campo = 'comissao'",
                 br.com.gems.app.model.entity.auditoria.CampoAlterado.class )
                 .setParameter( "id", parceiroId )
+                .setParameter( "operacao", OperacaoAuditoria.ALTERACAO )
                 .getResultList();
 
         assertThat( camposDaAlteracao )

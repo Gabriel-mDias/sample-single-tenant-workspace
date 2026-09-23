@@ -1,8 +1,10 @@
 package br.com.gems.app.auditoria;
 
+import br.com.gems.app.auditoria.repository.RegistroAuditoriaRepository;
 import br.com.gems.app.model.entity.auditoria.RegistroAuditoria;
 import br.com.gems.app.model.entity.normalizacao.Pessoa;
 import br.com.gems.app.model.enums.OperacaoAuditoria;
+import br.com.gems.app.model.params.AuditoriaFilterParams;
 import br.com.gems.app.support.AbstractIntegrationTest;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.AfterEach;
@@ -13,9 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -48,6 +52,9 @@ class AuditoriaInterceptorIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
     private TransactionTemplate transactionTemplate;
+
+    @Autowired
+    private RegistroAuditoriaRepository repository;
 
     /** Único por execução — é o que restringe toda asserção ao dado desta classe. */
     private final String sufixo = "Auditoria-" + UUID.randomUUID();
@@ -131,6 +138,7 @@ class AuditoriaInterceptorIntegrationTest extends AbstractIntegrationTest {
     @DisplayName("rollback do dado é rollback da trilha")
     void deveComprovarRollbackNaoDeixaRegistro_quandoExecutaOCenario() {
         var id = UUID.randomUUID();
+        MDC.put( "correlationId", "rollback-" + sufixo );
 
         try {
             transactionTemplate.executeWithoutResult( status -> {
@@ -176,7 +184,7 @@ class AuditoriaInterceptorIntegrationTest extends AbstractIntegrationTest {
 
         var registro = trilhaDe( "Pessoa", id ).getFirst();
 
-        assertThat( registro.getAutorNome() ).isEqualTo( "sistema" );
+        assertThat( registro.getAutorNome() ).isEqualTo( "SISTEMA" );
         assertThat( registro.getAutorId() ).isNull();
     }
 
@@ -194,6 +202,26 @@ class AuditoriaInterceptorIntegrationTest extends AbstractIntegrationTest {
 
         assertThat( registro.getAutorId() ).isEqualTo( sub );
         assertThat( registro.getAutorNome() ).isEqualTo( "joao.operador" );
+    }
+
+    @Test
+    @DisplayName("filtros preservam id estável e data final inclusiva")
+    void deveComprovarFiltrosPorIdEDataInclusiva_quandoExecutaOCenario() {
+        var sub = UUID.randomUUID();
+        autenticarComo( sub, "filtro.operador" );
+        var id = transactionTemplate.execute( status -> gravarPessoa( "Isabela" ).getId() );
+
+        var filtro = new AuditoriaFilterParams();
+        filtro.setEntidade( "Pessoa" );
+        filtro.setRegistroAfetado( id );
+        filtro.setOperacao( "INSERCAO" );
+        filtro.setAutorId( sub );
+        filtro.setDataInicio( LocalDate.now() );
+        filtro.setDataFim( LocalDate.now() );
+
+        assertThat( repository.search( filtro, PageRequest.of( 0, 10 ) ).getContent() )
+                .singleElement()
+                .satisfies( registro -> assertThat( registro.getRegistroAfetado() ).isEqualTo( id ) );
     }
 
     // ------------------------------------------------------------------ apoio
@@ -222,14 +250,12 @@ class AuditoriaInterceptorIntegrationTest extends AbstractIntegrationTest {
                 .getResultList();
     }
 
-    /** Toda a trilha de Pessoa produzida por esta execução — restrita pelo sobrenome-sufixo. */
+    /** Toda a trilha tentada pela transação revertida — restrita pela correlação única. */
     private List<RegistroAuditoria> trilhaDoSufixo() {
         return entityManager.createQuery(
-                "SELECT r FROM RegistroAuditoria r WHERE r.entidade = 'Pessoa' "
-                        + "AND r.registroAfetado IN ("
-                        + "  SELECT p.id FROM Pessoa p WHERE p.sobrenome = :sufixo)",
+                "SELECT r FROM RegistroAuditoria r WHERE r.correlacaoId = :correlacao",
                 RegistroAuditoria.class )
-                .setParameter( "sufixo", sufixo )
+                .setParameter( "correlacao", "rollback-" + sufixo )
                 .getResultList();
     }
 

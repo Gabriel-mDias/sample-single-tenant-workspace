@@ -49,10 +49,10 @@ class ParceiroRollbackIntegrationTest extends AbstractIntegrationTest {
 
     @AfterEach
     void limparDadosProprios() {
-        jdbc.update( "DELETE FROM auditoria.CAMPO_ALTERADO WHERE ID_REGISTRO_AUDITORIA IN "
-                + "(SELECT ID_REGISTRO_AUDITORIA FROM auditoria.REGISTRO_AUDITORIA WHERE CD_CORRELACAO = ?)",
+        jdbc.update( "DELETE FROM auditoria.AUDIT_CHANGE WHERE ID_AUDIT_OPERATION IN "
+                + "(SELECT ID_AUDIT_OPERATION FROM auditoria.AUDIT_OPERATION WHERE CD_CORRELATION = ?)",
                 correlacao );
-        jdbc.update( "DELETE FROM auditoria.REGISTRO_AUDITORIA WHERE CD_CORRELACAO = ?", correlacao );
+        jdbc.update( "DELETE FROM auditoria.AUDIT_OPERATION WHERE CD_CORRELATION = ?", correlacao );
         registros.forEach( registro -> jdbc
                 .update( "DELETE FROM " + registro.tabela() + " WHERE " + registro.chave() + " = ?", registro.id() ) );
         MDC.clear();
@@ -78,7 +78,7 @@ class ParceiroRollbackIntegrationTest extends AbstractIntegrationTest {
                     .as( "rollback físico de %s por id %s", registro.tabela(), registro.id() ).isZero();
             assertThat( quantidadeTrilha( registro.id() ) ).isZero();
         } );
-        assertThat( jdbc.queryForObject( "SELECT COUNT(*) FROM auditoria.REGISTRO_AUDITORIA WHERE CD_CORRELACAO = ?",
+        assertThat( jdbc.queryForObject( "SELECT COUNT(*) FROM auditoria.AUDIT_OPERATION WHERE CD_CORRELATION = ?",
                 Long.class, correlacao ) ).isZero();
     }
 
@@ -163,8 +163,8 @@ class ParceiroRollbackIntegrationTest extends AbstractIntegrationTest {
 
     private long quantidadeTrilha( UUID id ) {
         return jdbc.queryForObject(
-                "SELECT COUNT(*) FROM auditoria.REGISTRO_AUDITORIA WHERE ID_REGISTRO_AFETADO = ? AND CD_CORRELACAO = ?",
-                Long.class, id, correlacao );
+                "SELECT COUNT(*) FROM auditoria.AUDIT_OPERATION WHERE DS_ENTITY_ID = ? AND CD_CORRELATION = ?",
+                Long.class, id.toString(), correlacao );
     }
 
     private record Registro(String tabela, String chave, UUID id) {

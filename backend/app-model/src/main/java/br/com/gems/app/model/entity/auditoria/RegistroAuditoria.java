@@ -3,8 +3,7 @@ package br.com.gems.app.model.entity.auditoria;
 import br.com.gems.app.model.enums.OperacaoAuditoria;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import jakarta.persistence.Convert;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -19,6 +18,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -57,7 +58,7 @@ import java.util.UUID;
 @Setter
 @ToString
 @Entity
-@Table(name = "REGISTRO_AUDITORIA", schema = "auditoria")
+@Table(name = "AUDIT_OPERATION", schema = "auditoria")
 @NamedEntityGraph(name = "registro-auditoria-entity-graph", attributeNodes = {
         @NamedAttributeNode(value = "camposAlterados"),
 })
@@ -65,33 +66,35 @@ public class RegistroAuditoria {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "ID_REGISTRO_AUDITORIA")
+    @Column(name = "ID_AUDIT_OPERATION")
     private UUID id;
 
-    @Column(name = "NM_ENTIDADE", nullable = false, length = 100)
+    @Column(name = "NM_ENTITY", nullable = false, length = 100)
     private String entidade;
 
     /** Não é FK: precisa sobreviver à exclusão do alvo e aponta para tabelas diferentes. */
-    @Column(name = "ID_REGISTRO_AFETADO", nullable = false)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
+    @Column(name = "DS_ENTITY_ID", nullable = false, length = 255)
     private UUID registroAfetado;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "CD_OPERACAO", nullable = false, length = 20)
+    @Convert(converter = OperacaoAuditoria.PersistenciaConverter.class)
+    @Column(name = "CD_OPERATION", nullable = false, length = 20)
     private OperacaoAuditoria operacao;
 
-    @Column(name = "DT_OPERACAO", nullable = false)
+    @Column(name = "DT_OPERATION", nullable = false)
     private LocalDateTime dataOperacao;
 
     /** Não é FK: a trilha precisa continuar legível se o usuário for removido. Nulo = sistema. */
-    @Column(name = "ID_AUTOR")
+    @JdbcTypeCode(SqlTypes.VARCHAR)
+    @Column(name = "ID_ACTOR", length = 200)
     private UUID autorId;
 
     /** Desnormalizado de propósito — ver javadoc da classe. O login, ou "sistema". */
-    @Column(name = "NM_AUTOR", nullable = false, length = 150)
+    @Column(name = "NM_ACTOR", nullable = false, length = 150)
     private String autorNome;
 
     /** Amarra todas as entidades gravadas no mesmo {@code save}. */
-    @Column(name = "CD_CORRELACAO", length = 64)
+    @Column(name = "CD_CORRELATION", length = 200)
     private String correlacaoId;
 
     @ToString.Exclude

@@ -62,7 +62,7 @@ management:
         enabled: true
 
 # ---------------------------------------------------------------------------
-# Configuração da aplicação (namespace tipado — ver AppKeycloakProperties)
+# Configuração da aplicação
 # ---------------------------------------------------------------------------
 app:
   security:
@@ -72,6 +72,8 @@ app:
       # Client confidencial usado nas operações administrativas (Admin API)
       client-id: ${KEYCLOAK_BACKEND_CLIENT_ID:app-backend}
       client-secret: ${KEYCLOAK_BACKEND_CLIENT_SECRET:app-backend-local-secret}
+      connect-timeout: ${KEYCLOAK_CONNECT_TIMEOUT:5s}
+      read-timeout: ${KEYCLOAK_READ_TIMEOUT:10s}
 
     # Origens liberadas para CORS (SPA Angular). Lista separada por vírgula.
     # Em produção, aponte para o domínio do frontend; nunca use "*" com credenciais.
@@ -102,6 +104,10 @@ springdoc:
     enabled: ${SPRINGDOC_ENABLED:true}
 
 gems:
+  auditing:
+    enabled: ${GEMS_AUDITING_ENABLED:true}
+    schema: ${GEMS_AUDITING_SCHEMA:auditoria}
+    context-columns-enabled: ${GEMS_AUDITING_CONTEXT_COLUMNS_ENABLED:true}
   rest:
     correlation-id:
       header-name: ${CORRELATION_ID_HEADER:X-Correlation-Id}

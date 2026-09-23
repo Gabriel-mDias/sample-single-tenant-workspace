@@ -1,6 +1,6 @@
 package br.com.gems.app.model.entity.parceiro;
 
-import br.com.gems.app.model.entity.base.CampoSigiloso;
+import br.com.gems.auditing.SensitiveField;
 import br.com.gems.app.model.entity.base.EntidadeAuditavel;
 import br.com.gems.app.model.entity.normalizacao.Contato;
 import br.com.gems.app.model.entity.normalizacao.Endereco;
@@ -78,13 +78,13 @@ public class Parceiro extends EntidadeAuditavel {
      * Percentual de comissão do parceiro.
      *
      * <p>
-     * {@link CampoSigiloso} tira o <b>valor</b> da trilha de auditoria: a trilha registra que o
+     * {@link SensitiveField} tira o <b>valor</b> da trilha de auditoria: a trilha registra que o
      * campo mudou, e não para quanto. Quem enxerga o número na API é decidido no
      * {@code ParceiroService}, por {@code possuiAcao(VISUALIZAR_COMISSAO)} — em {@code toDTO}, na
      * busca <b>e</b> na gravação, para que um payload malicioso não sobrescreva o que o chamador
      * não podia ler.
      */
-    @CampoSigiloso
+    @SensitiveField
     @Column(name = "VL_COMISSAO", precision = 5, scale = 2)
     private BigDecimal comissao;
 

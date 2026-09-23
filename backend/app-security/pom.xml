@@ -46,6 +46,11 @@
             <groupId>br.com.gems</groupId>
             <artifactId>gems-keycloak-admin</artifactId>
         </dependency>
+        <dependency>
+            <groupId>br.com.gems</groupId>
+            <artifactId>gems-auditing</artifactId>
+        </dependency>
+
         <!-- Primeiro classpath de teste deste módulo. Não traz Mockito de propósito: o
              UsuarioAutenticadoService é testado contra o SecurityContextHolder real, com um Jwt de
              verdade — mocar o token esconderia justamente o claim ausente. -->

@@ -50,7 +50,7 @@ class AuditoriaControllerSemEscritaTest {
                 .as( """
                         O AuditoriaController expõe método de escrita. Isso viola o requisito.
 
-                        Quem grava a trilha é o AuditoriaInterceptor, na camada de persistência. Um \
+                        Quem grava a trilha é o writer do GEMS Auditing, na camada de persistência. Um \
                         endpoint de escrita permite forjar registro; um de exclusão faz da trilha \
                         algo apagável. Se a necessidade for legítima — expurgo por retenção, por \
                         exemplo — ela é rotina de banco, não API, e passa por decisão registrada.""" )

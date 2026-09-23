@@ -110,6 +110,11 @@
 				<artifactId>gems-keycloak-admin</artifactId>
 				<version>${gems.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>br.com.gems</groupId>
+				<artifactId>gems-auditing</artifactId>
+				<version>${gems.version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 

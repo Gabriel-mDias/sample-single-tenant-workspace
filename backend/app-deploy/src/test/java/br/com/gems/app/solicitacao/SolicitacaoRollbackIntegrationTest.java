@@ -59,10 +59,10 @@ class SolicitacaoRollbackIntegrationTest extends AbstractIntegrationTest {
 
     @AfterEach
     void limparDadosProprios() {
-        jdbc.update( "DELETE FROM auditoria.CAMPO_ALTERADO WHERE ID_REGISTRO_AUDITORIA IN "
-                + "(SELECT ID_REGISTRO_AUDITORIA FROM auditoria.REGISTRO_AUDITORIA WHERE CD_CORRELACAO IN (?, ?))",
+        jdbc.update( "DELETE FROM auditoria.AUDIT_CHANGE WHERE ID_AUDIT_OPERATION IN "
+                + "(SELECT ID_AUDIT_OPERATION FROM auditoria.AUDIT_OPERATION WHERE CD_CORRELATION IN (?, ?))",
                 correlacao, correlacao + "-fixture" );
-        jdbc.update( "DELETE FROM auditoria.REGISTRO_AUDITORIA WHERE CD_CORRELACAO IN (?, ?)", correlacao,
+        jdbc.update( "DELETE FROM auditoria.AUDIT_OPERATION WHERE CD_CORRELATION IN (?, ?)", correlacao,
                 correlacao + "-fixture" );
         if ( ObjectUtil.isNotNullAndNotEmpty( etapaId ) ) {
             jdbc.update( "DELETE FROM ETAPA_SOLICITACAO WHERE ID_ETAPA_SOLICITACAO = ?", etapaId );
@@ -114,8 +114,8 @@ class SolicitacaoRollbackIntegrationTest extends AbstractIntegrationTest {
         assertThat( jdbc.queryForObject( "SELECT CD_SITUACAO FROM SOLICITACAO WHERE ID_SOLICITACAO = ?", String.class,
                 solicitacaoId ) ).isEqualTo( "RASCUNHO" );
         assertThat( trilha( correlacao ) ).hasSize( 2 );
-        assertThat( trilha( correlacao ) ).extracting( linha -> linha.get( "id_registro_afetado" ) )
-                .containsExactlyInAnyOrder( solicitacaoId, etapaId );
+        assertThat( trilha( correlacao ) ).extracting( linha -> linha.get( "ds_entity_id" ) )
+                .containsExactlyInAnyOrder( solicitacaoId.toString(), etapaId.toString() );
         assertThat( estadoDoParceiro() ).isEqualTo( baseline );
     }
 
@@ -158,8 +158,8 @@ class SolicitacaoRollbackIntegrationTest extends AbstractIntegrationTest {
                 LocalDateTime.class, solicitacaoId ) ).isNotNull();
         assertThat( jdbc.queryForObject( "SELECT NR_SOLICITACOES_CONCLUIDAS FROM PARCEIRO WHERE ID_PARCEIRO = ?",
                 Integer.class, parceiroId ) ).isEqualTo( 1 );
-        assertThat( trilha( correlacao ) ).extracting( linha -> linha.get( "id_registro_afetado" ) )
-                .contains( solicitacaoId, parceiroId, etapaId );
+        assertThat( trilha( correlacao ) ).extracting( linha -> linha.get( "ds_entity_id" ) )
+                .contains( solicitacaoId.toString(), parceiroId.toString(), etapaId.toString() );
         assertThat( jdbc.queryForObject( "SELECT FL_CONCLUIDA FROM ETAPA_SOLICITACAO WHERE ID_ETAPA_SOLICITACAO = ?",
                 Boolean.class, etapaId ) ).isTrue();
     }
@@ -266,13 +266,13 @@ class SolicitacaoRollbackIntegrationTest extends AbstractIntegrationTest {
                 jdbc.queryForList( "SELECT * FROM ETAPA_SOLICITACAO WHERE ID_ETAPA_SOLICITACAO = ?", etapaId ),
                 estadoDoParceiro(),
                 jdbc.queryForList(
-                        "SELECT c.* FROM auditoria.CAMPO_ALTERADO c JOIN auditoria.REGISTRO_AUDITORIA r ON r.ID_REGISTRO_AUDITORIA = c.ID_REGISTRO_AUDITORIA WHERE r.CD_CORRELACAO = ? ORDER BY c.ID_CAMPO_ALTERADO",
+                        "SELECT c.* FROM auditoria.AUDIT_CHANGE c JOIN auditoria.AUDIT_OPERATION r ON r.ID_AUDIT_OPERATION = c.ID_AUDIT_OPERATION WHERE r.CD_CORRELATION = ? ORDER BY c.ID_AUDIT_CHANGE",
                         correlacao + "-fixture" ) );
     }
 
     private List<Map<String, Object>> trilha( String codigo ) {
         return jdbc.queryForList(
-                "SELECT * FROM auditoria.REGISTRO_AUDITORIA WHERE CD_CORRELACAO = ? ORDER BY ID_REGISTRO_AUDITORIA",
+                "SELECT * FROM auditoria.AUDIT_OPERATION WHERE CD_CORRELATION = ? ORDER BY ID_AUDIT_OPERATION",
                 codigo );
     }
 

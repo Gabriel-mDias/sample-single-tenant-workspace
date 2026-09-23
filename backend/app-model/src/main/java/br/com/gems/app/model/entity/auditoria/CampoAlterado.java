@@ -43,20 +43,20 @@ import java.util.UUID;
 @Setter
 @ToString
 @Entity
-@Table(name = "CAMPO_ALTERADO", schema = "auditoria")
+@Table(name = "AUDIT_CHANGE", schema = "auditoria")
 public class CampoAlterado {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "ID_CAMPO_ALTERADO")
+    @Column(name = "ID_AUDIT_CHANGE")
     private UUID id;
 
     @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "ID_REGISTRO_AUDITORIA", nullable = false)
+    @JoinColumn(name = "ID_AUDIT_OPERATION", nullable = false)
     private RegistroAuditoria registroAuditoria;
 
-    @Column(name = "NM_CAMPO", nullable = false, length = 100)
+    @Column(name = "NM_FIELD", nullable = false, length = 100)
     private String campo;
 
     /**
@@ -75,11 +75,11 @@ public class CampoAlterado {
      * limitado aqui pelo mesmo motivo: um valor anterior pode ser qualquer campo de qualquer
      * entidade auditada.
      */
-    @Column(name = "DS_VALOR_ANTERIOR")
+    @Column(name = "DS_OLD_VALUE")
     private String valorAnterior;
 
     /** Nulo quando o campo passou a vazio, ou quando {@code sigiloso} é verdadeiro. */
-    @Column(name = "DS_VALOR_NOVO")
+    @Column(name = "DS_NEW_VALUE")
     private String valorNovo;
 
     /** Quando verdadeiro, os dois valores acima são nulos e a tela mostra "valor não registrado". */
