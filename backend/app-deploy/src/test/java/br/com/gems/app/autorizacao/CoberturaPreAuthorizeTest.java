@@ -1,25 +1,17 @@
 package br.com.gems.app.autorizacao;
 
-import br.com.gems.app.security.annotation.PublicEndpoint;
+import br.com.gems.app.security.AcaoSistema;
 import br.com.gems.app.support.AbstractIntegrationTest;
+import br.com.gems.security.authorization.AuthorizationCatalog;
+import br.com.gems.security.authorization.EndpointAuthorizationScan;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -69,50 +61,38 @@ class CoberturaPreAuthorizeTest extends AbstractIntegrationTest {
     @Autowired
     private ApplicationContext context;
 
+    @Autowired
+    private RequestMappingHandlerMapping requestMappingHandlerMapping;
+
     /**
      * Só os controllers escritos por este projeto. Controllers de terceiros são cobertos por regra de
      * caminho no {@code SecurityConfig} — ver o javadoc da classe.
      */
     private static final String PACOTE_DO_PROJETO = "br.com.gems.app";
 
-    private static final List<Class<? extends Annotation>> ANOTACOES_DE_MAPEAMENTO = List.of(
-            GetMapping.class, PostMapping.class, PutMapping.class, DeleteMapping.class,
-            PatchMapping.class, RequestMapping.class );
-
     @Test
-    @DisplayName("todo método mapeado de todo @RestController tem @PreAuthorize, salvo @PublicEndpoint")
-    void deveComprovarTodoEndpointTemPreAuthorizeOuEhPublico_quandoExecutaOCenario() {
-        var semAnotacao = new ArrayList<String>();
+    @DisplayName("a varredura publicada aceita todos os endpoints do projeto")
+    void deveComprovarTodoEndpointAtendePoliticaPublicada_quandoExecutaOCenario() {
+        var metodosDoProjeto = requestMappingHandlerMapping.getHandlerMethods().values().stream()
+                .filter( metodo -> metodo.getBeanType().getName().startsWith( PACOTE_DO_PROJETO ) )
+                .toList();
+        var referenciaAutenticada = metodosDoProjeto.stream()
+                .filter( metodo -> {
+                    var preAuthorize = metodo.getMethodAnnotation( PreAuthorize.class );
+                    return preAuthorize != null && "isAuthenticated()".equals( preAuthorize.value() );
+                } )
+                .toList();
 
-        for ( var bean : context.getBeansWithAnnotation( RestController.class ).values() ) {
-            var classeAlvo = AopUtils.getTargetClass( bean );
+        assertThat( referenciaAutenticada )
+                .extracting( metodo -> metodo.getBeanType().getSimpleName() + "#" + metodo.getMethod().getName() )
+                .containsExactlyInAnyOrder(
+                        "CepController#buscarPorCep",
+                        "LocalidadeController#listarEstadosPorPais",
+                        "LocalidadeController#listarPaises" );
 
-            if ( !classeAlvo.getName().startsWith( PACOTE_DO_PROJETO ) ) {
-                continue;
-            }
-
-            if ( classeAlvo.isAnnotationPresent( PublicEndpoint.class ) ) {
-                continue;
-            }
-
-            for ( var metodo : classeAlvo.getMethods() ) {
-                if ( !ehEndpointMapeado( metodo ) ) {
-                    continue;
-                }
-
-                if ( metodo.isAnnotationPresent( PublicEndpoint.class ) ) {
-                    continue;
-                }
-
-                if ( !metodo.isAnnotationPresent( PreAuthorize.class ) ) {
-                    semAnotacao.add( classeAlvo.getSimpleName() + "#" + metodo.getName() );
-                }
-            }
-        }
-
-        assertThat( semAnotacao )
-                .as( "métodos mapeados sem @PreAuthorize nem @PublicEndpoint: %s", semAnotacao )
-                .isEmpty();
+        EndpointAuthorizationScan.assertProtected(
+                metodosDoProjeto.stream().filter( metodo -> !referenciaAutenticada.contains( metodo ) ).toList(),
+                AuthorizationCatalog.of( AcaoSistema.class ) );
     }
 
     @Test
@@ -136,10 +116,6 @@ class CoberturaPreAuthorizeTest extends AbstractIntegrationTest {
         assertThat( controllersDoProjeto ).containsExactly(
                 "AuditoriaController", "CepController", "LocalidadeController",
                 "ParceiroController", "SolicitacaoController" );
-    }
-
-    private boolean ehEndpointMapeado( Method metodo ) {
-        return ANOTACOES_DE_MAPEAMENTO.stream().anyMatch( metodo::isAnnotationPresent );
     }
 
 }

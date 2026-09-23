@@ -1,5 +1,6 @@
 package br.com.gems.app.solicitacao.controller;
 
+import br.com.gems.security.authorization.GlobalEndpoint;
 import br.com.gems.app.model.dto.SolicitacaoDTO;
 import br.com.gems.app.model.params.SolicitacaoFilterParams;
 import br.com.gems.app.model.response.SolicitacaoResponseDTO;
@@ -41,6 +42,7 @@ import java.util.UUID;
 @RequestMapping("/api/solicitacoes")
 @RequiredArgsConstructor
 @Tag(name = "Solicitações", description = "Fluxo de solicitações")
+@GlobalEndpoint
 public class SolicitacaoController extends BaseController {
 
     private final SolicitacaoService service;

@@ -2,6 +2,7 @@ package br.com.gems.app.autorizacao;
 
 import br.com.gems.app.model.enums.PerfilAtuacao;
 import br.com.gems.app.security.AcaoSistema;
+import br.com.gems.security.authorization.AuthorizationCatalog;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -46,6 +47,19 @@ class MapaPerfilAcoesTest {
                 .as( "acrescentar uma ação ao enum deve alcançar o administrador sem editar o mapa" )
                 .hasSize( AcaoSistema.values().length )
                 .containsExactlyInAnyOrder( AcaoSistema.values() );
+    }
+
+    @Test
+    @DisplayName("o mapa usa exatamente o catálogo global publicado")
+    void deveComprovarMapaUsaCatalogoPublicado_quandoExecutaOCenario() {
+        var catalogo = AuthorizationCatalog.of( AcaoSistema.class );
+
+        assertThat( catalogo.tenantActions() ).isEmpty();
+        assertThat( catalogo.globalActions() )
+                .containsExactlyInAnyOrderElementsOf(
+                        MapaPerfilAcoes.acoesDe( PerfilAtuacao.ADMINISTRADOR ).stream()
+                                .map( Enum::name )
+                                .toList() );
     }
 
     @ParameterizedTest

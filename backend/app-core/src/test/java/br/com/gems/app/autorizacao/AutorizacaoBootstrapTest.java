@@ -3,8 +3,9 @@ package br.com.gems.app.autorizacao;
 import br.com.gems.app.model.enums.PerfilAtuacao;
 import br.com.gems.app.security.AcaoSistema;
 import br.com.gems.app.security.SecurityRoles;
-import br.com.gems.app.security.service.KeycloakGroupService;
-import br.com.gems.app.security.service.KeycloakRoleService;
+import br.com.gems.keycloak.admin.KeycloakRealmGroupGateway;
+import br.com.gems.keycloak.admin.KeycloakRealmGroupGateway.RealmGroup;
+import br.com.gems.keycloak.admin.KeycloakRealmRoleGateway;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,18 +36,18 @@ import static org.mockito.Mockito.when;
  */
 class AutorizacaoBootstrapTest {
 
-    private KeycloakRoleService roleService;
-    private KeycloakGroupService groupService;
+    private KeycloakRealmRoleGateway roleGateway;
+    private KeycloakRealmGroupGateway groupGateway;
     private AutorizacaoBootstrap bootstrap;
 
     @BeforeEach
     void preparar() {
-        roleService = mock( KeycloakRoleService.class );
-        groupService = mock( KeycloakGroupService.class );
-        bootstrap = new AutorizacaoBootstrap( roleService, groupService );
+        roleGateway = mock( KeycloakRealmRoleGateway.class );
+        groupGateway = mock( KeycloakRealmGroupGateway.class );
+        bootstrap = new AutorizacaoBootstrap( roleGateway, groupGateway );
 
-        when( groupService.buscarGrupo( anyString() ) ).thenReturn( Optional.empty() );
-        when( groupService.criarGrupo( anyString() ) ).thenReturn( "id-do-grupo" );
+        when( groupGateway.findRealmGroupByName( anyString() ) ).thenReturn( Optional.empty() );
+        when( groupGateway.createRealmGroup( anyString() ) ).thenReturn( "id-do-grupo" );
     }
 
     @Test
@@ -56,10 +57,10 @@ class AutorizacaoBootstrapTest {
 
         // addComposites e mapearRoleNoGrupo resolvem a role pelo NOME e falham se ela não existir.
         // A ordem não é estilo: é a diferença entre subir e não subir contra um realm recém-criado.
-        InOrder ordem = inOrder( roleService, groupService );
-        ordem.verify( roleService, atLeastOnce() ).garantirRole( anyString(), anyString() );
-        ordem.verify( roleService, atLeastOnce() ).garantirComposta( anyString(), anyString(), any() );
-        ordem.verify( groupService, atLeastOnce() ).mapearRoleNoGrupo( anyString(), anyString() );
+        InOrder ordem = inOrder( roleGateway, groupGateway );
+        ordem.verify( roleGateway, atLeastOnce() ).ensureRealmRole( anyString(), anyString() );
+        ordem.verify( roleGateway, atLeastOnce() ).ensureCompositeRealmRole( anyString(), anyString(), any() );
+        ordem.verify( groupGateway, atLeastOnce() ).ensureRealmRoleOnRealmGroup( anyString(), anyString() );
     }
 
     @Test
@@ -68,8 +69,8 @@ class AutorizacaoBootstrapTest {
         bootstrap.sincronizarAutorizacao();
 
         var nomes = ArgumentCaptor.forClass( String.class );
-        verify( roleService, times( AcaoSistema.values().length ) )
-                .garantirRole( nomes.capture(), anyString() );
+        verify( roleGateway, times( AcaoSistema.values().length ) )
+                .ensureRealmRole( nomes.capture(), anyString() );
 
         assertThat( nomes.getAllValues() )
                 .as( "uma ação nova no enum precisa chegar ao realm sem que ninguém edite mais nada" )
@@ -84,7 +85,7 @@ class AutorizacaoBootstrapTest {
         bootstrap.sincronizarAutorizacao();
 
         var filhos = ArgumentCaptor.forClass( Set.class );
-        verify( roleService ).garantirComposta( eq( SecurityRoles.ADMIN ), anyString(), filhos.capture() );
+        verify( roleGateway ).ensureCompositeRealmRole( eq( SecurityRoles.ADMIN ), anyString(), filhos.capture() );
 
         assertThat( (Set<String>) filhos.getValue() )
                 .hasSize( AcaoSistema.values().length );
@@ -95,9 +96,9 @@ class AutorizacaoBootstrapTest {
     void deveComprovarAdministradorMapeiaAdminDiretamente_quandoExecutaOCenario() {
         bootstrap.sincronizarAutorizacao();
 
-        verify( roleService, never() ).garantirComposta(
+        verify( roleGateway, never() ).ensureCompositeRealmRole(
                 eq( "PERFIL_" + PerfilAtuacao.ADMINISTRADOR.name() ), anyString(), any() );
-        verify( groupService ).mapearRoleNoGrupo( anyString(), eq( SecurityRoles.ADMIN ) );
+        verify( groupGateway ).ensureRealmRoleOnRealmGroup( anyString(), eq( SecurityRoles.ADMIN ) );
     }
 
     @Test
@@ -106,10 +107,10 @@ class AutorizacaoBootstrapTest {
         bootstrap.sincronizarAutorizacao();
 
         for ( var perfil : PerfilAtuacao.values() ) {
-            verify( groupService ).buscarGrupo( perfil.getNomeGrupo() );
+            verify( groupGateway ).findRealmGroupByName( perfil.getNomeGrupo() );
         }
-        verify( groupService, times( PerfilAtuacao.values().length ) )
-                .mapearRoleNoGrupo( anyString(), anyString() );
+        verify( groupGateway, times( PerfilAtuacao.values().length ) )
+                .ensureRealmRoleOnRealmGroup( anyString(), anyString() );
     }
 
     @Test
@@ -117,28 +118,27 @@ class AutorizacaoBootstrapTest {
     void deveComprovarFalhaNaoPropaga_quandoExecutaOCenario() {
         // Uma exceção que escape de um listener de ApplicationReadyEvent aborta o
         // SpringApplication.run. Ficar sem um perfil é ruim; não subir é pior.
-        when( roleService.garantirRole( anyString(), anyString() ) )
+        when( roleGateway.ensureRealmRole( anyString(), anyString() ) )
                 .thenThrow( new RuntimeException( "Keycloak fora do ar" ) );
 
         bootstrap.sincronizarAutorizacao();
 
-        verify( groupService, times( PerfilAtuacao.values().length ) )
-                .mapearRoleNoGrupo( anyString(), anyString() );
+        verify( groupGateway, times( PerfilAtuacao.values().length ) )
+                .ensureRealmRoleOnRealmGroup( anyString(), anyString() );
     }
 
     @Test
     @DisplayName("grupo preexistente tem a composta reconferida, não pulada")
     void deveComprovarGrupoPreexistenteEhReconferido_quandoExecutaOCenario() {
-        var representacao = mock( org.keycloak.representations.idm.GroupRepresentation.class );
-        when( representacao.getId() ).thenReturn( "id-existente" );
-        when( groupService.buscarGrupo( anyString() ) ).thenReturn( Optional.of( representacao ) );
+        var representacao = new RealmGroup( "id-existente", "OPERADOR" );
+        when( groupGateway.findRealmGroupByName( anyString() ) ).thenReturn( Optional.of( representacao ) );
 
         bootstrap.sincronizarAutorizacao();
 
         // Um grupo sem a composta mapeada é o pior defeito possível: o usuário loga e não recebe
         // permissão nenhuma. Reconferir sempre custa uma chamada e fecha essa porta.
-        verify( groupService, never() ).criarGrupo( anyString() );
-        verify( groupService, times( PerfilAtuacao.values().length ) )
-                .mapearRoleNoGrupo( eq( "id-existente" ), anyString() );
+        verify( groupGateway, never() ).createRealmGroup( anyString() );
+        verify( groupGateway, times( PerfilAtuacao.values().length ) )
+                .ensureRealmRoleOnRealmGroup( eq( "id-existente" ), anyString() );
     }
 }

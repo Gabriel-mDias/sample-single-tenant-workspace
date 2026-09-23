@@ -1,11 +1,5 @@
 package br.com.gems.app.security.config;
 
-import br.com.gems.app.security.annotation.PublicEndpoint;
-import br.com.gems.app.security.dto.PublicRoute;
-import br.com.gems.utils.ObjectUtil;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
@@ -20,27 +14,21 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-@Slf4j
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-@RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final ApplicationContext applicationContext;
-    private final AppKeycloakProperties keycloakProperties;
+    @Value("${app.security.keycloak.client-id}")
+    private String keycloakClientId;
 
     /**
      * Origens liberadas para requisições cross-origin (SPA Angular). Parametrizável por ambiente —
@@ -95,17 +83,8 @@ public class SecurityConfig {
             // conseguiria reabrir a porta.
             auth.requestMatchers( "/api/aws/s3/**" ).denyAll();
 
-            getPublicEndpoints().forEach( route -> {
-                if ( ObjectUtil.isNotNullAndNotEmpty( route.method() ) ) {
-                    auth.requestMatchers( route.method(), route.pattern() ).permitAll();
-                    log.warn( "Endpoint público identificado: [{}] {}. Ele não exigirá autenticação.", route.method(),
-                            route.pattern() );
-                } else {
-                    auth.requestMatchers( route.pattern() ).permitAll();
-                    log.warn( "Endpoint público identificado: [ALL] {}. Ele não exigirá autenticação.",
-                            route.pattern() );
-                }
-            } );
+            auth.requestMatchers( "/api/auth/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html" )
+                    .permitAll();
 
             auth.anyRequest().authenticated();
         } );
@@ -147,56 +126,6 @@ public class SecurityConfig {
         return source;
     }
 
-    /**
-     * Método que busca qualquer endpoint anotado com o @PublicEndpoint e retorna em uma lista.
-     * Desta forma, ele será exposto como público em nossa API.
-     *
-     * @return
-     */
-    private List<PublicRoute> getPublicEndpoints() {
-        var publicEndpoints = new ArrayList<PublicRoute>();
-
-        // Lista de endpoints públicos *default* (neste caso se aplicam a todos os verbos)
-        List.of(
-                "/api/auth/**",
-                "/v3/api-docs/**",
-                "/swagger-ui/**",
-                "/swagger-ui.html" ).forEach( pattern -> publicEndpoints.add( new PublicRoute( null, pattern ) ) );
-
-        try {
-            RequestMappingHandlerMapping requestMappingHandlerMapping = applicationContext
-                    .getBean( "requestMappingHandlerMapping", RequestMappingHandlerMapping.class );
-
-            Map<RequestMappingInfo, HandlerMethod> handlerMethods = requestMappingHandlerMapping.getHandlerMethods();
-
-            for ( Map.Entry<RequestMappingInfo, HandlerMethod> entry : handlerMethods.entrySet() ) {
-                HandlerMethod handlerMethod = entry.getValue();
-                RequestMappingInfo mappingInfo = entry.getKey();
-
-                boolean isPublic = handlerMethod.getMethod().isAnnotationPresent( PublicEndpoint.class ) ||
-                        handlerMethod.getBeanType().isAnnotationPresent( PublicEndpoint.class );
-
-                if ( isPublic && ObjectUtil.isNotNullAndNotEmpty( mappingInfo.getPatternValues() ) ) {
-                    var methods = mappingInfo.getMethodsCondition().getMethods();
-                    for ( String pattern : mappingInfo.getPatternValues() ) {
-                        if ( methods.isEmpty() ) {
-                            publicEndpoints.add( new PublicRoute( null, pattern ) );
-                        } else {
-                            for ( RequestMethod requestMethod : methods ) {
-                                publicEndpoints
-                                        .add( new PublicRoute( HttpMethod.valueOf( requestMethod.name() ), pattern ) );
-                            }
-                        }
-                    }
-                }
-            }
-        } catch ( Exception e ) {
-            // Ignore. O contexto Web MVC pode não estar disponível imediatamente
-        }
-
-        return publicEndpoints;
-    }
-
     private Converter<Jwt, ? extends AbstractAuthenticationToken> jwtAuthenticationConverter() {
         return jwt -> {
             var authorities = extractAuthorities( jwt );
@@ -220,7 +149,7 @@ public class SecurityConfig {
         // 2. Resource Roles (Client Roles dinâmicos do Keycloak)
         if ( jwt.hasClaim( "resource_access" ) ) {
             Map<String, Object> resourceAccess = jwt.getClaimAsMap( "resource_access" );
-            String clientId = keycloakProperties.getClientId();
+            String clientId = keycloakClientId;
             if ( resourceAccess != null && resourceAccess.containsKey( clientId ) ) {
                 Map<String, Object> clientAccess = (Map<String, Object>) resourceAccess.get( clientId );
                 if ( clientAccess != null && clientAccess.containsKey( "roles" ) ) {

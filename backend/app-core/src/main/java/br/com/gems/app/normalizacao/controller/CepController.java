@@ -1,5 +1,6 @@
 package br.com.gems.app.normalizacao.controller;
 
+import br.com.gems.security.authorization.GlobalEndpoint;
 import br.com.gems.app.model.dto.EnderecoDTO;
 import br.com.gems.app.normalizacao.service.CepService;
 import br.com.gems.exception.base.BaseController;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/enderecos")
 @RequiredArgsConstructor
 @Tag(name = "Endereços", description = "Consulta de endereço por CEP")
+@GlobalEndpoint
 public class CepController extends BaseController {
 
     private final CepService service;

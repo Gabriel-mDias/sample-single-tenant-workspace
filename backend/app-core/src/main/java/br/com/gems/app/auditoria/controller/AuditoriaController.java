@@ -1,5 +1,6 @@
 package br.com.gems.app.auditoria.controller;
 
+import br.com.gems.security.authorization.GlobalEndpoint;
 import br.com.gems.app.auditoria.service.AuditoriaService;
 import br.com.gems.app.model.params.AuditoriaFilterParams;
 import br.com.gems.app.model.response.RegistroAuditoriaResponseDTO;
@@ -37,6 +38,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/auditoria")
 @Tag(name = "Auditoria", description = "Consulta da trilha de alterações (somente leitura)")
+@GlobalEndpoint
 public class AuditoriaController extends BaseController {
 
     private final AuditoriaService service;

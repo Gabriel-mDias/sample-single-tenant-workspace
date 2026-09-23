@@ -1,5 +1,7 @@
 package br.com.gems.app.security;
 
+import br.com.gems.security.authorization.AuthorizationAction;
+import br.com.gems.security.authorization.AuthorizationScope;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -34,7 +36,7 @@ import lombok.RequiredArgsConstructor;
  */
 @Getter
 @RequiredArgsConstructor
-public enum AcaoSistema {
+public enum AcaoSistema implements AuthorizationAction {
 
     // ---- Parceiro ----------------------------------------------------------------------------
     CONSULTAR_PARCEIRO("Consultar parceiros"), INSERIR_PARCEIRO("Cadastrar parceiro"), ALTERAR_PARCEIRO(
@@ -103,5 +105,10 @@ public enum AcaoSistema {
 
     /** Vira a descrição da realm role no Keycloak, visível no console administrativo. */
     private final String descricao;
+
+    @Override
+    public AuthorizationScope scope() {
+        return AuthorizationScope.GLOBAL;
+    }
 
 }

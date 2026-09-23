@@ -1,5 +1,6 @@
 package br.com.gems.app.parceiro.controller;
 
+import br.com.gems.security.authorization.GlobalEndpoint;
 import br.com.gems.app.model.dto.ParceiroDTO;
 import br.com.gems.app.model.params.ParceiroFilterParams;
 import br.com.gems.app.model.response.ParceiroResponseDTO;
@@ -43,6 +44,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/parceiros")
 @RequiredArgsConstructor
 @Tag(name = "Parceiros", description = "Cadastro de parceiros")
+@GlobalEndpoint
 public class ParceiroController extends BaseController {
 
     private final ParceiroService service;

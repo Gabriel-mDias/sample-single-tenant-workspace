@@ -3,8 +3,8 @@ package br.com.gems.app.autorizacao;
 import br.com.gems.app.model.enums.PerfilAtuacao;
 import br.com.gems.app.security.AcaoSistema;
 import br.com.gems.app.security.SecurityRoles;
-import br.com.gems.app.security.service.KeycloakGroupService;
-import br.com.gems.app.security.service.KeycloakRoleService;
+import br.com.gems.keycloak.admin.KeycloakRealmGroupGateway;
+import br.com.gems.keycloak.admin.KeycloakRealmRoleGateway;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -71,8 +71,8 @@ public class AutorizacaoBootstrap {
 
     private static final String DESCRICAO_ADMIN = "Composta de todas as ações do sistema. Mapeada no grupo do administrador.";
 
-    private final KeycloakRoleService keycloakRoleService;
-    private final KeycloakGroupService keycloakGroupService;
+    private final KeycloakRealmRoleGateway keycloakRealmRoleGateway;
+    private final KeycloakRealmGroupGateway keycloakRealmGroupGateway;
 
     @EventListener(ApplicationReadyEvent.class)
     public void sincronizarAutorizacao() {
@@ -107,7 +107,7 @@ public class AutorizacaoBootstrap {
 
         for ( var acao : AcaoSistema.values() ) {
             try {
-                if ( keycloakRoleService.garantirRole( acao.name(), acao.getDescricao() ) ) {
+                if ( keycloakRealmRoleGateway.ensureRealmRole( acao.name(), acao.getDescricao() ) ) {
                     criadas++;
                     log.info( "Ação '{}' criada como realm role.", acao.name() );
                 }
@@ -138,7 +138,7 @@ public class AutorizacaoBootstrap {
                     .map( AcaoSistema::name )
                     .collect( Collectors.toCollection( LinkedHashSet::new ) );
 
-            acrescentados += keycloakRoleService.garantirComposta(
+            acrescentados += keycloakRealmRoleGateway.ensureCompositeRealmRole(
                     SecurityRoles.ADMIN, DESCRICAO_ADMIN, todasAsAcoes );
         } catch ( Exception e ) {
             log.error( "Falha ao garantir a composta '{}' no Keycloak. A aplicação segue no ar.",
@@ -152,7 +152,7 @@ public class AutorizacaoBootstrap {
             }
 
             try {
-                acrescentados += keycloakRoleService.garantirComposta(
+                acrescentados += keycloakRealmRoleGateway.ensureCompositeRealmRole(
                         nomeComposta( perfil ),
                         "Ações do perfil de atuação %s.".formatted( perfil.getDescricao() ),
                         nomesDasAcoes( perfil ) );
@@ -190,12 +190,12 @@ public class AutorizacaoBootstrap {
     }
 
     private void garantirGrupo( PerfilAtuacao perfil ) {
-        var existente = keycloakGroupService.buscarGrupo( perfil.getNomeGrupo() );
+        var existente = keycloakRealmGroupGateway.findRealmGroupByName( perfil.getNomeGrupo() );
 
         var groupId = existente
-                .map( grupo -> grupo.getId() )
+                .map( KeycloakRealmGroupGateway.RealmGroup::id )
                 .orElseGet( () -> {
-                    var id = keycloakGroupService.criarGrupo( perfil.getNomeGrupo() );
+                    var id = keycloakRealmGroupGateway.createRealmGroup( perfil.getNomeGrupo() );
                     log.info( "Grupo '{}' criado no realm.", perfil.getNomeGrupo() );
                     return id;
                 } );
@@ -203,7 +203,7 @@ public class AutorizacaoBootstrap {
         // Sempre reconferido, mesmo em grupo preexistente: um grupo sem a composta mapeada é o pior
         // defeito possível aqui — o usuário loga normalmente e não recebe permissão nenhuma, sintoma
         // que aparece como "acesso negado" e não como erro de cadastro.
-        keycloakGroupService.mapearRoleNoGrupo( groupId, roleDoGrupo( perfil ) );
+        keycloakRealmGroupGateway.ensureRealmRoleOnRealmGroup( groupId, roleDoGrupo( perfil ) );
     }
 
     /** {@code ADMIN} para o administrador; {@code PERFIL_<NOME>} para os demais. */

@@ -1,5 +1,6 @@
 package br.com.gems.app.localidade.controller;
 
+import br.com.gems.security.authorization.GlobalEndpoint;
 import br.com.gems.app.localidade.service.LocalidadeService;
 import br.com.gems.app.model.dto.EstadoDTO;
 import br.com.gems.app.model.dto.PaisDTO;
@@ -22,6 +23,7 @@ import java.util.List;
 @RequestMapping("/api/localidades")
 @RequiredArgsConstructor
 @Tag(name = "Localidades", description = "Dados de referência de países e estados")
+@GlobalEndpoint
 public class LocalidadeController extends BaseController {
 
     private final LocalidadeService service;
