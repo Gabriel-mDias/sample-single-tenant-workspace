@@ -11,7 +11,8 @@ import java.util.UUID;
 /**
  * Corpo de {@code POST /api/auditoria/search}.
  *
- * <p>{@code dataFim} é inclusivo até o fim do dia: o filtro é {@code LocalDate} e
+ * <p>
+ * {@code dataFim} é inclusivo até o fim do dia: o filtro é {@code LocalDate} e
  * {@code DT_OPERACAO} é {@code TIMESTAMP}, então o repository precisa comparar contra
  * {@code dataFim.atTime(LocalTime.MAX)} — comparar direto descartaria tudo que aconteceu depois da
  * meia-noite do próprio dia pedido.

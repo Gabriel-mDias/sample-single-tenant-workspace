@@ -18,7 +18,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Primeiro teste do {@code app-security} — o módulo não tinha nenhum, e a ausência teve preço.
  *
- * <p>O caso do token <b>sem {@code sub}</b> derrubou o registro de autoria na homologação da
+ * <p>
+ * O caso do token <b>sem {@code sub}</b> derrubou o registro de autoria na homologação da
  * homologação com {@code NullPointerException}: {@code UUID.fromString(null)} lança NPE, e o
  * {@code catch} existente só cobria {@code IllegalArgumentException}. O token vinha completo de
  * roles — o {@code @PreAuthorize} passava — e faltava apenas a identidade, porque o cliente do
@@ -49,8 +50,8 @@ class UsuarioAutenticadoServiceTest {
     }
 
     @Test
-    @DisplayName( "devolve o sub do token quando ele existe" )
-    void devolveOSub() {
+    @DisplayName("devolve o sub do token quando ele existe")
+    void deveComprovarDevolveOSub_quandoExecutaOCenario() {
         var id = UUID.randomUUID();
         autenticarCom( jwtCom( Map.of( "sub", id.toString() ) ) );
 
@@ -58,8 +59,8 @@ class UsuarioAutenticadoServiceTest {
     }
 
     @Test
-    @DisplayName( "token sem sub devolve vazio, e NÃO estoura NullPointerException" )
-    void tokenSemSubNaoEstoura() {
+    @DisplayName("token sem sub devolve vazio, e NÃO estoura NullPointerException")
+    void deveComprovarTokenSemSubNaoEstoura_quandoExecutaOCenario() {
         // Exatamente o token da homologação: roles presentes, identidade ausente.
         autenticarCom( jwtCom( Map.of( "realm_access", Map.of( "roles", List.of( "APROVAR_ARQUIVO" ) ) ) ) );
 
@@ -67,22 +68,22 @@ class UsuarioAutenticadoServiceTest {
     }
 
     @Test
-    @DisplayName( "sub fora do formato UUID devolve vazio em vez de gravar lixo" )
-    void subForaDoFormato() {
+    @DisplayName("sub fora do formato UUID devolve vazio em vez de gravar lixo")
+    void deveComprovarSubForaDoFormato_quandoExecutaOCenario() {
         autenticarCom( jwtCom( Map.of( "sub", "nao-e-um-uuid" ) ) );
 
         assertThat( service.idDoUsuarioAutenticado() ).isEmpty();
     }
 
     @Test
-    @DisplayName( "sem autenticacao no contexto devolve vazio" )
-    void semAutenticacao() {
+    @DisplayName("sem autenticacao no contexto devolve vazio")
+    void deveComprovarSemAutenticacao_quandoExecutaOCenario() {
         assertThat( service.idDoUsuarioAutenticado() ).isEmpty();
     }
 
     @Test
-    @DisplayName( "autenticacao que nao e JWT devolve vazio" )
-    void autenticacaoQueNaoEJwt() {
+    @DisplayName("autenticacao que nao e JWT devolve vazio")
+    void deveComprovarAutenticacaoQueNaoEJwt_quandoExecutaOCenario() {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken( "alguem", "senha", List.of() ) );
 

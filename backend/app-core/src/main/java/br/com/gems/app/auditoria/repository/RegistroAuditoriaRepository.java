@@ -25,12 +25,15 @@ import java.util.UUID;
  */
 @Repository
 public interface RegistroAuditoriaRepository
-        extends JpaRepository<RegistroAuditoria, UUID>, BaseCustomJpaRepository<RegistroAuditoria> {
+        extends
+            JpaRepository<RegistroAuditoria, UUID>,
+            BaseCustomJpaRepository<RegistroAuditoria> {
 
     /**
      * O histórico de um registro — a consulta do requisito, e a única que a tela usa.
      *
-     * <p><b>O {@code @EntityGraph} não é otimização, é correção.</b> {@code camposAlterados} é uma
+     * <p>
+     * <b>O {@code @EntityGraph} não é otimização, é correção.</b> {@code camposAlterados} é uma
      * coleção LAZY, {@code open-in-view} é {@code false}, e a conversão para DTO acontece depois de a
      * transação do repositório ter fechado. Sem o grafo, a conversão estoura
      * {@code LazyInitializationException} — em produção, não no teste unitário, onde o repositório é
@@ -38,33 +41,37 @@ public interface RegistroAuditoriaRepository
      * competente na 014, e {@code AuditoriaHistoricoIntegrationTest} existe, deliberadamente NÃO
      * transacional, para que ele não aconteça uma terceira vez.
      *
-     * <p><b>Sobre paginação com coleção buscada:</b> o Hibernate resolve o recorte em memória e
+     * <p>
+     * <b>Sobre paginação com coleção buscada:</b> o Hibernate resolve o recorte em memória e
      * avisa. É aceito aqui e só aqui — o histórico de <i>um</i> registro é pequeno por natureza, e a
      * alternativa (duas consultas) tiraria o grafo do caminho e com ele a rede que o teste arma. A
      * busca ampla, que pode devolver muita linha, usa o outro caminho.
      */
-    @EntityGraph( value = "registro-auditoria-entity-graph" )
+    @EntityGraph(value = "registro-auditoria-entity-graph")
     Page<RegistroAuditoria> findByEntidadeAndRegistroAfetadoOrderByDataOperacaoDesc(
             String entidade, UUID registroAfetado, Pageable pageable );
 
     /**
      * O histórico de um <b>cadastro</b>, e não de uma linha: a raiz mais os agregados dela.
      *
-     * <p><b>Por que existe.</b> A trilha é gravada por linha de tabela, e a tela pergunta por
+     * <p>
+     * <b>Por que existe.</b> A trilha é gravada por linha de tabela, e a tela pergunta por
      * cadastro. As duas coisas quase nunca coincidem neste projeto: {@code Cliente} tem um único
      * {@code @Column} — o identificador —, e telefone, e-mail, nome e endereço moram em
      * {@code Contato}, {@code Pessoa} e {@code Endereco}, cada um com a sua linha. Perguntar só pela
      * raiz devolvia o cadastro inicial e mais nada, por mais que o operador editasse.
      *
-     * <p><b>Por que filtra só por identificador.</b> {@code registroAfetado} é um UUID gerado por
+     * <p>
+     * <b>Por que filtra só por identificador.</b> {@code registroAfetado} é um UUID gerado por
      * linha, único entre todas as tabelas; acrescentar o nome da entidade ao filtro não tornaria a
      * consulta mais seletiva, apenas exigiria pares (entidade, id) que uma consulta derivada não
      * expressa. O nome continua vindo em cada registro, e é o que a tela mostra como origem.
      *
-     * <p>O {@code @EntityGraph} está aqui pela mesma razão da consulta acima — é correção, não
+     * <p>
+     * O {@code @EntityGraph} está aqui pela mesma razão da consulta acima — é correção, não
      * otimização.
      */
-    @EntityGraph( value = "registro-auditoria-entity-graph" )
+    @EntityGraph(value = "registro-auditoria-entity-graph")
     Page<RegistroAuditoria> findByRegistroAfetadoInOrderByDataOperacaoDesc(
             List<UUID> registrosAfetados, Pageable pageable );
 
@@ -133,7 +140,7 @@ public interface RegistroAuditoriaRepository
     }
 
     private void appendFilters( AuditoriaFilterParams filterParams, StringBuilder hql,
-                                HashMap<String, Object> params ) {
+            HashMap<String, Object> params ) {
         hql.append( " WHERE 1=1 " );
 
         if ( ObjectUtil.isNotNullAndNotEmpty( filterParams.getEntidade() ) ) {

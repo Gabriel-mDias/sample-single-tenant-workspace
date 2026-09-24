@@ -24,11 +24,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  * apagável — trilha apagável não é trilha, e uma trilha em que se pode inserir linha à mão não prova
  * nada em auditoria nenhuma.
  *
- * <p>Sem este teste, a proibição existe só como comentário no controller. E este projeto tem a lição
+ * <p>
+ * Sem este teste, a proibição existe só como comentário no controller. E este projeto tem a lição
  * escrita no próprio checklist de fechamento: <i>toda regra que só existe como texto será
  * violada</i> — normalmente por alguém de boa-fé, resolvendo um problema legítimo.
  *
- * <p>A única exceção é {@code POST /search}, que é consulta com corpo — a convenção do projeto para
+ * <p>
+ * A única exceção é {@code POST /search}, que é consulta com corpo — a convenção do projeto para
  * busca paginada. Ela é reconhecida pelo caminho, não dispensada por tipo de verbo.
  */
 class AuditoriaControllerSemEscritaTest {
@@ -37,8 +39,8 @@ class AuditoriaControllerSemEscritaTest {
     private static final List<String> CAMINHOS_DE_CONSULTA_COM_CORPO = List.of( "/search" );
 
     @Test
-    @DisplayName( "o controller não expõe nenhum método mapeado de escrita" )
-    void nenhumMetodoDeEscrita() {
+    @DisplayName("o controller não expõe nenhum método mapeado de escrita")
+    void deveComprovarNenhumMetodoDeEscrita_quandoExecutaOCenario() {
         var escritas = Arrays.stream( AuditoriaController.class.getDeclaredMethods() )
                 .filter( AuditoriaControllerSemEscritaTest::ehEscrita )
                 .map( Method::getName )
@@ -48,7 +50,7 @@ class AuditoriaControllerSemEscritaTest {
                 .as( """
                         O AuditoriaController expõe método de escrita. Isso viola o requisito.
 
-                        Quem grava a trilha é o AuditoriaInterceptor, na camada de persistência. Um \
+                        Quem grava a trilha é o writer do GEMS Auditing, na camada de persistência. Um \
                         endpoint de escrita permite forjar registro; um de exclusão faz da trilha \
                         algo apagável. Se a necessidade for legítima — expurgo por retenção, por \
                         exemplo — ela é rotina de banco, não API, e passa por decisão registrada.""" )
@@ -56,8 +58,8 @@ class AuditoriaControllerSemEscritaTest {
     }
 
     @Test
-    @DisplayName( "A varredura de fato examina o controller — não passa por olhar para o vazio" )
-    void aVarreduraExaminaOsMetodos() {
+    @DisplayName("A varredura de fato examina o controller — não passa por olhar para o vazio")
+    void deveComprovarAVarreduraExaminaOsMetodos_quandoExecutaOCenario() {
         var mapeados = Arrays.stream( AuditoriaController.class.getDeclaredMethods() )
                 .filter( metodo -> metodo.getAnnotations().length > 0 )
                 .count();
@@ -85,7 +87,7 @@ class AuditoriaControllerSemEscritaTest {
             return Arrays.stream( mapping.method() )
                     .anyMatch( verbo -> verbo != RequestMethod.GET && verbo != RequestMethod.HEAD
                             && verbo != RequestMethod.OPTIONS
-                            && !( verbo == RequestMethod.POST && ehConsultaComCorpo( mapping.value() ) ) );
+                            && !(verbo == RequestMethod.POST && ehConsultaComCorpo( mapping.value() )) );
         }
 
         return false;

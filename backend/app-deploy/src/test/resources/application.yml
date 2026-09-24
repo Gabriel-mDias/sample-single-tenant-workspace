@@ -56,6 +56,8 @@ app:
       realm: app-realm
       client-id: app-backend
       client-secret: test
+      connect-timeout: 1s
+      read-timeout: 1s
       # DESLIGADO nos testes. O bootstrap roda em ApplicationReadyEvent e conversa com o Keycloak
       # real; num teste isso é rede desnecessária, lenta e capaz de sujar o realm de desenvolvimento.
       bootstrap-grupos:
@@ -70,6 +72,10 @@ app:
       timeout: 1s
 
 gems:
+  auditing:
+    enabled: true
+    schema: auditoria
+    context-columns-enabled: true
   rest:
     correlation-id:
       header-name: X-Correlation-Id

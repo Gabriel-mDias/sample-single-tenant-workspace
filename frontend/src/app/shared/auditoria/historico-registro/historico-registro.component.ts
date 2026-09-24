@@ -1,6 +1,6 @@
 import { Component, effect, inject, input, output, signal } from '@angular/core';
 import { GemsAlertService, GemsModalComponent } from '@gabriel-mdias/angular-gems-sdk';
-import { dataBrOu } from '../../../commons/data-br';
+import { dataBrOu } from '../../utils/data-br';
 import {
   CampoAlteradoModel,
   EntidadeAuditada,

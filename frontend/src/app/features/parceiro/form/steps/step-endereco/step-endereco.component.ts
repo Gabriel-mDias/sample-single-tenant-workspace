@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import {
   GemsAlertService,
   GemsBaseStepComponent,
+  GemsFieldErrorComponent,
   GemsFormCardComponent,
   GemsInputMaskComponent,
   GemsInputTextComponent,
@@ -20,8 +21,7 @@ import {
   aplicarObrigatoriedadeDeUfECep,
   createEnderecoForm,
 } from '../../../../../shared/forms/endereco/endereco-form';
-import { FieldErrorComponent } from '../../../../../shared/forms/field-error/field-error.component';
-import { ParceiroFormStateService } from '../../../services/parceiro-form-state.service';
+import { ParceiroFormStateService } from '../../parceiro-state.service';
 import { STEP_CONTATO, STEP_ENDERECO, STEP_RESUMO } from '../../parceiro.config';
 
 /**
@@ -40,7 +40,7 @@ import { STEP_CONTATO, STEP_ENDERECO, STEP_RESUMO } from '../../parceiro.config'
     GemsInputTextComponent,
     GemsInputMaskComponent,
     GemsSelectComponent,
-    FieldErrorComponent,
+    GemsFieldErrorComponent,
   ],
   templateUrl: './step-endereco.component.html',
   styleUrl: './step-endereco.component.css',

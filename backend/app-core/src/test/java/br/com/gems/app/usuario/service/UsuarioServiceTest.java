@@ -34,12 +34,13 @@ import static org.mockito.Mockito.when;
 /**
  * Cobertura das regras da credencial de acesso.
  *
- * <p>Duas propriedades merecem destaque: a senha <b>nunca</b> sai em uma leitura, e o evento é
+ * <p>
+ * Duas propriedades merecem destaque: a senha <b>nunca</b> sai em uma leitura, e o evento é
  * publicado <b>antes</b> da persistência no cadastro — é isso que permite gravar o identificador do
  * Keycloak na mesma transação, com a coluna sendo {@code NOT NULL}.
  */
-@ExtendWith( MockitoExtension.class )
-@MockitoSettings( strictness = Strictness.LENIENT )
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class UsuarioServiceTest {
 
     private static final UUID ID_USUARIO = UUID.fromString( "77777777-7777-7777-7777-777777777777" );
@@ -59,8 +60,8 @@ class UsuarioServiceTest {
     }
 
     @Test
-    @DisplayName( "toDTO NUNCA devolve a senha, em nenhuma circunstância" )
-    void toDtoNuncaDevolveSenha() {
+    @DisplayName("toDTO NUNCA devolve a senha, em nenhuma circunstância")
+    void deveComprovarToDtoNuncaDevolveSenha_quandoExecutaOCenario() {
         var dto = service.toDTO( usuarioPersistido() );
 
         assertThat( dto.getSenha() ).isNull();
@@ -69,14 +70,14 @@ class UsuarioServiceTest {
     }
 
     @Test
-    @DisplayName( "toDTO de usuário nulo devolve nulo, sem estourar" )
-    void toDtoDeNuloDevolveNulo() {
+    @DisplayName("toDTO de usuário nulo devolve nulo, sem estourar")
+    void deveComprovarToDtoDeNuloDevolveNulo_quandoExecutaOCenario() {
         assertThat( service.toDTO( null ) ).isNull();
     }
 
     @Test
-    @DisplayName( "insert publica o evento ANTES de persistir, para que o id do Keycloak já esteja na linha" )
-    void insertPublicaAntesDePersistir() {
+    @DisplayName("insert publica o evento ANTES de persistir, para que o id do Keycloak já esteja na linha")
+    void deveComprovarInsertPublicaAntesDePersistir_quandoExecutaOCenario() {
         service.insert( usuarioDTO( "ana.souza", "Senha@Forte123" ), PerfilAtuacao.OPERADOR, pessoa(), contato() );
 
         // Se a ordem fosse invertida, o INSERT tentaria gravar CD_KEYCLOAK_ID nulo — e a coluna é
@@ -87,8 +88,8 @@ class UsuarioServiceTest {
     }
 
     @Test
-    @DisplayName( "insert monta o evento com senha, perfil, e-mail e nome vindos do agregado" )
-    void insertMontaEventoCompleto() {
+    @DisplayName("insert monta o evento com senha, perfil, e-mail e nome vindos do agregado")
+    void deveComprovarInsertMontaEventoCompleto_quandoExecutaOCenario() {
         service.insert( usuarioDTO( "ana.souza", "Senha@Forte123" ), PerfilAtuacao.CONSULTA, pessoa(), contato() );
 
         var captor = ArgumentCaptor.forClass( UsuarioCriadoEvent.class );
@@ -105,8 +106,8 @@ class UsuarioServiceTest {
     }
 
     @Test
-    @DisplayName( "reativar reabilita a credencial existente sem pedir senha nova" )
-    void reativarNaoPedeSenhaNova() {
+    @DisplayName("reativar reabilita a credencial existente sem pedir senha nova")
+    void deveComprovarReativarNaoPedeSenhaNova_quandoExecutaOCenario() {
         var existente = usuarioPersistido();
         existente.setAtivo( false );
 
@@ -121,8 +122,8 @@ class UsuarioServiceTest {
     }
 
     @Test
-    @DisplayName( "desativar marca a credencial como inativa e publica o evento de encerramento" )
-    void desativarMarcaInativo() {
+    @DisplayName("desativar marca a credencial como inativa e publica o evento de encerramento")
+    void deveComprovarDesativarMarcaInativo_quandoExecutaOCenario() {
         var existente = usuarioPersistido();
 
         service.desativar( existente );
@@ -133,16 +134,16 @@ class UsuarioServiceTest {
     }
 
     @Test
-    @DisplayName( "desativar usuário nulo não faz nada e não estoura" )
-    void desativarNuloNaoFazNada() {
+    @DisplayName("desativar usuário nulo não faz nada e não estoura")
+    void deveComprovarDesativarNuloNaoFazNada_quandoExecutaOCenario() {
         service.desativar( null );
 
         verify( repository, org.mockito.Mockito.never() ).save( any( Usuario.class ) );
     }
 
     @Test
-    @DisplayName( "sincronizar propaga os dados cadastrais correntes" )
-    void sincronizarPublicaAtualizacao() {
+    @DisplayName("sincronizar propaga os dados cadastrais correntes")
+    void deveComprovarSincronizarPublicaAtualizacao_quandoExecutaOCenario() {
         service.sincronizar( usuarioPersistido(), PerfilAtuacao.OPERADOR, pessoa(), contato() );
 
         var captor = ArgumentCaptor.forClass( UsuarioAtualizadoEvent.class );
@@ -153,8 +154,8 @@ class UsuarioServiceTest {
     }
 
     @Test
-    @DisplayName( "validação acumula login e senha ausentes numa submissão só" )
-    void validacaoEhAcumulada() {
+    @DisplayName("validação acumula login e senha ausentes numa submissão só")
+    void deveComprovarValidacaoEhAcumulada_quandoExecutaOCenario() {
         var errors = new ArrayList<String>();
 
         service.validar( new UsuarioDTO(), true, errors );
@@ -163,8 +164,8 @@ class UsuarioServiceTest {
     }
 
     @Test
-    @DisplayName( "login já usado por outro usuário ativo é recusado" )
-    void loginDuplicadoFalha() {
+    @DisplayName("login já usado por outro usuário ativo é recusado")
+    void deveComprovarLoginDuplicadoFalha_quandoExecutaOCenario() {
         when( repository.existsByLogin( "ana.souza" ) ).thenReturn( true );
         var errors = new ArrayList<String>();
 
@@ -174,8 +175,8 @@ class UsuarioServiceTest {
     }
 
     @Test
-    @DisplayName( "senha fraca é recusada pela política já vigente no projeto" )
-    void senhaFracaFalha() {
+    @DisplayName("senha fraca é recusada pela política já vigente no projeto")
+    void deveComprovarSenhaFracaFalha_quandoExecutaOCenario() {
         var errors = new ArrayList<String>();
 
         service.validar( usuarioDTO( "ana.souza", "123456" ), true, errors );
@@ -184,8 +185,8 @@ class UsuarioServiceTest {
     }
 
     @Test
-    @DisplayName( "senha forte passa: minúscula, maiúscula, especial, sem espaço e 12+ caracteres" )
-    void senhaForteEhAceita() {
+    @DisplayName("senha forte passa: minúscula, maiúscula, especial, sem espaço e 12+ caracteres")
+    void deveComprovarSenhaForteEhAceita_quandoExecutaOCenario() {
         var errors = new ArrayList<String>();
 
         service.validar( usuarioDTO( "ana.souza", "Senha@Forte123" ), true, errors );
@@ -194,8 +195,8 @@ class UsuarioServiceTest {
     }
 
     @Test
-    @DisplayName( "acesso já existente dispensa login e senha: o formulário nem os envia" )
-    void acessoExistenteNaoExigeCredenciais() {
+    @DisplayName("acesso já existente dispensa login e senha: o formulário nem os envia")
+    void deveComprovarAcessoExistenteNaoExigeCredenciais_quandoExecutaOCenario() {
         var errors = new ArrayList<String>();
 
         service.validar( null, false, errors );

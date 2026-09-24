@@ -5,7 +5,7 @@ severity: recommended
 see-also: [rest-common.md, services.md]
 origem: local
 precedencia: local-vence
-versao: 2.0.0
+versao: 2.1.0
 ---
 
 # Observabilidade — gems-observability
@@ -39,16 +39,16 @@ Anote métodos que devem ser rastreados (Micrometer cria spans e métricas autom
 @RequiredArgsConstructor
 public class {Entidade}Service {
 
-    @Observed( name = "{entidade}.insert", contextualName = "Criação de {Entidade}" )
-    @Transactional( rollbackFor = Exception.class )
+    @Observed(name = "{entidade}.insert", contextualName = "Criação de {Entidade}")
+    @Transactional(rollbackFor = Exception.class)
     public {Entidade}DTO insert( {Entidade}DTO dto ) {
         // Micrometer rastreia latência, sucesso e erros deste método
         validate( dto );
-        var entity = repository.save( mapper.map( dto, {Entidade}.class ) );
-        return mapper.map( entity, {Entidade}DTO.class );
+        var entity = repository.save( mapper.toEntity( dto ) );
+        return mapper.toDTO( entity );
     }
 
-    @Observed( name = "{entidade}.search" )
+    @Observed(name = "{entidade}.search")
     public Page<{Entidade}ResponseDTO> search( {Entidade}FilterParams filterParams, Pageable pageable ) {
         return repository.search( filterParams, pageable );
     }

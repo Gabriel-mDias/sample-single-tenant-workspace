@@ -33,13 +33,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Prova, em nível HTTP, que a autorização por ação <b>morde</b> — não apenas que a anotação existe
  * (isso já é responsabilidade do {@link CoberturaPreAuthorizeTest}).
  *
- * <p>As credenciais simuladas carregam <b>exatamente</b> as ações de um perfil, montadas a partir de
+ * <p>
+ * As credenciais simuladas carregam <b>exatamente</b> as ações de um perfil, montadas a partir de
  * {@link MapaPerfilAcoes#acoesDe(PerfilAtuacao)} e prefixadas com {@code ROLE_} — o mesmo cálculo que
  * o Keycloak faria ao expandir a composta {@code PERFIL_*} dentro de {@code realm_access.roles}. Não
  * há {@code ADMIN} em nenhuma delas: o objetivo é justamente provar o comportamento de um perfil que
@@ -82,12 +84,12 @@ class AutorizacaoPorAcaoIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @DisplayName( "(a) Operador tenta excluir parceiro -> 403, e o parceiro CONTINUA existindo" )
-    void operadorNaoExcluiParceiro() throws Exception {
+    @DisplayName("(a) Operador tenta excluir parceiro -> 403, e o parceiro CONTINUA existindo")
+    void deveComprovarOperadorNaoExcluiParceiro_quandoExecutaOCenario() throws Exception {
         parceiroId = criarParceiroDeTeste();
 
         mockMvc.perform( delete( "/api/parceiros/{id}", parceiroId )
-                        .with( jwt().authorities( authoritiesDoPerfil( PerfilAtuacao.OPERADOR ) ) ) )
+                .with( jwt().authorities( authoritiesDoPerfil( PerfilAtuacao.OPERADOR ) ) ) )
                 .andExpect( status().isForbidden() );
 
         // Asserção sobre o DADO, não só sobre o código HTTP: prova que a exclusão nunca foi
@@ -98,59 +100,65 @@ class AutorizacaoPorAcaoIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @DisplayName( "(b) Consulta tenta cadastrar parceiro -> 403 (não possui INSERIR_PARCEIRO)" )
-    void consultaNaoCadastra() throws Exception {
+    @DisplayName("(b) Consulta tenta cadastrar parceiro -> 403 (não possui INSERIR_PARCEIRO)")
+    void deveComprovarConsultaNaoCadastra_quandoExecutaOCenario() throws Exception {
         mockMvc.perform( post( "/api/parceiros" )
-                        .with( jwt().authorities( authoritiesDoPerfil( PerfilAtuacao.CONSULTA ) ) )
-                        .contentType( MediaType.APPLICATION_JSON )
-                        .content( objectMapper.writeValueAsString( dtoDeTeste( "Parceiro Recusado" ) ) ) )
-                .andExpect( status().isForbidden() );
+                .with( jwt().authorities( authoritiesDoPerfil( PerfilAtuacao.CONSULTA ) ) )
+                .contentType( MediaType.APPLICATION_JSON )
+                .content( objectMapper.writeValueAsString( dtoDeTeste( "Parceiro Recusado" ) ) ) )
+                .andExpect( status().isForbidden() )
+                .andExpect( jsonPath( "$.occurrenceTime" ).exists() )
+                .andExpect( jsonPath( "$.errorType" ).value( "ACESSO_NEGADO" ) )
+                .andExpect( jsonPath( "$.message" ).isNotEmpty() )
+                .andExpect( jsonPath( "$.path" ).value( "/api/parceiros" ) )
+                .andExpect( jsonPath( "$.method" ).value( "POST" ) );
     }
 
     @Test
-    @DisplayName( "(c) Consulta PESQUISA parceiros -> 200 (possui CONSULTAR_PARCEIRO)" )
-    void consultaPesquisa() throws Exception {
+    @DisplayName("(c) Consulta PESQUISA parceiros -> 200 (possui CONSULTAR_PARCEIRO)")
+    void deveComprovarConsultaPesquisa_quandoExecutaOCenario() throws Exception {
         mockMvc.perform( post( "/api/parceiros/search" )
-                        .with( jwt().authorities( authoritiesDoPerfil( PerfilAtuacao.CONSULTA ) ) )
-                        .contentType( MediaType.APPLICATION_JSON )
-                        .content( "{}" ) )
+                .with( jwt().authorities( authoritiesDoPerfil( PerfilAtuacao.CONSULTA ) ) )
+                .contentType( MediaType.APPLICATION_JSON )
+                .content( "{}" ) )
                 .andExpect( status().isOk() );
     }
 
     @Test
-    @DisplayName( "(d) Operador conclui solicitação -> não é 403 (possui CONCLUIR_SOLICITACAO)" )
-    void operadorPodeConcluir() throws Exception {
+    @DisplayName("(d) Operador conclui solicitação -> não é 403 (possui CONCLUIR_SOLICITACAO)")
+    void deveComprovarOperadorPodeConcluir_quandoExecutaOCenario() throws Exception {
         // Id inexistente de propósito: aqui interessa que NÃO seja 403. Um 400 de negócio prova que
         // a requisição atravessou a camada de segurança e chegou ao service — que é o ponto.
         mockMvc.perform( post( "/api/solicitacoes/{id}/concluir", UUID.randomUUID() )
-                        .with( jwt().authorities( authoritiesDoPerfil( PerfilAtuacao.OPERADOR ) ) ) )
+                .with( jwt().authorities( authoritiesDoPerfil( PerfilAtuacao.OPERADOR ) ) ) )
                 .andExpect( result -> assertThat( result.getResponse().getStatus() ).isNotEqualTo( 403 ) );
     }
 
     @Test
-    @DisplayName( "(e) Consulta tenta concluir solicitação -> 403 (transição é ação própria)" )
-    void consultaNaoConclui() throws Exception {
+    @DisplayName("(e) Consulta tenta concluir solicitação -> 403 (transição é ação própria)")
+    void deveComprovarConsultaNaoConclui_quandoExecutaOCenario() throws Exception {
         // O núcleo do desenho: a situação não vem do corpo, e cada transição tem a sua ação. Sem
         // isso, quem pudesse editar concluiria.
         mockMvc.perform( post( "/api/solicitacoes/{id}/concluir", UUID.randomUUID() )
-                        .with( jwt().authorities( authoritiesDoPerfil( PerfilAtuacao.CONSULTA ) ) ) )
+                .with( jwt().authorities( authoritiesDoPerfil( PerfilAtuacao.CONSULTA ) ) ) )
                 .andExpect( status().isForbidden() );
     }
 
     @Test
-    @DisplayName( "(f) Token sem ação nenhuma -> 403 em tudo. O guard falha FECHADO." )
-    void tokenVazioNaoAlcancaNada() throws Exception {
+    @DisplayName("(f) Token sem ação nenhuma -> 403 em tudo. O guard falha FECHADO.")
+    void deveComprovarTokenVazioNaoAlcancaNada_quandoExecutaOCenario() throws Exception {
         mockMvc.perform( post( "/api/parceiros/search" )
-                        .with( jwt().authorities( List.of() ) )
-                        .contentType( MediaType.APPLICATION_JSON )
-                        .content( "{}" ) )
+                .with( jwt().authorities( List.of() ) )
+                .contentType( MediaType.APPLICATION_JSON )
+                .content( "{}" ) )
                 .andExpect( status().isForbidden() );
     }
 
     /**
      * As authorities de um perfil, calculadas do mesmo mapa que alimenta o Keycloak.
      *
-     * <p>Derivar em vez de listar à mão é deliberado: uma ação nova entra no teste sozinha, e o
+     * <p>
+     * Derivar em vez de listar à mão é deliberado: uma ação nova entra no teste sozinha, e o
      * teste continua descrevendo o perfil real em vez de uma fotografia dele.
      */
     private List<GrantedAuthority> authoritiesDoPerfil( PerfilAtuacao perfil ) {
@@ -208,7 +216,7 @@ class AutorizacaoPorAcaoIntegrationTest extends AbstractIntegrationTest {
 
     /** CPF sintético válido para o dígito verificador, gerado por teste. */
     private String gerarCpf() {
-        var base = String.format( "%09d", (int) ( Math.random() * 1_000_000_000L ) );
+        var base = String.format( "%09d", (int) (Math.random() * 1_000_000_000L) );
         var digitos = base.chars().map( c -> c - '0' ).toArray();
 
         var d1 = digitoVerificador( digitos, 10 );
@@ -219,7 +227,7 @@ class AutorizacaoPorAcaoIntegrationTest extends AbstractIntegrationTest {
 
     private int[] somar( int[] base, int digito ) {
         var novo = java.util.Arrays.copyOf( base, base.length + 1 );
-        novo[ base.length ] = digito;
+        novo[base.length] = digito;
         return novo;
     }
 

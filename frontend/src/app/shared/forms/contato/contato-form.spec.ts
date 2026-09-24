@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { createContatoForm } from './contato-form';
 
 describe('createContatoForm', () => {
-  it('mantém e-mail e telefone obrigatórios na ordem canônica', () => {
+  it('deveManterCamposObrigatoriosNaOrdemCanonica_quandoCriarFormulario', () => {
     const form = createContatoForm(new FormBuilder());
 
     expect(Object.keys(form.controls)).toEqual(['email', 'telefone']);

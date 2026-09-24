@@ -1,7 +1,7 @@
 ---
 origem: local
 precedencia: local-vence
-versao: 2.0.0
+versao: 2.1.0
 ---
 
 # Recipe: Erros e Validação Ponta-a-Ponta
@@ -49,10 +49,9 @@ public class {Entidade}DTO {
 ```java
 // Controller — @Valid aciona Bean Validation
 @PostMapping
-public ResponseEntity<{Entidade}DTO> insert(@Valid @RequestBody {Entidade}DTO dto) {
-    setBodyToExceptionLog(dto);
-    return ResponseEntity.status(HttpStatus.CREATED)
-        .body(mapper.toResponse(service.insert(dto)));
+public ResponseEntity<{Entidade}DTO> insert( @Valid @RequestBody {Entidade}DTO dto, HttpServletRequest request ) {
+    super.setBodyToExceptionLog( dto, request );
+    return ResponseEntity.status( HttpStatus.CREATED ).body( service.insert( dto ) );
 }
 ```
 
@@ -77,15 +76,17 @@ Validações de negócio que dependem de estado do banco:
 private void validate({Entidade}DTO dto) {
     List<String> errors = new ArrayList<>();
 
-    if (ObjectUtil.isNullOrEmpty(dto.getNome()))
-        errors.add("Nome é obrigatório.");
+    if ( ObjectUtil.isNullOrEmpty( dto.getNome() ) ) {
+        errors.add( "Nome é obrigatório." );
+    }
 
-    if (ObjectUtil.isNotNullOrEmpty(dto.getEmail()) &&
-        repository.existsByEmailAndIdNot(dto.getEmail(), dto.getId() != null ? UUID.fromString(dto.getId()) : null))
-        errors.add("E-mail já cadastrado para outro registro.");
+    if ( ObjectUtil.isNotNullAndNotEmpty( dto.getEmail() ) && repository.existsByEmailAndIdNot( dto.getEmail(), dto.getId() ) ) {
+        errors.add( "E-mail já cadastrado para outro registro." );
+    }
 
-    if (!errors.isEmpty())
-        throw new BusinessException(errors);   // Lança com lista de erros
+    if ( ObjectUtil.isNotNullAndNotEmpty( errors ) ) {
+        throw new BusinessException( errors );   // Lança com lista de erros
+    }
 }
 ```
 

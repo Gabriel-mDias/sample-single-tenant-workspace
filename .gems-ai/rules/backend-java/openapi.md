@@ -5,7 +5,7 @@ severity: recommended
 see-also: [controllers.md, security.md]
 origem: local
 precedencia: local-vence
-versao: 2.0.0
+versao: 2.1.0
 ---
 
 # OpenAPI / Swagger — gems-openapi
@@ -54,25 +54,25 @@ gems:
 ## 3. Enriquecendo Controllers com Anotações
 
 ```java
-@Tag( name = "{Entidade}", description = "Gerenciamento de {entidades}" )
+@Tag(name = "{Entidade}", description = "Gerenciamento de {entidades}")
 @RestController
-@RequestMapping( "/api/{recurso}" )
+@RequestMapping("/api/{recurso}")
 @RequiredArgsConstructor
 public class {Entidade}Controller extends BaseController {
 
-    @Operation( summary = "Busca {entidade} por ID", description = "Retorna os dados completos de uma {entidade} pelo seu UUID." )
-    @GetMapping( "/{id}" )
+    @Operation(summary = "Busca {entidade} por ID", description = "Retorna os dados completos de uma {entidade} pelo seu UUID.")
+    @GetMapping("/{id}")
     public ResponseEntity<{Entidade}DTO> findById( @PathVariable UUID id ) {
         return ResponseEntity.ok( service.findById( id ) );
     }
 
-    @Operation( summary = "Pesquisa paginada de {entidades}" )
-    @PostMapping( "/search" )
+    @Operation(summary = "Pesquisa paginada de {entidades}")
+    @PostMapping("/search")
     public ResponseEntity<Page<{Entidade}ResponseDTO>> search( ... ) { ... }
 
-    @Operation( summary = "Cria nova {entidade}", responses = {
-        @ApiResponse( responseCode = "201", description = "Criado com sucesso" ),
-        @ApiResponse( responseCode = "400", description = "Dados inválidos (BusinessException)" )
+    @Operation(summary = "Cria nova {entidade}", responses = {
+        @ApiResponse(responseCode = "201", description = "Criado com sucesso"),
+        @ApiResponse(responseCode = "400", description = "Dados inválidos (BusinessException)")
     })
     @PostMapping
     public ResponseEntity<{Entidade}DTO> insert( ... ) { ... }
@@ -86,10 +86,10 @@ public class {Entidade}Controller extends BaseController {
 ```java
 public class {Entidade}DTO {
 
-    @Schema( description = "ID único (UUID)", example = "550e8400-e29b-41d4-a716-446655440000" )
+    @Schema(description = "ID único (UUID)", example = "550e8400-e29b-41d4-a716-446655440000")
     private UUID id;
 
-    @Schema( description = "Nome completo", example = "João da Silva", required = true )
+    @Schema(description = "Nome completo", example = "João da Silva", required = true)
     private String nome;
 }
 ```

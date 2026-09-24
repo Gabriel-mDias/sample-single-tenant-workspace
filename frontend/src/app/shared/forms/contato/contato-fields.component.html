@@ -8,7 +8,7 @@
       icon="fa-solid fa-envelope"
       [maxlength]="255"
     ></gems-input-text>
-    <app-field-error [control]="form().get('email')" [messages]="erroEmail"></app-field-error>
+    <gems-field-error [control]="form().get('email')" [messages]="erroEmail"></gems-field-error>
   </div>
 
   <div class="form-group">
@@ -21,6 +21,9 @@
       [hint]="hintTelefone()"
       [maxlength]="255"
     ></gems-input-text>
-    <app-field-error [control]="form().get('telefone')" [messages]="erroTelefone"></app-field-error>
+    <gems-field-error
+      [control]="form().get('telefone')"
+      [messages]="erroTelefone"
+    ></gems-field-error>
   </div>
 </div>

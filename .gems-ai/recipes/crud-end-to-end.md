@@ -1,7 +1,7 @@
 ---
 origem: local
 precedencia: local-vence
-versao: 2.0.0
+versao: 2.1.0
 ---
 
 # Recipe: CRUD Ponta-a-Ponta
@@ -11,8 +11,7 @@ versao: 2.0.0
 **Pré-requisitos:**
 - `gems-jpa` (BaseCustomJpaRepository, soft delete)
 - `gems-mapstruct` (`GemsMappingConfig`, `unmappedTargetPolicy = ERROR`)
-- `gems-rest-common` (ApiResponseDTO, BaseController)
-- `gems-exception` (BusinessException)
+- `gems-exception` (`BaseController`, envelope de resposta e `BusinessException`)
 - `gems-sdk` Angular (GemsBaseStore, FormCardComponent, TableComponent)
 
 **Rules relacionadas:**
@@ -34,188 +33,32 @@ versao: 2.0.0
 
 ---
 
-## Camada 1: Entidade JPA
+## Camadas 1 a 5: backend
 
-```java
-@Entity
-@Table(name = "TB_{ENTIDADE}")
-@Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
-@SQLDelete(sql = "UPDATE TB_{ENTIDADE} SET ST_ATIVO = false WHERE ID_{ENTIDADE} = ?")
-@SQLRestriction("ST_ATIVO = true")
-public class {Entidade} {
+Cada camada tem um **template** que já é a forma da regra — copie o template, não este documento:
 
-    @Id
-    @Column(name = "ID_{ENTIDADE}", columnDefinition = "VARCHAR(36)")
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+| Camada | Template | Regra | O que muda por domínio |
+| :--- | :--- | :--- | :--- |
+| 1. Entidade JPA | [`EntityTemplate.java`](../templates/backend/EntityTemplate.java) | `architecture.md` §2, `persistence-db.md` §6 | tabela, schema, colunas com prefixo, enum |
+| 1b. Changeset Liquibase | `persistence-db.md` §4 (SQL puro em `<sql><![CDATA[ ]]>`) | `persistence-db.md` | `changelog-<dominio>.xml` novo, incluído no `changelog-master.xml` |
+| 2. DTOs (3) | [`DtoTemplate.java`](../templates/backend/DtoTemplate.java) | `architecture.md` §3 | espelho em `model.dto`, grid em `model.response`, filtro em `model.params` — **id é `UUID`** |
+| 3. Mapper | `mapping.md` §2 | `mapping.md` | `toDTO`, `toEntity`, `toResponse`, `atualizar(@MappingTarget)` |
+| 4. Repository | [`RepositoryTemplate.java`](../templates/backend/RepositoryTemplate.java) | `repositories.md` | `JpaRepository` + `BaseCustomJpaRepository`; tétrade `search`/`countQuery`/`searchQuery`/`appendFilters`; HQL, nunca `@Query` nativa |
+| 5. Service | [`ServiceTemplate.java`](../templates/backend/ServiceTemplate.java) | `services.md` | validação acumulada; ordem canônica dos métodos |
+| 6. Controller | [`ControllerTemplate.java`](../templates/backend/ControllerTemplate.java) | `controllers.md`, `security.md` | ação concreta de `AcaoSistema` em cada endpoint; `setBodyToExceptionLog( dto, request )` |
 
-    @Column(name = "DS_NOME", nullable = false, length = 100)
-    private String nome;
+Fatos que os templates não carregam e a regra também não:
 
-    @Column(name = "ST_ATIVO", nullable = false)
-    private Boolean ativo = true;
+- **Soft delete é por `DT_EXCLUSAO`** (`@SQLDelete` faz `SET DT_EXCLUSAO = NOW()`), nunca por coluna
+  booleana `ST_ATIVO`.
+- **`dataCriacao` é atribuída na Service** (`dto.setDataCriacao( LocalDateTime.now() )` no `insert`),
+  não por `@CreationTimestamp`.
+- O Controller devolve o DTO **direto** — o `gems-exception` envelopa a resposta; não existe
+  `ApiResponseDTO.of(...)` no código do projeto.
+- Toda ação nova entra no enum `AcaoSistema` antes de aparecer em `@PreAuthorize`; o JSON do frontend
+  é gerado dele no build.
 
-    @Column(name = "DT_CRIACAO", updatable = false)
-    @CreationTimestamp
-    private LocalDateTime dataCriacao;
-
-    @Column(name = "DT_ATUALIZACAO")
-    @UpdateTimestamp
-    private LocalDateTime dataAtualizacao;
-}
-```
-
-## Camada 2: DTOs
-
-```java
-// {Entidade}DTO.java — espelho (create/update)
-@Data
-public class {Entidade}DTO {
-    private String id;
-    private String nome;
-}
-
-// {Entidade}ResponseDTO.java — somente para listagem
-@Data
-public class {Entidade}ResponseDTO {
-    private String id;
-    private String nome;
-    private LocalDateTime dataCriacao;
-}
-
-// {Entidade}FilterParams.java — filtros do search
-@Data
-public class {Entidade}FilterParams {
-    private String nome;
-}
-```
-
-## Camada 3: Repository
-
-```java
-public interface {Entidade}Repository extends BaseCustomJpaRepository<{Entidade}> {
-
-    Page<{Entidade}ResponseDTO> search(
-        @Param("nome") String nome,
-        Pageable pageable
-    );
-
-    @Query(value = "SELECT e FROM {Entidade} e WHERE 1=1 /*filter*/", countQuery = "SELECT COUNT(e) FROM {Entidade} e WHERE 1=1 /*filter*/")
-    Page<{Entidade}ResponseDTO> searchQuery(
-        @Param("nome") String nome,
-        Pageable pageable
-    );
-
-    default Page<{Entidade}ResponseDTO> search({Entidade}FilterParams filter, Pageable pageable) {
-        return searchQuery(filter.getNome(), pageable);
-    }
-}
-```
-
-## Camada 4: Service
-
-```java
-@Service
-@RequiredArgsConstructor
-public class {Entidade}Service {
-
-    private final {Entidade}Mapper mapper;
-    private final {Entidade}Repository repository;
-
-    public {Entidade} findById(String id) {
-        return findById(UUID.fromString(id));
-    }
-
-    public {Entidade} findById(UUID id) {
-        return repository.findById(id)
-            .orElseThrow(() -> new BusinessException("{Entidade} não encontrado."));
-    }
-
-    public Page<{Entidade}ResponseDTO> search({Entidade}FilterParams filter, Pageable pageable) {
-        return repository.search(filter.getNome(), pageable);
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    public {Entidade} insert({Entidade}DTO dto) {
-        validate(dto);
-        {Entidade} entidade = mapper.toEntity(dto);
-        return repository.save(entidade);
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    public {Entidade} save(String id, {Entidade}DTO dto) {
-        validate(dto);
-        {Entidade} entidade = findById(id);
-        mapper.atualizar(dto, entidade);
-        return repository.save(entidade);
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    public void delete(String id) {
-        {Entidade} entidade = findById(id);
-        repository.delete(entidade);   // Soft delete via @SQLDelete
-    }
-
-    private void validate({Entidade}DTO dto) {
-        List<String> errors = new ArrayList<>();
-        if (ObjectUtil.isNullOrEmpty(dto.getNome()))
-            errors.add("Nome é obrigatório.");
-        if (!errors.isEmpty())
-            throw new BusinessException(errors);
-    }
-}
-```
-
-## Camada 5: Controller
-
-```java
-@RestController
-@RequestMapping("/api/{recurso}")
-@RequiredArgsConstructor
-@Tag(name = "{Entidade}", description = "Gerenciamento de {Entidade}")
-public class {Entidade}Controller extends BaseController {
-
-    private final {Entidade}Service service;
-    private final {Entidade}Mapper mapper;
-
-    @GetMapping("/{id}")
-    public ResponseEntity<ApiResponseDTO<{Entidade}DTO>> findById(@PathVariable String id) {
-        {Entidade} entidade = service.findById(id);
-        return ResponseEntity.ok(ApiResponseDTO.of(mapper.toResponse(entidade)));
-    }
-
-    @PostMapping("/search")
-    public ResponseEntity<ApiResponseDTO<Page<{Entidade}ResponseDTO>>> search(
-            @RequestBody {Entidade}FilterParams filter,
-            @PageableDefault(size = 10, sort = "nome") Pageable pageable) {
-        return ResponseEntity.ok(ApiResponseDTO.of(service.search(filter, pageable)));
-    }
-
-    @PostMapping
-    public ResponseEntity<ApiResponseDTO<{Entidade}DTO>> insert(@Valid @RequestBody {Entidade}DTO dto) {
-        setBodyToExceptionLog(dto);
-        {Entidade} entidade = service.insert(dto);
-        return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ApiResponseDTO.of(mapper.toResponse(entidade)));
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<ApiResponseDTO<{Entidade}DTO>> save(
-            @PathVariable String id, @Valid @RequestBody {Entidade}DTO dto) {
-        setBodyToExceptionLog(dto);
-        {Entidade} entidade = service.save(id, dto);
-        return ResponseEntity.ok(ApiResponseDTO.of(mapper.toResponse(entidade)));
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable String id) {
-        service.delete(id);
-        return ResponseEntity.noContent().build();
-    }
-}
-```
-
-## Camada 6: Store Angular
+## Camada 7: Store Angular
 
 ```typescript
 @Injectable({ providedIn: 'root' })
@@ -244,7 +87,7 @@ export class {Entidade}Store extends GemsBaseStore {
 }
 ```
 
-## Camada 7: Models TypeScript
+## Camada 8: Models TypeScript
 
 ```typescript
 // {entidade}.model.ts
@@ -260,7 +103,7 @@ export interface {Entidade}FilterModel {
 }
 ```
 
-## Camada 8: Listagem e Formulário Angular
+## Camada 9: Listagem e Formulário Angular
 
 Ver receitas:
 - [search-paginated-end-to-end.md](./search-paginated-end-to-end.md) — listagem com filtros e paginação.
@@ -275,7 +118,7 @@ Ver receitas:
 - [ ] Service com ordem: `findById(String)` > `findById(UUID)` > `search` > `delete` > `insert` > `save` > `validate`.
 - [ ] `ObjectUtil.isNullOrEmpty()` em toda validação — nunca `== null`.
 - [ ] `validate()` acumula erros em `ArrayList<String>` + lança `BusinessException(errors)`.
-- [ ] Controller extende `BaseController`, chama `setBodyToExceptionLog(dto)` nos mutantes.
+- [ ] Controller estende `BaseController`, chama `super.setBodyToExceptionLog( dto, request )` nos mutantes e nomeia uma ação de `AcaoSistema` em cada endpoint.
 - [ ] `POST /search` para listagem paginada (não `GET`).
 - [ ] `POST` retorna `201 CREATED`; `PUT` e `DELETE` retornam `200` e `204`.
 - [ ] Store com `super('api/{recurso}')` sem barra inicial.

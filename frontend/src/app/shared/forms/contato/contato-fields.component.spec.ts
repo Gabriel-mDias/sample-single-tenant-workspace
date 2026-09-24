@@ -15,7 +15,7 @@ describe('ContatoFieldsComponent', () => {
     fixture.detectChanges();
   });
 
-  it('renderiza e-mail e telefone com os ícones consolidados', () => {
+  it('deveRenderizarEmailETelefone_quandoCriarComponente', () => {
     const campos = Array.from(
       fixture.nativeElement.querySelectorAll('gems-input-text'),
     ) as HTMLElement[];

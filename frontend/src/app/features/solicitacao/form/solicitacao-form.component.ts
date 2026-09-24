@@ -1,20 +1,21 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import {
   GemsAlertService,
+  GemsFieldErrorComponent,
   GemsFormCardComponent,
   GemsInputTextComponent,
+  GemsNavigationService,
   GemsSelectComponent,
   GemsSelectOption,
   GemsTextareaComponent,
 } from '@gabriel-mdias/angular-gems-sdk';
 import { Observable } from 'rxjs';
-import { Acoes } from '../../../core/auth/acoes';
+import { Acoes, globalAuthorization } from '../../../core/auth/acoes';
 import { AuthService } from '../../../core/auth/auth.service';
 import { BotaoHistoricoComponent } from '../../../shared/auditoria/botao-historico/botao-historico.component';
-import { FieldErrorComponent } from '../../../shared/forms/field-error/field-error.component';
-import { ParceiroStore } from '../../parceiro/services/parceiro.store';
+import { ParceiroLookupStore } from '../../../shared/parceiro/parceiro-lookup.store';
 import { SITUACAO_CLASSES, SITUACAO_LABELS, SolicitacaoModel } from '../models/solicitacao.model';
 import { SolicitacaoStore } from '../services/solicitacao.store';
 
@@ -41,7 +42,7 @@ type Modo = 'create' | 'edit' | 'view';
     GemsInputTextComponent,
     GemsTextareaComponent,
     GemsSelectComponent,
-    FieldErrorComponent,
+    GemsFieldErrorComponent,
   ],
   templateUrl: './solicitacao-form.component.html',
   styleUrl: './solicitacao-form.component.css',
@@ -49,9 +50,9 @@ type Modo = 'create' | 'edit' | 'view';
 export class SolicitacaoFormComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
+  private readonly navigationService = inject(GemsNavigationService);
   private readonly store = inject(SolicitacaoStore);
-  private readonly parceiroStore = inject(ParceiroStore);
+  private readonly parceiroLookupStore = inject(ParceiroLookupStore);
   private readonly auth = inject(AuthService);
   private readonly alertService = inject(GemsAlertService);
 
@@ -77,20 +78,28 @@ export class SolicitacaoFormComponent implements OnInit {
 
   // Cada botão de transição: possível a partir da situação atual E permitido para este usuário.
   protected readonly podeAbrir = computed(
-    () => this.solicitacao()?.situacao === 'RASCUNHO' && this.auth.hasRole(Acoes.ABRIR_SOLICITACAO),
+    () =>
+      this.solicitacao()?.situacao === 'RASCUNHO' &&
+      this.auth.isAuthorized(globalAuthorization(Acoes.ABRIR_SOLICITACAO)),
   );
   protected readonly podeIniciar = computed(
-    () => this.solicitacao()?.situacao === 'ABERTA' && this.auth.hasRole(Acoes.INICIAR_SOLICITACAO),
+    () =>
+      this.solicitacao()?.situacao === 'ABERTA' &&
+      this.auth.isAuthorized(globalAuthorization(Acoes.INICIAR_SOLICITACAO)),
   );
   protected readonly podeConcluir = computed(
     () =>
       this.solicitacao()?.situacao === 'EM_ANDAMENTO' &&
-      this.auth.hasRole(Acoes.CONCLUIR_SOLICITACAO),
+      this.auth.isAuthorized(globalAuthorization(Acoes.CONCLUIR_SOLICITACAO)),
   );
   protected readonly podeCancelar = computed(() => {
     const situacao = this.solicitacao()?.situacao;
     const terminal = situacao === 'CONCLUIDA' || situacao === 'CANCELADA';
-    return !!situacao && !terminal && this.auth.hasRole(Acoes.CANCELAR_SOLICITACAO);
+    return (
+      !!situacao &&
+      !terminal &&
+      this.auth.isAuthorized(globalAuthorization(Acoes.CANCELAR_SOLICITACAO))
+    );
   });
 
   protected readonly erroTitulo = { required: 'O título é obrigatório.' };
@@ -130,7 +139,7 @@ export class SolicitacaoFormComponent implements OnInit {
   }
 
   protected sair(): void {
-    this.router.navigate(['/solicitacoes']);
+    this.navigationService.navigate(['/solicitacoes/list']);
   }
 
   protected salvar(): void {
@@ -160,7 +169,7 @@ export class SolicitacaoFormComponent implements OnInit {
           id ? 'Solicitação atualizada' : 'Solicitação aberta',
           'Os dados foram gravados com sucesso.',
         );
-        this.router.navigate(['/solicitacoes']);
+        this.navigationService.navigate(['/solicitacoes/list']);
       },
       error: (err) => {
         this.alertService.errorFromApi(err);
@@ -250,13 +259,13 @@ export class SolicitacaoFormComponent implements OnInit {
       error: (err) => {
         this.alertService.errorFromApi(err);
         this.isCarregando.set(false);
-        this.router.navigate(['/solicitacoes']);
+        this.navigationService.navigate(['/solicitacoes/list']);
       },
     });
   }
 
   private carregarParceiros(): void {
-    this.parceiroStore.search({}, { page: 0, size: 100, sort: ['nome,asc'] }).subscribe({
+    this.parceiroLookupStore.search({}, { page: 0, size: 100, sort: ['nome,asc'] }).subscribe({
       next: (pagina) =>
         this.parceiros.set(pagina.content.map((p) => ({ label: p.nome, value: p.id }))),
       error: (err) => this.alertService.errorFromApi(err),

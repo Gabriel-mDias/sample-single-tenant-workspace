@@ -2,11 +2,11 @@ package br.com.gems.app.normalizacao.service;
 
 import br.com.gems.app.model.dto.PessoaDTO;
 import br.com.gems.app.model.entity.normalizacao.Pessoa;
+import br.com.gems.app.normalizacao.mapper.PessoaMapper;
 import br.com.gems.app.normalizacao.repository.PessoaRepository;
-import br.com.gems.mapper.ModelMapperUtils;
 import br.com.gems.app.normalizacao.event.PessoaExcluidaEvent;
 import br.com.gems.utils.ObjectUtil;
-import org.modelmapper.ModelMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
@@ -18,41 +18,36 @@ import java.util.UUID;
 /**
  * Serviço de apoio da identidade civil normalizada.
  *
- * <p>Nasce já pensado para ser reaproveitado por todo domínio que precise de identidade civil —
+ * <p>
+ * Nasce já pensado para ser reaproveitado por todo domínio que precise de identidade civil —
  * daí viver em {@code normalizacao} e não no domínio do parceiro nem no do usuário.
  *
- * <p>O CPF é a chave natural: {@link #buscarPorCpf} é o que permite reaproveitar uma pessoa já
+ * <p>
+ * O CPF é a chave natural: {@link #buscarPorCpf} é o que permite reaproveitar uma pessoa já
  * cadastrada em vez de duplicá-la. A unicidade é verificada aqui, no serviço, e não por
  * constraint de banco, porque a regra é "único <b>entre os ativos</b>" — e o
  * {@code @SQLRestriction} da entidade já dá exatamente esse recorte às consultas do repositório.
  */
 @Service
+@RequiredArgsConstructor
 public class PessoaService {
 
     private static final int TAMANHO_CPF = 11;
 
-    private final ModelMapper modelMapper;
+    private final PessoaMapper mapper;
     private final PessoaRepository repository;
 
     private final ApplicationEventPublisher eventPublisher;
 
-    public PessoaService( ModelMapper modelMapper,
-                          PessoaRepository repository,
-                          ApplicationEventPublisher eventPublisher ) {
-        this.modelMapper = modelMapper;
-        this.repository = repository;
-        this.eventPublisher = eventPublisher;
-        configurarMapeamentos();
-    }
-
     public PessoaDTO toDTO( Pessoa pessoa ) {
-        return ModelMapperUtils.mapStrict( pessoa, PessoaDTO.class );
+        return mapper.toDTO( pessoa );
     }
 
     /**
      * Busca por CPF entre os registros ativos.
      *
-     * <p>O CPF é normalizado para apenas dígitos antes da consulta: a máscara é detalhe de
+     * <p>
+     * O CPF é normalizado para apenas dígitos antes da consulta: a máscara é detalhe de
      * apresentação e não pode influenciar a identidade.
      */
     public Optional<Pessoa> buscarPorCpf( String cpf ) {
@@ -80,28 +75,16 @@ public class PessoaService {
     }
 
     public Pessoa save( Pessoa gerenciada, PessoaDTO dto ) {
-        modelMapper.map( dto, gerenciada );
+        mapper.atualizar( dto, gerenciada );
         gerenciada.setCpf( apenasDigitos( dto.getCpf() ) );
         gerenciada.setDataAproximada( Boolean.TRUE.equals( dto.getDataAproximada() ) );
         return repository.save( gerenciada );
     }
 
-    /** Ver {@link ContatoService#configurarMapeamentos} para a razão do padrão e do guard. */
-    private void configurarMapeamentos() {
-        if ( ObjectUtil.isNullOrEmpty( modelMapper.getTypeMap( PessoaDTO.class, Pessoa.class ) ) ) {
-            modelMapper.emptyTypeMap( PessoaDTO.class, Pessoa.class )
-                    .addMappings( m -> m.skip( Pessoa::setId ) )
-                    .implicitMappings();
-        }
-    }
-
-    private String apenasDigitos( String valor ) {
-        return ObjectUtil.isNullOrEmpty( valor ) ? valor : valor.replaceAll( "\\D", "" );
-    }
-
     /**
-     * @param idExistente id da pessoa que está sendo reaproveitada ou editada, para que ela não
-     *                    acuse duplicidade contra si mesma. {@code null} num cadastro novo.
+     * @param idExistente
+     *            id da pessoa que está sendo reaproveitada ou editada, para que ela não
+     *            acuse duplicidade contra si mesma. {@code null} num cadastro novo.
      */
     public void validar( PessoaDTO pessoa, UUID idExistente, List<String> errors ) {
         validar( pessoa, idExistente, true, errors );
@@ -110,7 +93,8 @@ public class PessoaService {
     /**
      * Valida a identidade civil de acordo com o papel que a consome.
      *
-     * <p>{@code Parceiro} e {@code Usuario} passam {@code exigeCpf=true}, preservando também a
+     * <p>
+     * {@code Parceiro} e {@code Usuario} passam {@code exigeCpf=true}, preservando também a
      * obrigatoriedade da data de nascimento — são identidades civis de pessoas vivas e presentes.
      * Um cadastro que registre pessoa sem documento (histórica, estrangeira, ou de terceiro que
      * nunca se apresentou) passa {@code false}: o CPF e a data deixam de ser exigidos, mas
@@ -144,6 +128,10 @@ public class PessoaService {
         }
 
         validarCpf( pessoa, idExistente, exigeCpf, errors );
+    }
+
+    private String apenasDigitos( String valor ) {
+        return ObjectUtil.isNullOrEmpty( valor ) ? valor : valor.replaceAll( "\\D", "" );
     }
 
     private void validarCpf( PessoaDTO pessoa, UUID idExistente, boolean exigeCpf, List<String> errors ) {

@@ -1,23 +1,23 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
 import {
   GemsAlertService,
   GemsFormCardComponent,
   GemsInputTextComponent,
+  GemsNavigationService,
   GemsPageable,
   GemsTableAction,
   GemsTableColumn,
   GemsTableComponent,
   GemsTableRow,
 } from '@gabriel-mdias/angular-gems-sdk';
-import { GEMS_TABLE_LABELS_PT_BR } from '../../../commons/gems-table-labels';
-import { parseTableSort } from '../../../commons/table-sort';
-import { Acoes } from '../../../core/auth/acoes';
+import { GEMS_TABLE_LABELS_PT_BR } from '../../../shared/models/gems-table-labels';
+import { parseTableSort } from '../../../shared/utils/table-sort';
+import { Acoes, globalAuthorization } from '../../../core/auth/acoes';
 import { AuthService } from '../../../core/auth/auth.service';
 import { EnterBuscaDirective } from '../../../shared/forms/enter-busca/enter-busca.directive';
 import { ParceiroFilterModel } from '../models/parceiro-filter.model';
-import { ParceiroResponseModel } from '../models/parceiro-response.model';
+import { ParceiroResponseModel } from '../models/parceiro.model';
 import { ParceiroStore } from '../services/parceiro.store';
 
 /** Ordenação inicial da listagem. */
@@ -41,7 +41,7 @@ const SORT_PADRAO = { field: 'nome', direction: 'asc' as const };
 })
 export class ParceiroListComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
-  private readonly router = inject(Router);
+  private readonly navigationService = inject(GemsNavigationService);
   private readonly store = inject(ParceiroStore);
   private readonly alertService = inject(GemsAlertService);
   private readonly auth = inject(AuthService);
@@ -61,10 +61,18 @@ export class ParceiroListComponent implements OnInit {
 
   // A UI não decide autorização — o backend recusa de qualquer forma. Ela evita oferecer ao
   // operador um caminho que termina em 403. Cada sinal espelha a AÇÃO CONCRETA do endpoint.
-  protected readonly podeInserir = signal(this.auth.hasRole(Acoes.INSERIR_PARCEIRO));
-  protected readonly podeAlterar = signal(this.auth.hasRole(Acoes.ALTERAR_PARCEIRO));
-  protected readonly podeExcluir = signal(this.auth.hasRole(Acoes.EXCLUIR_PARCEIRO));
-  protected readonly podeVerComissao = signal(this.auth.hasRole(Acoes.VISUALIZAR_COMISSAO));
+  protected readonly podeInserir = signal(
+    this.auth.isAuthorized(globalAuthorization(Acoes.INSERIR_PARCEIRO)),
+  );
+  protected readonly podeAlterar = signal(
+    this.auth.isAuthorized(globalAuthorization(Acoes.ALTERAR_PARCEIRO)),
+  );
+  protected readonly podeExcluir = signal(
+    this.auth.isAuthorized(globalAuthorization(Acoes.EXCLUIR_PARCEIRO)),
+  );
+  protected readonly podeVerComissao = signal(
+    this.auth.isAuthorized(globalAuthorization(Acoes.VISUALIZAR_COMISSAO)),
+  );
 
   /** Verdadeiro quando a busca corrente tem algum filtro aplicado — muda a mensagem de vazio. */
   private readonly comFiltro = signal(false);
@@ -178,7 +186,7 @@ export class ParceiroListComponent implements OnInit {
   }
 
   protected novo(): void {
-    this.router.navigate(['/parceiros/novo']);
+    this.navigationService.navigate(['/parceiros/form']);
   }
 
   protected onAction(event: { action: string; row: GemsTableRow }): void {
@@ -186,10 +194,10 @@ export class ParceiroListComponent implements OnInit {
 
     switch (event.action) {
       case 'view':
-        this.router.navigate(['/parceiros', id]);
+        this.navigationService.navigate(['/parceiros/view', id]);
         break;
       case 'edit':
-        this.router.navigate(['/parceiros', id, 'editar']);
+        this.navigationService.navigate(['/parceiros/form', id]);
         break;
       case 'delete':
         this.confirmarExclusao(id, String(event.row['nome']));

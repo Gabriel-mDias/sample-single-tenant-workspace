@@ -5,7 +5,7 @@ severity: mandatory
 see-also: [services.md, architecture.md, utils.md]
 origem: local
 precedencia: local-vence
-versao: 2.0.0
+versao: 2.1.0
 ---
 
 # Repositories & HQL Queries — Java / Spring Boot
@@ -14,7 +14,7 @@ versao: 2.0.0
 > - **Sempre** estender `JpaRepository<E, UUID>` E `BaseCustomJpaRepository<E>` (nesta ordem), com `@Repository`.
 > - Trinca obrigatória: `search()` default público + `countQuery()` privado + `searchQuery()` privado + `appendFilters()` privado.
 > - HQL `WHERE 1=1` + filtros condicionais via `ObjectUtil.isNotNullAndNotEmpty()`. **Nunca** `!= null`.
-> - ResponseDTO via constructor expression: `SELECT new br.com.gems.{app}.core.dto.{DTO}(campos...)`.
+> - ResponseDTO via constructor expression: `SELECT new br.com.gems.{app}.model.response.{dominio}.{DTO}(campos...)`.
 > - Aliases curtos: `e`, `c`, `p`, `a`, `i`, `cg`. JOINs idênticos em `countQuery` e `searchQuery`.
 > - `@EntityGraph` em `findById` quando há relacionamentos a carregar eagerly.
 
@@ -64,7 +64,7 @@ private List<{Entidade}ResponseDTO> searchQuery( {Entidade}FilterParams filterPa
     var hql = new StringBuilder();
     var params = new HashMap<String, Object>();
 
-    hql.append( " SELECT new br.com.gems.{app}.core.dto.{Entidade}ResponseDTO( " );
+    hql.append( " SELECT new br.com.gems.{app}.model.response.{dominio}.{Entidade}ResponseDTO( " );
     hql.append( "       e.id, " );
     hql.append( "       e.campo " );
     hql.append( " ) " );
@@ -176,7 +176,7 @@ hql.append( " JOIN e.categoria cg " );
 
 ```java
 @Override
-@EntityGraph( attributePaths = { "relacionamento", "relacionamento.categoria" } )
+@EntityGraph(attributePaths = { "relacionamento", "relacionamento.categoria" })
 Optional<{Entidade}> findById( UUID id );
 ```
 

@@ -1,5 +1,6 @@
 package br.com.gems.app.auditoria.interceptor;
 
+import br.com.gems.auditing.AuditPolicy;
 import br.com.gems.app.model.entity.base.EntidadeAuditavel;
 import br.com.gems.app.support.AbstractIntegrationTest;
 import jakarta.persistence.EntityManagerFactory;
@@ -23,7 +24,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * as tabelas de rota <b>à mão</b> — e ignorou uma feature inteira, porque a tabela dela nunca entrou
  * na lista. A rede montada para pegar o esquecimento foi vítima do mesmo esquecimento.
  *
- * <p>Aqui a fonte é o {@code Metamodel} do Hibernate: tudo que é entidade mapeada aparece, queira o
+ * <p>
+ * Aqui a fonte é o {@code Metamodel} do Hibernate: tudo que é entidade mapeada aparece, queira o
  * autor ou não. Uma entidade criada em qualquer rodada futura entra nesta varredura no instante em
  * que for mapeada, sem que ninguém precise lembrar de nada.
  *
@@ -40,9 +42,6 @@ class AuditoriaCoberturaIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private EntityManagerFactory entityManagerFactory;
 
-    @Autowired
-    private AuditoriaInterceptor interceptor;
-
     /** As duas tabelas puramente referenciais, que o Princípio II isenta de soft delete. */
     private static final List<String> REFERENCIAIS = List.of( "Pais", "Estado" );
 
@@ -50,10 +49,10 @@ class AuditoriaCoberturaIntegrationTest extends AbstractIntegrationTest {
     private static final List<String> DA_TRILHA = List.of( "RegistroAuditoria", "CampoAlterado" );
 
     @Test
-    @DisplayName( "toda entidade de negócio mapeada está coberta pela trilha" )
-    void todaEntidadeDeNegocioEstaCoberta() {
+    @DisplayName("toda entidade de negócio mapeada está coberta pela trilha")
+    void deveComprovarTodaEntidadeDeNegocioEstaCoberta_quandoExecutaOCenario() {
         var descobertas = entidadesDeNegocio().stream()
-                .filter( tipo -> !interceptor.deveAuditar( instanciar( tipo ) ) )
+                .filter( tipo -> !AuditPolicy.isAuditable( tipo ) )
                 .map( Class::getSimpleName )
                 .toList();
 
@@ -71,8 +70,8 @@ class AuditoriaCoberturaIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @DisplayName( "SC-140: nenhuma entidade de negócio tem chave que o mecanismo não saiba registrar" )
-    void todaEntidadeDeNegocioTemChaveUuid() {
+    @DisplayName("SC-140: nenhuma entidade de negócio tem chave que o mecanismo não saiba registrar")
+    void deveComprovarTodaEntidadeDeNegocioTemChaveUuid_quandoExecutaOCenario() {
         var forasteiras = entidadesDeNegocio().stream()
                 .filter( tipo -> !UUID.class.equals( tipoDaChave( tipo ) ) )
                 .map( tipo -> tipo.getSimpleName() + " (" + tipoDaChave( tipo ) + ")" )
@@ -86,15 +85,15 @@ class AuditoriaCoberturaIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @DisplayName( "A trilha e as tabelas referenciais ficam FORA da cobertura, e isso é deliberado" )
-    void oQueFicaDeForaContinuaDeFora() {
+    @DisplayName("A trilha e as tabelas referenciais ficam FORA da cobertura, e isso é deliberado")
+    void deveComprovarOQueFicaDeForaContinuaDeFora_quandoExecutaOCenario() {
         var mapeadas = entityManagerFactory.getMetamodel().getEntities().stream()
                 .map( EntityType::getJavaType )
                 .collect( Collectors.toMap( Class::getSimpleName, tipo -> tipo, ( a, b ) -> a ) );
 
         for ( var referencial : REFERENCIAIS ) {
             assertThat( mapeadas ).containsKey( referencial );
-            assertThat( interceptor.deveAuditar( instanciar( mapeadas.get( referencial ) ) ) )
+            assertThat( AuditPolicy.isAuditable( mapeadas.get( referencial ) ) )
                     .as( "%s é tabela puramente referencial: auditá-la encheria a trilha com a "
                             + "carga de seed", referencial )
                     .isFalse();
@@ -102,15 +101,15 @@ class AuditoriaCoberturaIntegrationTest extends AbstractIntegrationTest {
 
         for ( var daTrilha : DA_TRILHA ) {
             assertThat( mapeadas ).containsKey( daTrilha );
-            assertThat( interceptor.deveAuditar( instanciar( mapeadas.get( daTrilha ) ) ) )
+            assertThat( AuditPolicy.isAuditable( mapeadas.get( daTrilha ) ) )
                     .as( "auditar %s seria recursão sem fim", daTrilha )
                     .isFalse();
         }
     }
 
     @Test
-    @DisplayName( "nenhuma entidade mapeada escapa sem classificação" )
-    void nenhumaEntidadeMapeadaFicaSemClassificacao() {
+    @DisplayName("nenhuma entidade mapeada escapa sem classificação")
+    void deveComprovarNenhumaEntidadeMapeadaFicaSemClassificacao_quandoExecutaOCenario() {
         var semClassificacao = entityManagerFactory.getMetamodel().getEntities().stream()
                 .map( EntityType::getJavaType )
                 .filter( tipo -> !EntidadeAuditavel.class.isAssignableFrom( tipo ) )
@@ -153,20 +152,4 @@ class AuditoriaCoberturaIntegrationTest extends AbstractIntegrationTest {
                 .orElse( null );
     }
 
-    /**
-     * Toda entidade do projeto tem construtor sem argumentos — é exigência do JPA e da convenção
-     * Lombok ({@code @NoArgsConstructor}). Se um dia não tiver, este teste falha de forma barulhenta,
-     * que é o comportamento certo.
-     */
-    private Object instanciar( Class<?> tipo ) {
-        try {
-            var construtor = tipo.getDeclaredConstructor();
-            construtor.setAccessible( true );
-            return construtor.newInstance();
-        } catch ( ReflectiveOperationException e ) {
-            throw new IllegalStateException(
-                    "não foi possível instanciar " + tipo.getSimpleName()
-                            + " — toda entidade precisa de construtor sem argumentos", e );
-        }
-    }
 }

@@ -1,5 +1,5 @@
 import { Component, inject, input, signal } from '@angular/core';
-import { Acoes } from '../../../core/auth/acoes';
+import { Acoes, globalAuthorization } from '../../../core/auth/acoes';
 import { AuthService } from '../../../core/auth/auth.service';
 import { EntidadeAuditada } from '../auditoria.model';
 import { HistoricoRegistroComponent } from '../historico-registro/historico-registro.component';
@@ -32,7 +32,9 @@ export class BotaoHistoricoComponent {
   readonly entidade = input.required<EntidadeAuditada>();
   readonly registroId = input<string | null>(null);
 
-  protected readonly podeVerAuditoria = signal(this.auth.hasRole(Acoes.CONSULTAR_AUDITORIA));
+  protected readonly podeVerAuditoria = signal(
+    this.auth.isAuthorized(globalAuthorization(Acoes.CONSULTAR_AUDITORIA)),
+  );
   protected readonly aberto = signal(false);
 
   protected abrir(): void {

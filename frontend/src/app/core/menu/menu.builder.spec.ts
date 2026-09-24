@@ -12,33 +12,32 @@ import { buildMenu } from './menu.builder';
  */
 describe('buildMenu', () => {
   const contextoCom = (...acoes: string[]): MenuAuthContext => ({
-    hasRole: (acao: string) => acoes.includes(acao),
-    hasAnyRole: (lista: string[]) => lista.some((acao) => acoes.includes(acao)),
+    isAuthorized: (requirement) => requirement.actions.every((acao) => acoes.includes(acao)),
   });
 
-  it('sem ação nenhuma, o menu é vazio — falha FECHADO', () => {
+  it('deveRetornarMenuVazio_quandoNenhumaAcaoAutorizada', () => {
     expect(buildMenu(contextoCom())).toEqual([]);
   });
 
-  it('cada ação de consulta acrescenta exatamente um item', () => {
+  it('deveAcrescentarItem_quandoAcaoDeConsultaAutorizada', () => {
     expect(buildMenu(contextoCom(Acoes.CONSULTAR_PARCEIRO))).toHaveLength(1);
     expect(buildMenu(contextoCom(Acoes.CONSULTAR_SOLICITACAO))).toHaveLength(1);
     expect(buildMenu(contextoCom(Acoes.CONSULTAR_AUDITORIA))).toHaveLength(1);
   });
 
-  it('o item de parceiros aponta para a rota de parceiros', () => {
+  it('deveApontarParaRotaDeParceiros_quandoAcaoDeConsultaAutorizada', () => {
     const [item] = buildMenu(contextoCom(Acoes.CONSULTAR_PARCEIRO));
-    expect(item.route).toBe('/parceiros');
+    expect(item.route).toBe('/parceiros/list');
     expect(item.label).toBe('Parceiros');
   });
 
-  it('ação de ESCRITA não abre item de menu sozinha', () => {
+  it('naoDeveAbrirItem_quandoSomenteAcaoDeEscritaAutorizada', () => {
     // Quem só pode inserir mas não pode consultar não consegue abrir a listagem: mostrar o item
     // seria oferecer uma tela que responde 403.
     expect(buildMenu(contextoCom(Acoes.INSERIR_PARCEIRO))).toEqual([]);
   });
 
-  it('quem tem tudo vê todos os itens, sem duplicata', () => {
+  it('deveExibirTodosItensSemDuplicata_quandoTodasAcoesAutorizadas', () => {
     const menu = buildMenu(
       contextoCom(Acoes.CONSULTAR_PARCEIRO, Acoes.CONSULTAR_SOLICITACAO, Acoes.CONSULTAR_AUDITORIA),
     );
@@ -46,7 +45,7 @@ describe('buildMenu', () => {
     expect(new Set(menu.map((i) => i.route)).size).toBe(3);
   });
 
-  it('a home não tem entrada de menu', () => {
+  it('naoDeveExibirHome_quandoMontarMenu', () => {
     const menu = buildMenu(
       contextoCom(Acoes.CONSULTAR_PARCEIRO, Acoes.CONSULTAR_SOLICITACAO, Acoes.CONSULTAR_AUDITORIA),
     );

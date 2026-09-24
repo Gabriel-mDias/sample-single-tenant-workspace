@@ -12,7 +12,7 @@
         icon="fa-solid fa-handshake"
         [maxlength]="255"
       ></gems-input-text>
-      <app-field-error [control]="formGroup.get('nome')" [messages]="erroNome"></app-field-error>
+      <gems-field-error [control]="formGroup.get('nome')" [messages]="erroNome"></gems-field-error>
     </div>
 
     @if (podeVerComissao) {
@@ -24,10 +24,10 @@
           placeholder="Ex.: 12,50"
           icon="fa-solid fa-percent"
         ></gems-input-text>
-        <app-field-error
+        <gems-field-error
           [control]="formGroup.get('comissao')"
           [messages]="erroComissao"
-        ></app-field-error>
+        ></gems-field-error>
       </div>
     }
 

@@ -6,10 +6,10 @@ import br.com.gems.app.model.dto.EnderecoDTO;
 import br.com.gems.app.model.entity.localidades.Estado;
 import br.com.gems.app.model.entity.localidades.Pais;
 import br.com.gems.app.model.entity.normalizacao.Endereco;
+import br.com.gems.app.normalizacao.mapper.EnderecoMapper;
 import br.com.gems.app.normalizacao.repository.EnderecoRepository;
-import br.com.gems.mapper.ModelMapperUtils;
 import br.com.gems.utils.ObjectUtil;
-import org.modelmapper.ModelMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,41 +18,34 @@ import java.util.Optional;
 /**
  * Serviço de apoio dos endereços normalizados.
  *
- * <p><b>Não trava país.</b> Uma regra do tipo "a sede precisa estar em território brasileiro" é
+ * <p>
+ * <b>Não trava país.</b> Uma regra do tipo "a sede precisa estar em território brasileiro" é
  * específica do cadastro que a exige e permanece no serviço dele; empurrá-la para cá faria todo
  * cadastro que reaproveita {@code Endereco} herdar uma restrição que não é dele — um parceiro
  * externo pode morar fora do Brasil.
  *
- * <p>O que o serviço faz é <b>usar</b> o país para decidir a obrigatoriedade de
+ * <p>
+ * O que o serviço faz é <b>usar</b> o país para decidir a obrigatoriedade de
  * CEP e de estado. Essa condicional não cabe no banco: uma constraint não sabe
  * condicionar-se ao valor de outra coluna. Com {@code ID_ESTADO} e {@code CD_CEP} agora anuláveis, é
  * este serviço — e só ele — que impede um endereço brasileiro incompleto.
  *
- * <p>Como em {@link ContatoService}, {@link #validar} acumula na lista do chamador e nunca lança.
+ * <p>
+ * Como em {@link ContatoService}, {@link #validar} acumula na lista do chamador e nunca lança.
  */
 @Service
+@RequiredArgsConstructor
 public class EnderecoService {
 
     private static final String PAIS_COM_UF_E_CEP = "Brasil";
 
-    private final ModelMapper modelMapper;
+    private final EnderecoMapper mapper;
     private final EnderecoRepository repository;
     private final EstadoRepository estadoRepository;
     private final PaisRepository paisRepository;
 
-    public EnderecoService( ModelMapper modelMapper,
-                            EnderecoRepository repository,
-                            EstadoRepository estadoRepository,
-                            PaisRepository paisRepository ) {
-        this.modelMapper = modelMapper;
-        this.repository = repository;
-        this.estadoRepository = estadoRepository;
-        this.paisRepository = paisRepository;
-        configurarMapeamentos();
-    }
-
     public EnderecoDTO toDTO( Endereco endereco ) {
-        return ModelMapperUtils.mapStrict( endereco, EnderecoDTO.class );
+        return mapper.toDTO( endereco );
     }
 
     public void delete( Endereco endereco ) {
@@ -72,12 +65,13 @@ public class EnderecoService {
      * repositórios, e não copiados do DTO, para que o que se persiste seja sempre instância
      * gerenciada.
      *
-     * <p>Chamado apenas depois de {@link #validar}, então a busca do país não pode falhar. Já o
+     * <p>
+     * Chamado apenas depois de {@link #validar}, então a busca do país não pode falhar. Já o
      * estado é resolvido de forma <b>opcional</b>: endereço fora do Brasil legitimamente não tem um,
      * e um {@code orElseThrow()} incondicional aqui quebraria todo cadastro estrangeiro.
      */
     public Endereco save( Endereco gerenciado, EnderecoDTO dto ) {
-        modelMapper.map( dto, gerenciado );
+        mapper.atualizar( dto, gerenciado );
         gerenciado.setPais( buscarPais( dto ).orElseThrow() );
         gerenciado.setEstado( buscarEstado( dto ).orElse( null ) );
         return repository.save( gerenciado );
@@ -99,27 +93,6 @@ public class EnderecoService {
             return Optional.empty();
         }
         return paisRepository.findById( dto.getPais().getId() );
-    }
-
-    /**
-     * Além do {@code id}, {@code estado} e {@code pais} também são pulados: sem isso, os DTOs
-     * recebidos sobrescreveriam campo a campo as instâncias gerenciadas pela sessão — e {@code ESTADO}
-     * e {@code PAIS} são dados de referência compartilhados, então renomear ali afetaria todos os
-     * endereços do sistema.
-     *
-     * <p>Ver {@link ContatoService#configurarMapeamentos} para a razão do {@code emptyTypeMap} e do
-     * guard.
-     */
-    private void configurarMapeamentos() {
-        if ( ObjectUtil.isNullOrEmpty( modelMapper.getTypeMap( EnderecoDTO.class, Endereco.class ) ) ) {
-            modelMapper.emptyTypeMap( EnderecoDTO.class, Endereco.class )
-                    .addMappings( m -> {
-                        m.skip( Endereco::setId );
-                        m.skip( Endereco::setEstado );
-                        m.skip( Endereco::setPais );
-                    } )
-                    .implicitMappings();
-        }
     }
 
     public void validar( EnderecoDTO endereco, List<String> errors ) {
@@ -200,7 +173,8 @@ public class EnderecoService {
      * Sem um país resolvido que comprovadamente não é o Brasil (ausente, inexistente ou ainda não
      * validado), a exigência permanece de pé.
      *
-     * <p>Isso preserva a validação em rodada única: um formulário vazio acusa país, CEP e estado de
+     * <p>
+     * Isso preserva a validação em rodada única: um formulário vazio acusa país, CEP e estado de
      * uma vez, em vez de exigir que o operador escolha o país, submeta, e só então descubra os
      * outros dois.
      */

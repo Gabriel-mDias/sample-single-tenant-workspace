@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { SEXO_OPTIONS, createDadosPessoaisForm, sexoLabel } from './dados-pessoais-form';
 
 describe('createDadosPessoaisForm', () => {
-  it('mantém a ordem canônica dos dados pessoais', () => {
+  it('deveManterOrdemCanonica_quandoCriarFormulario', () => {
     const form = createDadosPessoaisForm(new FormBuilder());
 
     expect(Object.keys(form.controls)).toEqual([
@@ -16,7 +16,7 @@ describe('createDadosPessoaisForm', () => {
     ]);
   });
 
-  it('exige os campos obrigatórios e CPF com onze dígitos', () => {
+  it('deveExigirCamposObrigatoriosECpfValido_quandoValidarFormulario', () => {
     const form = createDadosPessoaisForm(new FormBuilder());
     const cpf = form.get('cpf')!;
 
@@ -32,7 +32,7 @@ describe('createDadosPessoaisForm', () => {
     expect(cpf.hasError('maxlength')).toBe(true);
   });
 
-  it('exige o sexo e o inicializa em null para o placeholder aparecer', () => {
+  it('deveInicializarSexoNuloEObrigatorio_quandoCriarFormulario', () => {
     const form = createDadosPessoaisForm(new FormBuilder());
     const sexo = form.get('sexo')!;
 
@@ -44,7 +44,7 @@ describe('createDadosPessoaisForm', () => {
     expect(sexo.valid).toBe(true);
   });
 
-  it('rotula as três opções de sexo e devolve travessão quando não há valor', () => {
+  it('deveRotularOpcoesEUsarTravessao_quandoSexoEstiverAusente', () => {
     expect(SEXO_OPTIONS.map((opcao) => opcao.value)).toEqual([
       'MASCULINO',
       'FEMININO',

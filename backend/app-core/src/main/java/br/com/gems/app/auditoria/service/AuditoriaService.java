@@ -43,8 +43,8 @@ public class AuditoriaService {
     private final EntityManagerFactory entityManagerFactory;
 
     public AuditoriaService( RegistroAuditoriaRepository repository,
-                             CampoAlteradoRepository campoAlteradoRepository,
-                             EntityManagerFactory entityManagerFactory ) {
+            CampoAlteradoRepository campoAlteradoRepository,
+            EntityManagerFactory entityManagerFactory ) {
         this.repository = repository;
         this.campoAlteradoRepository = campoAlteradoRepository;
         this.entityManagerFactory = entityManagerFactory;
@@ -62,11 +62,12 @@ public class AuditoriaService {
      * perguntar só pela raiz devolvia o cadastro inicial e mais nada, por mais que o operador
      * editasse. Foi o que a homologação encontrou.
      *
-     * <p>A coleção de campos vem pelo {@code @EntityGraph} da consulta — ver a nota no repositório
+     * <p>
+     * A coleção de campos vem pelo {@code @EntityGraph} da consulta — ver a nota no repositório
      * sobre por que isso é correção, e não otimização.
      */
     public Page<RegistroAuditoriaResponseDTO> historico( String entidade, UUID registroAfetado,
-                                                         Pageable pageable ) {
+            Pageable pageable ) {
         validate( entidade, null );
 
         return repository
@@ -78,7 +79,8 @@ public class AuditoriaService {
     /**
      * A busca ampla — "o que fulano alterou na semana passada".
      *
-     * <p>Os campos alterados vêm de uma <b>segunda consulta</b>, por lote de identificadores. Não é
+     * <p>
+     * Os campos alterados vêm de uma <b>segunda consulta</b>, por lote de identificadores. Não é
      * N+1: é uma ida ao banco para a página inteira.
      */
     public Page<RegistroAuditoriaResponseDTO> search( AuditoriaFilterParams filterParams, Pageable pageable ) {
@@ -108,7 +110,8 @@ public class AuditoriaService {
      * associação singular cujo alvo é {@link EntidadeAuditavel} entra, e um agregado novo passa a
      * ser coberto no instante em que é mapeado.
      *
-     * <p>O filtro por {@code EntidadeAuditavel} já exclui o que não deve entrar: {@code Pais} e
+     * <p>
+     * O filtro por {@code EntidadeAuditavel} já exclui o que não deve entrar: {@code Pais} e
      * {@code Estado} são referenciais e isentos, então {@code Parceiro.paisRepresentado} fica de
      * fora sozinho, sem regra especial.
      *
@@ -218,7 +221,8 @@ public class AuditoriaService {
     /**
      * Os nomes de entidade que a trilha pode conter, tirados do <b>metamodelo JPA</b>.
      *
-     * <p>Nunca de uma lista escrita à mão: a fronteira é a mesma do interceptador — subclasse de
+     * <p>
+     * Nunca de uma lista escrita à mão: a fronteira é a mesma do interceptador — subclasse de
      * {@link EntidadeAuditavel} —, e derivá-la da mesma fonte é o que impede a validação de recusar
      * uma entidade nova que a trilha já está registrando.
      */
@@ -233,8 +237,10 @@ public class AuditoriaService {
     /**
      * Validação acumulada, nunca fail-fast (Princípio IV): junta tudo e lança uma vez só.
      *
-     * @param entidade     o nome a conferir, ou {@code null} quando não veio no filtro
-     * @param filterParams presente apenas na busca ampla; {@code null} no histórico
+     * @param entidade
+     *            o nome a conferir, ou {@code null} quando não veio no filtro
+     * @param filterParams
+     *            presente apenas na busca ampla; {@code null} no histórico
      */
     private void validate( String entidade, AuditoriaFilterParams filterParams ) {
         var errors = new ArrayList<String>();
@@ -249,10 +255,11 @@ public class AuditoriaService {
         if ( ObjectUtil.isNotNullAndNotEmpty( filterParams ) ) {
             if ( ObjectUtil.isNotNullAndNotEmpty( filterParams.getOperacao() )
                     && Arrays.stream( OperacaoAuditoria.values() )
-                    .noneMatch( operacao -> operacao.name().equals( filterParams.getOperacao() ) ) ) {
+                            .noneMatch( operacao -> operacao.name().equals( filterParams.getOperacao() ) ) ) {
                 errors.add( "A operação '" + filterParams.getOperacao() + "' é inválida. Valores aceitos: "
                         + Arrays.stream( OperacaoAuditoria.values() ).map( Enum::name )
-                        .collect( Collectors.joining( ", " ) ) + "." );
+                                .collect( Collectors.joining( ", " ) )
+                        + "." );
             }
 
             if ( ObjectUtil.isNotNullAndNotEmpty( filterParams.getDataInicio() )

@@ -1,7 +1,7 @@
 ---
 origem: local
 precedencia: local-vence
-versao: 2.0.0
+versao: 2.1.0
 ---
 
 # Recipe: Setup Backend — Java GEMS SDK
@@ -181,7 +181,7 @@ br.com.gems.{app}/
 │   ├── controller/
 │   ├── service/
 │   ├── repository/
-│   ├── mapper/          # @Mapper( config = GemsMappingConfig.class )
+│   ├── mapper/          # @Mapper(config = GemsMappingConfig.class)
 │   ├── entity/
 │   └── dto/
 └── {modulo2}/

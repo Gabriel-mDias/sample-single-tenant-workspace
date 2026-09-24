@@ -17,7 +17,7 @@ describe('DadosPessoaisFieldsComponent', () => {
     fixture.detectChanges();
   });
 
-  it('renderiza campos e ícones na ordem canônica', () => {
+  it('deveRenderizarCamposEIconesNaOrdemCanonica_quandoCriarComponente', () => {
     const campos = Array.from(
       fixture.nativeElement.querySelectorAll(
         'gems-input-text, gems-input-document, gems-input-date',
@@ -36,7 +36,7 @@ describe('DadosPessoaisFieldsComponent', () => {
     expect(campos[3].getAttribute('icon')).toBe('fa-solid fa-address-card');
   });
 
-  it('emite a intenção de busca pelo botão visível', () => {
+  it('deveEmitirBusca_quandoClicarNoBotaoVisivel', () => {
     const buscarCpf = vi.fn();
     fixture.componentInstance.buscarCpf.subscribe(buscarCpf);
 
@@ -48,14 +48,14 @@ describe('DadosPessoaisFieldsComponent', () => {
     expect(buscarCpf).toHaveBeenCalledOnce();
   });
 
-  it('oculta a busca no modo somente leitura', () => {
+  it('deveOcultarBusca_quandoModoForSomenteLeitura', () => {
     fixture.componentRef.setInput('isReadOnly', true);
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('[data-testid="buscar-cpf"]')).toBeNull();
   });
 
-  it('desabilita a busca e exibe o loading durante a consulta', () => {
+  it('deveDesabilitarBuscaEExibirLoading_quandoConsultaEstiverEmAndamento', () => {
     fixture.componentRef.setInput('isSearching', true);
     fixture.detectChanges();
 

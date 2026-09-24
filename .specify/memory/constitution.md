@@ -1,4 +1,15 @@
 <!--
+SYNC IMPACT REPORT — v2.0.0
+Version change: 1.0.0 → 2.0.0 (MAJOR: regras de escrita vencem código consolidado).
+Aprovado na rodada 010 do Meduc, roteiro §12, 2026-09-14.
+Atualizados: Governance, Adoção de Módulo SDK GEMS, IV (Spring rollbackFor),
+V (BaseController incondicional e catálogo derivado), VI (SDK, shared, rotas), VII (mutação).
+Preservados: cinco módulos app-*, single-tenant, schemas public/security/auditoria,
+domínios parceiro/solicitacao e remoção do scaffold no primeiro domínio real.
+Contexto propagado na mesma alteração; a conformação do código será a rodada 002.
+Nenhum registro factual da fundação Meduc nem requisito tenant foi importado.
+-->
+<!--
 SYNC IMPACT REPORT — v1.0.0 (criação)
 =====================================
 Version change: — → 1.0.0
@@ -149,7 +160,7 @@ nem altera tabela.
   descobrir um erro por submit.
 - Proibido `!= null` e `.isEmpty()`: use `ObjectUtil.isNullOrEmpty` e
   `ObjectUtil.isNotNullAndNotEmpty`.
-- `@Transactional(rollbackOn = Exception.class)` em toda mutação. Cadastros compostos (entidade +
+- `@Transactional(rollbackFor = Exception.class)` de `org.springframework.transaction.annotation` em toda mutação. Cadastros compostos (entidade +
   agregados) gravam em **uma única transação**, a partir de um único payload.
 - Sobrecargas que recebem id `String` delegam para a sobrecarga `UUID`.
 - Repository estende `JpaRepository<E, UUID>` **e** `BaseCustomJpaRepository<E>`. A busca vive como
@@ -165,6 +176,11 @@ nem altera tabela.
 - Controller estende `BaseController`, chama `super.setBodyToExceptionLog(dto, request)` em **todo**
   POST e PUT, documenta com `@Tag` na classe e `@Operation`/`@ApiResponse` nos métodos, e retorna
   **201** em insert, **204** em delete e **200** no restante.
+- A extensão é incondicional, inclusive em controller somente GET. Não estender
+  exige motivo específico no Javadoc da classe; ausência de corpo não é exceção.
+- O catálogo é derivado do enum de ações do projeto, implementando `AuthorizationAction`,
+  via `AuthorizationCatalog` da SDK. Ações escritas incorretamente devem falhar na
+  compilação; o JSON gerado deve ser verificado no build, nunca mantido à mão.
 - Busca paginada é **`POST /search`** com `@RequestBody FilterParams` e `@PageableDefault` — nunca
   GET com query params.
 - **Autorização é por ação, não por nível.** Cada endpoint declara
@@ -187,8 +203,8 @@ nem altera tabela.
   endpoints de ação dedicados (`POST /api/solicitacoes/{id}/concluir`), cada um com a sua própria
   ação de `AcaoSistema`. Aceitar a situação num `PUT` genérico transforma a máquina de estados em
   sugestão e a autorização por transição em ficção.
-- A UI **espelha a ação concreta**: `hasRole(Acoes.EXCLUIR_PARCEIRO)` no sinal que controla o botão,
-  `data: { roles: [Acoes.INSERIR_PARCEIRO] }` na rota. `core/auth/acoes.ts` é o espelho exato de
+- A UI **espelha a ação concreta**: `isAuthorized(Acoes.EXCLUIR_PARCEIRO)` no sinal que controla o botão,
+  `data: { roles: [Acoes.INSERIR_PARCEIRO] }` na rota. O JSON frontend é gerado e verificado a partir de
   `AcaoSistema.java`, verificado por diff dos dois conjuntos.
 - **As duas varreduras que fecham a falha silenciosa são obrigatórias**, e toda rodada nova MUST
   entrar nelas: `CoberturaPreAuthorizeTest` falha se um método mapeado de `br.com.gems.app` não
@@ -235,17 +251,18 @@ nem altera tabela.
   StateService baseado em signals fornecido no `providers` do orquestrador, steps isolados que só
   conversam pelo StateService, um passo final de Resumo e submit único ao backend. O `gems-wizard` é
   só a barra de progresso: quem renderiza o passo ativo é o orquestrador, com `@switch`.
-- **Mensagem de erro de campo usa `app-field-error`** (`shared/forms/field-error/`), não o
-  `gems-field-error` da SDK npm 1.1.0 — o `errorMessage` dela é um `computed()` sobre propriedades
-  que não são sinais, e por isso **nunca exibe mensagem nenhuma**. Enquanto a SDK não corrigir, usar
-  o componente dela é entregar um formulário que recusa salvar sem dizer por quê.
-- **Estrutura duplicada em duas features tem um dono só, e ele fica em `shared/` ou `commons/`** —
-  nunca dentro de uma delas. `shared/` para o que atravessa features (formulários, componentes,
-  modelos compartilhados); `commons/` para constante e função pura. Uma feature importar de outra
-  feature é defeito estrutural; `shared/` importar de `features/` é o mesmo defeito, invertido.
-- A mesma rota base atende os três modos: `/<recurso>` (lista), `/<recurso>/novo`,
-  `/<recurso>/:id/editar` e `/<recurso>/:id` (leitura). A ordem importa: `novo` e `:id/editar` vêm
-  **antes** de `:id`.
+- **Mensagem de erro de campo usa `gems-field-error` da SDK (≥ 2.0.0)**, e **senha usa
+  `gems-input-password`** com `enforcePolicy`, `showCriteria` e `matchControl` — não se recria
+  política de senha nem `passwordMismatch` no projeto. A SDK 2.1.0 fornece os componentes e a política aprovados para a rodada 002. Cópia local de componente que a SDK entrega é o
+  defeito que a seção "Adoção de Módulo da SDK GEMS" existe para remover.
+- **Estrutura duplicada em duas features tem um dono só, e ele fica em `shared/`** — nunca dentro
+  de uma delas: formulários, componentes, modelos, constantes e funções puras que atravessam
+  features. Uma feature importar de outra feature é defeito estrutural; `core/` ou `shared/`
+  importar de `features/` é o mesmo defeito, invertido.
+- A mesma rota base atende os três modos, com os nomes de
+  `.gems-ai/rules/frontend-angular/organization.md`: `/<recurso>/list`, `/<recurso>/form` (novo),
+  `/<recurso>/form/:id` (edição) e `/<recurso>/view/:id` (leitura); a base `/<recurso>` redireciona
+  para `list`. Menu, redirects e `navigate([...])` mudam juntos, com teste.
 
 ### VII. Testes como Gate (NÃO NEGOCIÁVEL)
 
@@ -254,7 +271,9 @@ nem altera tabela.
 - Frontend testa com **Vitest** (builder `@angular/build:unit-test`). Funções puras de
   infraestrutura de UI — o construtor de menu é o caso canônico — MUST ter teste.
 - **Rede de segurança nova prova-se por mutação**: quebre deliberadamente o alvo, confirme que o
-  teste falha, restaure. Teste que passa sem nunca ter falhado não é prova de nada.
+  teste falha, restaure. Teste que passa sem nunca ter falhado não é prova de nada. **Rede que passa a
+  depender de módulo da SDK entra nesta regra** — a garantia mudou de dono, e o teste precisa provar
+  que o dono novo a cumpre.
 - Nenhum teste pode referenciar classe ou componente inexistente. Teste órfão de código removido é
   removido junto, no mesmo commit.
 - **Gate de merge:** `.\mvnw.cmd clean install` (reator inteiro, com testes) verde, `npm test`
@@ -325,13 +344,63 @@ ao resto do ambiente.
   `X-Frame-Options`, `Referrer-Policy`, CSP) e MUST ser verificado **de fora da máquina** antes de
   ser considerado entregue.
 
+## Adoção de Módulo da SDK GEMS
+
+A SDK GEMS é a origem dos mecanismos transversais deste projeto. Quando o backend implementa à mão
+algo que um módulo da SDK já entrega, a duplicata é **defeito de fundação**, não escolha de estilo: as
+duas cópias divergem, e a divergência aparece como comportamento — não como erro de compilação.
+
+Esta seção autoriza a substituição e fixa o preço dela. Ela **não** autoriza adotar módulo por
+conveniência: substituir mecanismo em funcionamento é mudança de fundação, e mudança de fundação
+passa pelo Princípio VIII.
+
+**Condições de entrada — todas MUST estar satisfeitas antes da primeira linha de substituição:**
+
+1. **O módulo está publicado no registry**, na versão que o projeto vai consumir. Branch, snapshot ou
+   clone local não habilitam substituição: o bloco que depende de artefato não publicado fica
+   **bloqueado**, nunca contornado.
+2. **A versão é declarada num único lugar** (`<gems.version>` no POM pai). Módulo filho declara
+   dependência, nunca versão.
+3. **O alcance real da versão é medido, não presumido** — `dependency:tree` antes e depois. Um MAJOR
+   da SDK é atravessável quando nenhuma das quebras alcança o grafo do projeto, e isso é uma medição,
+   não uma expectativa.
+4. **A garantia que o mecanismo local oferecia está nomeada** antes de ele sair. Mecanismo que existe
+   sem que ninguém saiba dizer o que ele protege não é substituído: é estudado primeiro.
+5. **O módulo é de escopo aprovado.** Adotar um módulo que não consta do escopo da rodada é escopo
+   novo, e escopo é decisão do product owner — registrada no `roteiro.md`, não no commit.
+6. **Mudança de comportamento observável** (resposta de API, código de status, falha de boot,
+   contrato de configuração) é **decisão do product owner**, tomada antes e registrada no roteiro.
+   Nunca efeito colateral descoberto depois.
+
+**O que a substituição MUST provar, e prova é execução, não inspeção:**
+
+1. **Equivalência com teste no projeto.** A garantia nomeada na condição 4 continua tendo, **neste
+   repositório**, um teste que falha se o módulo deixar de cumpri-la. Teste que vive só na SDK prova a
+   SDK, não a adoção dela aqui.
+2. **Prova por mutação** (Princípio VII) sobre toda rede que passa a depender do módulo: quebrar o
+   alvo real, confirmar o vermelho, restaurar por edição inversa.
+3. **Gate onde a falha é silenciosa.** Garantia cuja violação não gera erro —
+   paridade de catálogo, cobertura de anotação — MUST continuar tendo varredura que **quebra o
+   build**, e a varredura é código deste projeto se o módulo não a traz.
+4. **Gate do Princípio VII verde**, com o reator inteiro, e aplicação subindo com `ddl-auto: validate`.
+
+**O que a substituição não autoriza:**
+
+- **Coexistência.** A classe local sai **na mesma alteração** em que o módulo entra; teste órfão sai
+  com ela. Duas fontes de verdade em trânsito é exatamente o defeito que a substituição vem corrigir.
+- **Adaptar o módulo ao projeto por dentro.** Se o módulo não serve, o caminho é a rodada da SDK — não
+  uma camada de contorno aqui, que reintroduz a duplicata com outro nome.
+- **Reduzir cobertura.** Substituição que diminui o número de provas do projeto é regressão, ainda que
+  verde: o que o teste local cobria MUST continuar coberto.
+
+
 ## Stack e Restrições Técnicas
 
 | Camada | Tecnologia |
 | :--- | :--- |
 | Backend | Java 21, Spring Boot 4.1, Maven multi-módulo, GEMS SDK, Liquibase |
 | Banco | PostgreSQL 16 |
-| Frontend | Angular 22 standalone, TypeScript 6, `angular-gems-sdk` 1.1.0, Vitest, Prettier (**não há ESLint**) |
+| Frontend | Angular 22 standalone, TypeScript 6, `angular-gems-sdk` 2.1.0, Vitest, Prettier (**não há ESLint**) |
 | Segurança | Keycloak 26 como resource server JWT |
 | Arquivos | AWS S3 (LocalStack no ambiente local) |
 | DevOps | Docker Compose, GitHub Actions |
@@ -340,8 +409,8 @@ Restrições operacionais que MUST ser respeitadas:
 
 - No Windows, o build usa `.\mvnw.cmd`; use `-pl <modulo>` para mirar um módulo e `-am` para
   recompilar suas dependências no próprio reator.
-- `npm install` exige `--legacy-peer-deps`: o `angular-gems-sdk@1.1.0` declara peer
-  `@angular/common@^20` e o projeto está no Angular 22. Sem a flag, `ERESOLVE` aborta o install.
+- Na base SDK 1.1.0, `npm ci` exige temporariamente `--legacy-peer-deps`: o `angular-gems-sdk@1.1.0` declara peer
+  `@angular/common@^20` e o projeto está no Angular 22. Sem a flag, `ERESOLVE` aborta o install. Na rodada 002, SDK 2.1.0 e overrides resolvem os peers: a flag sai e npm ci deve passar sem ela.
 - Infra local em `environments/local`: **`docker compose up -d` e nada mais**. O serviço one-shot
   `keycloak-config` aplica o realm declarado em `environments/shared/keycloak/` assim que o Keycloak
   fica saudável — não há script manual a rodar depois. O Keycloak leva cerca de 80 segundos no
@@ -371,6 +440,56 @@ Esta constituição **prevalece sobre qualquer outra prática documentada**, inc
 arquivos em `.gems-ai/`. Quando um desses arquivos divergir da constituição, **ele** é corrigido —
 não a constituição.
 
+### A regra de escrita vence o código consolidado
+
+**As regras de `.gems-ai/rules/` prevalecem sobre o código já consolidado.** Quando o código do
+repositório divergir de uma regra de escrita, é **o código** que se corrige — e enquanto não se
+corrige, o desvio MUST carregar uma **exceção escrita** no próprio ponto do código.
+
+A hierarquia é invertida em 2026-09-14 por decisão do product owner na rodada 010 do Meduc. O levantamento do sample mediu repositories, transações e mecanismos locais que divergem das regras recebidas.
+
+**"Código vence documentação" permanece inteiro para o que ele sempre protegeu**: especificações,
+requisitos e documentos de negócio. Ali o código continua sendo a verdade, e a divergência é
+registrada, nunca corrigida em silêncio — é a proteção contra documento alucinado, e não é o que
+esta seção troca. O que muda é **apenas** a relação entre código e **regra de escrita**.
+
+| Quando divergem | Quem vence | Onde |
+| :--- | :--- | :--- |
+| Constituição × qualquer outro documento | **a constituição** | acima |
+| Regra de `.gems-ai/rules/` × código consolidado | **a regra** | esta seção |
+| Spec, requisito ou documento de negócio × código | **o código** | Princípio VIII |
+
+**A regra também pode estar errada, e então é ela que se corrige.** A inversão não transforma a
+regra em verdade revelada: quando obedecê-la literalmente produziria código que não compila ou
+quebra comportamento provado, a saída é emendar a regra — com a mesma cerimônia desta seção —, nunca
+ignorá-la em silêncio. A anotação transacional do Princípio IV é alinhada a
+`services.md`.
+
+### Exceção escrita de conformidade
+
+O desvio autorizado existe, e tem forma única:
+
+```text
+GEMS-EXCEPTION(<arquivo-de-regra>#<seção>): <motivo>; expira AAAA-MM-DD
+```
+
+O formato completo, os portadores por linguagem, o ciclo de vida e as três formas de reprovar —
+vencida, órfã e regra inexistente — vivem em **`.gems-ai/rules/conformance-exceptions.md`**, que
+esta seção autoriza e não duplica.
+
+Três exigências são constitucionais:
+
+1. **Prazo obrigatório, que reprova o build quando vence.** Desvio autorizado sem data é permissão
+   permanente, e permissão permanente é a hierarquia antiga de volta com outro nome.
+2. **Ela é decisão humana.** Agente de codificação **não** escreve exceção para fazer gate vermelho
+   ficar verde. Gate vermelho é informação: ou o código está errado, ou a regra está — e nos dois
+   casos a saída é corrigir o que está errado.
+3. **Exceção não é baseline.** Baseline é dívida que uma rodada não alcançou, sem justificativa
+   individual e sem prazo; ele **só encolhe**. Exceção é desvio decidido, com motivo e data.
+   Confundir os dois transforma o baseline no caminho pelo qual o desvio volta com aparência de
+   autorização.
+
+
 Emendas exigem:
 
 1. Registro no **Sync Impact Report** no topo deste arquivo.
@@ -383,4 +502,4 @@ Toda revisão de PR MUST verificar conformidade com estes princípios. Complexid
 justificada por escrito no `plan.md` da feature — ausência de justificativa é motivo suficiente para
 recusar o PR.
 
-**Version**: 1.0.0 | **Ratified**: 2026-09-05 | **Last Amended**: 2026-09-05
+**Version**: 2.0.0 | **Ratified**: 2026-09-05 | **Last Amended**: 2026-09-14

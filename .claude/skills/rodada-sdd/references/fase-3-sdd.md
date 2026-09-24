@@ -64,6 +64,20 @@ Três coisas continuam suas, delegando ou não:
 
 ## 3. Implementar
 
+### Antes de qualquer coisa: a rodada é conduzida por blocos?
+
+Se existir `specs/programa-estabilizacao/README.md`, **abra-o primeiro**. Ele é o ledger do programa e
+responde "onde o programa parou": a tabela de blocos diz qual é o primeiro bloco não-verde, e a coluna
+`Retomar por` nomeia o `estado-lote-<bloco>.md` que tem o ponto exato de parada. O protocolo de
+retomada, o repositório onde os commits caem e as regras de execução estão lá — **não os reproduza
+aqui nem os peça ao usuário.**
+
+Com o ledger aberto, a retomada inteira é: primeiro bloco não-verde → o `estado-lote` dele → executar
+**um bloco**, fechá-lo e parar. Nada mais precisa entrar em contexto, e nada mais precisa ser digitado
+além de `/rodada-sdd`.
+
+Sem esse arquivo, a rodada é conduzida pelo `tasks.md` direto, como abaixo.
+
 Siga o `tasks.md` na ordem das fases, respeitando os checkpoints de cada uma.
 
 **Test-first onde o `plan.md` marcou.** É exigência do Princípio VII, e nas fases marcadas o teste

@@ -25,7 +25,8 @@ public class ParceiroDTO {
      * Preenchido apenas para quem tem {@code VISUALIZAR_COMISSAO}, e zerado pelo service para os
      * demais — em {@code toDTO}, na busca <b>e</b> na gravação.
      *
-     * <p>Zerar na gravação não é excesso: sem isso, um payload de quem não pode ler o campo
+     * <p>
+     * Zerar na gravação não é excesso: sem isso, um payload de quem não pode ler o campo
      * sobrescreveria o valor existente com {@code null}, e a autorização de leitura viraria uma
      * autorização de escrita ao contrário.
      */

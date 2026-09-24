@@ -1,7 +1,6 @@
 import { Component, input } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { GemsInputTextComponent } from '@gabriel-mdias/angular-gems-sdk';
-import { FieldErrorComponent } from '../field-error/field-error.component';
+import { GemsFieldErrorComponent, GemsInputTextComponent } from '@gabriel-mdias/angular-gems-sdk';
 import { ERRO_EMAIL, ERRO_TELEFONE } from './contato-form';
 
 /**
@@ -15,7 +14,7 @@ import { ERRO_EMAIL, ERRO_TELEFONE } from './contato-form';
  */
 @Component({
   selector: 'app-contato-fields',
-  imports: [ReactiveFormsModule, GemsInputTextComponent, FieldErrorComponent],
+  imports: [ReactiveFormsModule, GemsInputTextComponent, GemsFieldErrorComponent],
   templateUrl: './contato-fields.component.html',
 })
 export class ContatoFieldsComponent {

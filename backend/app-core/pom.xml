@@ -55,15 +55,15 @@
         </dependency>
         <dependency>
             <groupId>br.com.gems</groupId>
-            <artifactId>gems-model-mapper</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>br.com.gems</groupId>
             <artifactId>gems-utils</artifactId>
         </dependency>
         <dependency>
             <groupId>br.com.gems</groupId>
             <artifactId>gems-openapi</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>br.com.gems</groupId>
+            <artifactId>gems-mapstruct</artifactId>
         </dependency>
 
         <dependency>

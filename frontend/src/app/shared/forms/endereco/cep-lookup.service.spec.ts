@@ -58,7 +58,7 @@ describe('CepLookupService', () => {
     form.get('cep')?.setValue(valor);
   }
 
-  it('não consulta com CEP incompleto', () => {
+  it('naoDeveConsultar_quandoCepEstiverIncompleto', () => {
     comCep('2901');
     service.consultar(form);
 
@@ -66,7 +66,7 @@ describe('CepLookupService', () => {
     expect(service.consultando()).toBe(false);
   });
 
-  it('preenche cidade, bairro, logradouro e estado a partir da resposta', () => {
+  it('devePreencherEndereco_quandoConsultaRetornarDados', () => {
     buscarPorCep.mockReturnValue(of(resposta('Vitória', 'estado-es')));
     comCep('29010000');
 
@@ -80,7 +80,7 @@ describe('CepLookupService', () => {
     expect(service.consultando()).toBe(false);
   });
 
-  it('avisa quando o CEP existe mas o estado não está no cadastro', () => {
+  it('deveAvisar_quandoEstadoNaoEstiverCadastrado', () => {
     buscarPorCep.mockReturnValue(of(resposta('Vitória')));
     comCep('29010000');
 
@@ -90,7 +90,7 @@ describe('CepLookupService', () => {
     expect(form.get('cidade')?.value).toBe('Vitória');
   });
 
-  it('trata 400 como aviso, preservando o preenchimento manual', () => {
+  it('devePreservarPreenchimentoManual_quandoApiRetornar400', () => {
     buscarPorCep.mockReturnValue(throwError(() => ({ status: 400 })));
     comCep('29010000');
 
@@ -100,7 +100,7 @@ describe('CepLookupService', () => {
     expect(errorFromApi).not.toHaveBeenCalled();
   });
 
-  it('trata 502 como aviso: provedor fora do ar não bloqueia o cadastro', () => {
+  it('deveAvisarSemBloquear_quandoApiRetornar502', () => {
     buscarPorCep.mockReturnValue(throwError(() => ({ status: 502 })));
     comCep('29010000');
 
@@ -110,7 +110,7 @@ describe('CepLookupService', () => {
     expect(errorFromApi).not.toHaveBeenCalled();
   });
 
-  it('encaminha status inesperado para errorFromApi, sem virar aviso', () => {
+  it('deveEncaminharErro_quandoStatusForInesperado', () => {
     buscarPorCep.mockReturnValue(throwError(() => ({ status: 500 })));
     comCep('29010000');
 
@@ -120,7 +120,7 @@ describe('CepLookupService', () => {
     expect(service.aviso()).toBeNull();
   });
 
-  it('invalidar() descarta a resposta de uma consulta em voo', () => {
+  it('deveDescartarResposta_quandoConsultaForInvalidada', () => {
     // A consulta sai, o operador corrige o CEP, e só então a resposta antiga chega.
     let emitir: ((valor: CepEnderecoModel) => void) | undefined;
     buscarPorCep.mockReturnValue({

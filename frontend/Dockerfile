@@ -14,29 +14,23 @@ FROM node:22 AS build
 #
 # O pacote NÃO resolve sem credencial: npm.pkg.github.com responde 401 com token ausente.
 # Na máquina do desenvolvedor ele resolve porque o ~/.npmrc global tem _authToken; num build limpo,
-# não. O CI repassa GEMS_REGISTRY_USER/GEMS_REGISTRY_TOKEN como build args.
+# não. O CI monta GEMS_REGISTRY_TOKEN como secret BuildKit.
 #
-# As variáveis continuam com default vazio, e o .npmrc só é gerado quando as duas chegam
-# preenchidas: um .npmrc com token vazio quebra a resolução em vez de ser inofensivo, e a mensagem
-# de erro resultante é pior que o 401 puro.
-ARG GEMS_REGISTRY_USER=""
-ARG GEMS_REGISTRY_TOKEN=""
+# O `.npmrc` é criado e removido na mesma camada que instala as dependências.
 
 WORKDIR /workspace
 
 COPY package.json package-lock.json ./
 
-RUN if [ -n "$GEMS_REGISTRY_USER" ] && [ -n "$GEMS_REGISTRY_TOKEN" ]; then \
-      printf '@gabriel-mdias:registry=https://npm.pkg.github.com\n//npm.pkg.github.com/:_authToken=%s\n' "$GEMS_REGISTRY_TOKEN" > .npmrc; \
-    fi
-
-# --legacy-peer-deps é OBRIGATÓRIO: angular-gems-sdk@1.1.0 declara peer @angular/common@^20 e o
-# projeto está no Angular 22. Sem a flag, o install aborta com ERESOLVE (CLAUDE.md §2).
-RUN npm ci --legacy-peer-deps
+# A SDK 2.1.0 e os overrides do package.json resolvem os peers no Angular 22.
+RUN --mount=type=secret,id=gems_registry_token,required=true \
+    printf '@gabriel-mdias:registry=https://npm.pkg.github.com\n//npm.pkg.github.com/:_authToken=%s\n' "$(cat /run/secrets/gems_registry_token)" > .npmrc \
+    && npm ci \
+    && rm .npmrc
 
 COPY . .
 
-RUN npm run build -- --configuration production
+RUN npx ng build --configuration production
 
 # ---------------------------------------------------------------------------
 # Stage 2 — runtime

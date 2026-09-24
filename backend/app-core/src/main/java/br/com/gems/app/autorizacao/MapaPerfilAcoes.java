@@ -9,12 +9,26 @@ import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
 
-import static br.com.gems.app.security.AcaoSistema.*;
+import static br.com.gems.app.security.AcaoSistema.ABRIR_SOLICITACAO;
+import static br.com.gems.app.security.AcaoSistema.ALTERAR_ETAPA_SOLICITACAO;
+import static br.com.gems.app.security.AcaoSistema.ALTERAR_PARCEIRO;
+import static br.com.gems.app.security.AcaoSistema.ALTERAR_SOLICITACAO;
+import static br.com.gems.app.security.AcaoSistema.CANCELAR_SOLICITACAO;
+import static br.com.gems.app.security.AcaoSistema.CONCLUIR_SOLICITACAO;
+import static br.com.gems.app.security.AcaoSistema.CONSULTAR_PARCEIRO;
+import static br.com.gems.app.security.AcaoSistema.CONSULTAR_SOLICITACAO;
+import static br.com.gems.app.security.AcaoSistema.EXCLUIR_ETAPA_SOLICITACAO;
+import static br.com.gems.app.security.AcaoSistema.EXCLUIR_SOLICITACAO;
+import static br.com.gems.app.security.AcaoSistema.INICIAR_SOLICITACAO;
+import static br.com.gems.app.security.AcaoSistema.INSERIR_ETAPA_SOLICITACAO;
+import static br.com.gems.app.security.AcaoSistema.INSERIR_PARCEIRO;
+import static br.com.gems.app.security.AcaoSistema.INSERIR_SOLICITACAO;
 
 /**
  * Quais ações cada perfil de atuação possui — a matriz de permissões do sistema, em código.
  *
- * <p>Este é o <b>único</b> lugar que se edita para mudar o que um perfil pode fazer. A fonte é a
+ * <p>
+ * Este é o <b>único</b> lugar que se edita para mudar o que um perfil pode fazer. A fonte é a
  * matriz aprovada pelo product owner, no {@code contracts/} da rodada que a definiu, e o
  * {@code MapaPerfilAcoesTest} confere este mapa contra ela. Divergência entre os dois é defeito,
  * não interpretação.
@@ -47,7 +61,8 @@ public final class MapaPerfilAcoes {
     /**
      * Administrador: <b>todas</b> as ações, por construção.
      *
-     * <p>Não é uma lista mantida à mão — é {@code EnumSet.allOf}. Acrescentar uma constante ao
+     * <p>
+     * Não é uma lista mantida à mão — é {@code EnumSet.allOf}. Acrescentar uma constante ao
      * {@link AcaoSistema} já a inclui aqui.
      */
     private static final Set<AcaoSistema> ADMINISTRADOR_ACOES = EnumSet.allOf( AcaoSistema.class );
@@ -56,7 +71,8 @@ public final class MapaPerfilAcoes {
      * Operador: opera os dois domínios de ponta a ponta, mas não exclui parceiro nem enxerga o valor
      * da comissão.
      *
-     * <p>As duas ausências são deliberadas e de naturezas diferentes: excluir parceiro é ato
+     * <p>
+     * As duas ausências são deliberadas e de naturezas diferentes: excluir parceiro é ato
      * destrutivo sobre cadastro de referência, e a comissão é informação de gestão — o mesmo motivo
      * pelo qual a trilha de auditoria também não está aqui.
      */
@@ -64,20 +80,19 @@ public final class MapaPerfilAcoes {
             CONSULTAR_PARCEIRO, INSERIR_PARCEIRO, ALTERAR_PARCEIRO,
             CONSULTAR_SOLICITACAO, INSERIR_SOLICITACAO, ALTERAR_SOLICITACAO, EXCLUIR_SOLICITACAO,
             ABRIR_SOLICITACAO, INICIAR_SOLICITACAO, CONCLUIR_SOLICITACAO, CANCELAR_SOLICITACAO,
-            INSERIR_ETAPA_SOLICITACAO, ALTERAR_ETAPA_SOLICITACAO, EXCLUIR_ETAPA_SOLICITACAO
-    );
+            INSERIR_ETAPA_SOLICITACAO, ALTERAR_ETAPA_SOLICITACAO, EXCLUIR_ETAPA_SOLICITACAO );
 
     /**
      * Consulta: só lê.
      *
-     * <p>É o perfil que prova que o modelo funciona: sem nenhuma ação de escrita, cada
+     * <p>
+     * É o perfil que prova que o modelo funciona: sem nenhuma ação de escrita, cada
      * {@code @PreAuthorize} de mutação o barra sem que exista um único {@code if} no código a
      * respeito dele.
      */
     private static final Set<AcaoSistema> CONSULTA_ACOES = EnumSet.of(
             CONSULTAR_PARCEIRO,
-            CONSULTAR_SOLICITACAO
-    );
+            CONSULTAR_SOLICITACAO );
 
     private static final Map<PerfilAtuacao, Set<AcaoSistema>> MAPA;
 

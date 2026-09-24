@@ -7,7 +7,7 @@
  * e não em silêncio.
  *
  * `ADMIN` não aparece aqui de propósito: ele é a role **composta** que contém todas as ações, e o
- * Keycloak a expande no token. Um `hasRole(Acoes.EXCLUIR_PARCEIRO)` já é verdadeiro para o
+ * Keycloak a expande no token. Uma consulta da ação `EXCLUIR_PARCEIRO` já é verdadeira para o
  * administrador — sem nenhum caso especial na tela.
  */
 export const Acoes = {
@@ -53,3 +53,14 @@ export const Acoes = {
 } as const;
 
 export type Acao = (typeof Acoes)[keyof typeof Acoes];
+
+/** Requisito de autorização explícito consumido pela fachada e pelos guards. */
+export interface AuthorizationRequirement {
+  readonly scope: 'global';
+  readonly actions: readonly Acao[];
+}
+
+/** O sample é single-tenant: todas as ações pertencem ao escopo global. */
+export function globalAuthorization(...actions: Acao[]): AuthorizationRequirement {
+  return { scope: 'global', actions };
+}

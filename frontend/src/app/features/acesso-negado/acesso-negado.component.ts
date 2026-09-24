@@ -1,6 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { Router } from '@angular/router';
-import { GemsButtonComponent } from '@gabriel-mdias/angular-gems-sdk';
+import { GemsButtonComponent, GemsNavigationService } from '@gabriel-mdias/angular-gems-sdk';
 
 @Component({
   selector: 'app-acesso-negado',
@@ -9,5 +8,9 @@ import { GemsButtonComponent } from '@gabriel-mdias/angular-gems-sdk';
   styleUrl: './acesso-negado.component.css',
 })
 export class AcessoNegadoComponent {
-  protected readonly router = inject(Router);
+  private readonly navigationService = inject(GemsNavigationService);
+
+  protected voltarInicio(): void {
+    this.navigationService.navigate(['/']);
+  }
 }

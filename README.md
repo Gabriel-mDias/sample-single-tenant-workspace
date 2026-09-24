@@ -28,7 +28,7 @@ cd backend
 .\mvnw.cmd clean install
 
 cd ..\frontend
-npm install --legacy-peer-deps
+npm ci
 npm test
 npm run build
 
@@ -145,8 +145,8 @@ confunde com token errado:
 ## Restrições operacionais
 
 - No Windows o build é `.\mvnw.cmd`. O script shell `./mvnw` falha na invocação por `powershell.exe`.
-- `npm install` exige `--legacy-peer-deps`: a SDK declara peer `@angular/common@^20` e o projeto está
-  no 22. Sem a flag, `ERESOLVE` aborta.
+- Use `npm ci` para instalar as versões do lockfile. O Angular 22 usa a SDK 2.1.0 e os overrides
+  de peers do `keycloak-angular` declarados em `frontend/package.json`.
 - **Nunca `docker compose down -v`.** O volume guarda o banco da aplicação **e** o do Keycloak, e as
   senhas dos usuários existem apenas no segundo.
 - O Keycloak leva ~80s no primeiro boot. Espere `keycloak-config-cli ran in` nos logs.
@@ -174,5 +174,20 @@ confunde com token errado:
 | `backend/AGENTS.md` · `frontend/AGENTS.md` | Convenções da camada, incluindo as armadilhas já pagas |
 | `environments/AGENTS.md` · `environments/vps/` | Ambiente, publicação e os runbooks de operação |
 | `specs/AGENTS.md` | Como o ciclo SDD funciona aqui |
-| `.gems-ai/` · `.gems-ai/MIGRACAO-2.0.0.md` | As regras de escrita (2.0.0) e o que o código daqui ainda **não** cumpre delas, medido |
+| `.gems-ai/` · `.gems-ai/MIGRACAO-2.4.0.md` | As regras de escrita (2.4.0) e o que o código daqui ainda **não** cumpre delas, medido |
 | `business/` | O produto em linguagem de negócio, para o cliente |
+
+## Gates de conformidade
+
+Backend: `.\mvnw.cmd clean install`. Frontend: `npm test` e `npm run build`.
+O CI executa os mesmos comandos e `npx prettier --check .`.
+Spotless, Checkstyle, arquitetura/fonte e exceções escritas reprovam violações novas.
+Frontend verifica silent check-sso e 13 regras antes de teste e build.
+Catálogo de ações desligado até S-09, conforme contrato da rodada 010.
+
+Dívida congelada em S-def: Checkstyle 314 ocorrências; arquitetura/fonte 189 identidades;
+frontend 174 ocorrências. Baselines só encolhem. Supressões Checkstyle aceitas estão em
+`backend/app-deploy/src/test/resources/checkstyle-baseline.txt`; ampliar o conjunto reprova.
+Spotless usa `ratchetFrom=411156d`, preservando arquivos anteriores às definições.
+S-codex conformará domínio e removerá o ratchet. Medições e mutações:
+`specs/002-conformidade-gems/`. Baseline não é exceção individual.

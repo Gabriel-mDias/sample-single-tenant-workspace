@@ -24,7 +24,7 @@ import java.util.UUID;
 public interface SolicitacaoRepository extends JpaRepository<Solicitacao, UUID>, BaseCustomJpaRepository<Solicitacao> {
 
     @Override
-    @EntityGraph( value = "solicitacao-entity-graph" )
+    @EntityGraph(value = "solicitacao-entity-graph")
     Optional<Solicitacao> findById( UUID id );
 
     /** Usado pelo delete do parceiro para recusar a exclusão de quem tem solicitação viva. */
@@ -88,7 +88,8 @@ public interface SolicitacaoRepository extends JpaRepository<Solicitacao, UUID>,
         return PageRequest.of( pageable.getPageNumber(), pageable.getPageSize(), sort );
     }
 
-    private void appendFilters( SolicitacaoFilterParams filterParams, StringBuilder hql, HashMap<String, Object> params ) {
+    private void appendFilters( SolicitacaoFilterParams filterParams, StringBuilder hql,
+            HashMap<String, Object> params ) {
         hql.append( " WHERE 1=1 " );
 
         if ( ObjectUtil.isNotNullAndNotEmpty( filterParams.getTitulo() ) ) {

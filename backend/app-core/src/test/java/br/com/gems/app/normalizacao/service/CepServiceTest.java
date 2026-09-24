@@ -33,17 +33,19 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 /**
  * Cobertura dos modos de resposta e de falha da consulta de CEP.
  *
- * <p>Usa {@link MockRestServiceServer} em vez de mock do {@link RestClient}: a API do cliente é
+ * <p>
+ * Usa {@link MockRestServiceServer} em vez de mock do {@link RestClient}: a API do cliente é
  * fluente, e mocká-la elo a elo testaria a corrente de chamadas em vez do comportamento. Com o
  * servidor simulado, o que se exercita é o que de fato importa — como o serviço reage ao que chega
  * pela rede.
  *
- * <p>O caso mais importante é {@link #cepInexistenteEhRecusado()}: o ViaCEP responde <b>200</b> com
+ * <p>
+ * O caso mais importante é {@link #cepInexistenteEhRecusado()}: o ViaCEP responde <b>200</b> com
  * corpo de erro, e um serviço que olhasse só o status devolveria um endereço vazio como se fosse
  * sucesso.
  */
-@ExtendWith( MockitoExtension.class )
-@MockitoSettings( strictness = Strictness.LENIENT )
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class CepServiceTest {
 
     private static final String BASE_URL = "https://viacep.com.br/ws";
@@ -93,8 +95,8 @@ class CepServiceTest {
     }
 
     @Test
-    @DisplayName( "CEP encontrado devolve endereço com o estado já resolvido para o cadastro de referência" )
-    void cepEncontradoDevolveEnderecoResolvido() {
+    @DisplayName("CEP encontrado devolve endereço com o estado já resolvido para o cadastro de referência")
+    void deveComprovarCepEncontradoDevolveEnderecoResolvido_quandoExecutaOCenario() {
         server.expect( requestTo( URL_CONSULTA ) )
                 .andRespond( withSuccess( CORPO_OK, MediaType.APPLICATION_JSON ) );
 
@@ -110,8 +112,8 @@ class CepServiceTest {
     }
 
     @Test
-    @DisplayName( "número e complemento nunca vêm preenchidos: são do endereço, não do CEP" )
-    void numeroEComplementoNaoVemPreenchidos() {
+    @DisplayName("número e complemento nunca vêm preenchidos: são do endereço, não do CEP")
+    void deveComprovarNumeroEComplementoNaoVemPreenchidos_quandoExecutaOCenario() {
         server.expect( requestTo( URL_CONSULTA ) )
                 .andRespond( withSuccess( CORPO_OK, MediaType.APPLICATION_JSON ) );
 
@@ -122,9 +124,9 @@ class CepServiceTest {
     }
 
     @Test
-    @DisplayName( "ARMADILHA DO PROVEDOR: CEP inexistente chega como HTTP 200 com corpo de erro, e "
-            + "precisa ser recusado — não devolvido como endereço vazio" )
-    void cepInexistenteEhRecusado() {
+    @DisplayName("ARMADILHA DO PROVEDOR: CEP inexistente chega como HTTP 200 com corpo de erro, e "
+            + "precisa ser recusado — não devolvido como endereço vazio")
+    void deveComprovarCepInexistenteEhRecusado_quandoExecutaOCenario() {
         server.expect( requestTo( URL_CONSULTA ) )
                 .andRespond( withSuccess( CORPO_ERRO, MediaType.APPLICATION_JSON ) );
 
@@ -134,8 +136,8 @@ class CepServiceTest {
     }
 
     @Test
-    @DisplayName( "CEP fora do formato é recusado sem sequer chamar o provedor" )
-    void cepMalformadoNaoChegaAoProvedor() {
+    @DisplayName("CEP fora do formato é recusado sem sequer chamar o provedor")
+    void deveComprovarCepMalformadoNaoChegaAoProvedor_quandoExecutaOCenario() {
         assertThatThrownBy( () -> service.buscarPorCep( "123" ) )
                 .isInstanceOf( BusinessException.class )
                 .hasMessageContaining( "O CEP deve conter 8 dígitos." );
@@ -144,16 +146,16 @@ class CepServiceTest {
     }
 
     @Test
-    @DisplayName( "CEP nulo ou vazio é recusado como formato inválido, sem NullPointerException" )
-    void cepNuloEhRecusado() {
+    @DisplayName("CEP nulo ou vazio é recusado como formato inválido, sem NullPointerException")
+    void deveComprovarCepNuloEhRecusado_quandoExecutaOCenario() {
         assertThatThrownBy( () -> service.buscarPorCep( null ) )
                 .isInstanceOf( BusinessException.class )
                 .hasMessageContaining( "O CEP deve conter 8 dígitos." );
     }
 
     @Test
-    @DisplayName( "máscara no CEP é irrelevante: 29010-000 é o mesmo que 29010000" )
-    void mascaraNoCepEhIgnorada() {
+    @DisplayName("máscara no CEP é irrelevante: 29010-000 é o mesmo que 29010000")
+    void deveComprovarMascaraNoCepEhIgnorada_quandoExecutaOCenario() {
         server.expect( requestTo( URL_CONSULTA ) )
                 .andRespond( withSuccess( CORPO_OK, MediaType.APPLICATION_JSON ) );
 
@@ -164,8 +166,8 @@ class CepServiceTest {
     }
 
     @Test
-    @DisplayName( "UF que não existe no cadastro de referência não invalida o resto do endereço" )
-    void ufDesconhecidaDeixaEstadoNuloSemFalhar() {
+    @DisplayName("UF que não existe no cadastro de referência não invalida o resto do endereço")
+    void deveComprovarUfDesconhecidaDeixaEstadoNuloSemFalhar_quandoExecutaOCenario() {
         when( estadoRepository.findFirstBySiglaEstadoIgnoreCaseAndPaisNomeIgnoreCase( "ES", "Brasil" ) )
                 .thenReturn( Optional.empty() );
         server.expect( requestTo( URL_CONSULTA ) )
@@ -178,8 +180,8 @@ class CepServiceTest {
     }
 
     @Test
-    @DisplayName( "erro do provedor vira ProvedorExternoException (502), nunca 500 nem 400" )
-    void erroDoProvedorViraFalhaDeProvedorExterno() {
+    @DisplayName("erro do provedor vira ProvedorExternoException (502), nunca 500 nem 400")
+    void deveComprovarErroDoProvedorViraFalhaDeProvedorExterno_quandoExecutaOCenario() {
         server.expect( requestTo( URL_CONSULTA ) ).andRespond( withServerError() );
 
         assertThatThrownBy( () -> service.buscarPorCep( CEP ) )
@@ -188,8 +190,8 @@ class CepServiceTest {
     }
 
     @Test
-    @DisplayName( "indisponibilidade do provedor também vira ProvedorExternoException" )
-    void provedorIndisponivelViraFalhaDeProvedorExterno() {
+    @DisplayName("indisponibilidade do provedor também vira ProvedorExternoException")
+    void deveComprovarProvedorIndisponivelViraFalhaDeProvedorExterno_quandoExecutaOCenario() {
         server.expect( requestTo( URL_CONSULTA ) )
                 .andRespond( withStatus( HttpStatus.SERVICE_UNAVAILABLE ) );
 
@@ -198,8 +200,8 @@ class CepServiceTest {
     }
 
     @Test
-    @DisplayName( "resposta ilegível do provedor não escapa como erro do sistema" )
-    void respostaIlegivelViraFalhaDeProvedorExterno() {
+    @DisplayName("resposta ilegível do provedor não escapa como erro do sistema")
+    void deveComprovarRespostaIlegivelViraFalhaDeProvedorExterno_quandoExecutaOCenario() {
         server.expect( requestTo( URL_CONSULTA ) )
                 .andRespond( withSuccess( "isto não é json", MediaType.APPLICATION_JSON ) );
 

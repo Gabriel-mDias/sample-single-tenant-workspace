@@ -4,7 +4,7 @@ description: "Delega um lote de trabalho a um executor de outro modelo — subag
 argument-hint: "O lote a delegar (ex.: 'lote C da 002, frontend') ou vazio para avaliar o que há"
 compatibility: "Requer git. Os CLIs externos disponíveis variam por máquina e por período, e não são equivalentes entre si — a diferença que mais pesa é quem consegue rodar o portão. Sem nenhum, a skill roteia só para subagentes Claude."
 metadata:
-  author: "molde single-tenant"
+  author: "Meduc"
 user-invocable: true
 disable-model-invocation: false
 ---

@@ -27,8 +27,9 @@ Crie quando:
 
 **Antes de criar**, verificar: `gems-input-mask`, `gems-input-data`, `gems-input-documento`, `gems-input-checkbox` já cobrem a maioria dos casos.
 
-No Meduc, senha já está coberta por `shared/forms/password-input/app-password-input`. Reutilize esse
-componente e seu contrato documentado; esta receita não autoriza criar outra implementação por feature.
+Senha já está coberta por `gems-input-password` da SDK (≥ 2.0.0): política, critérios pendentes e
+`matchControl` (ver `rules/frontend-angular/gems-components.md`). Esta receita não autoriza recriar
+input de senha, política ou `passwordMismatch` por feature.
 
 ---
 

@@ -13,7 +13,8 @@ import java.util.UUID;
 /**
  * Um registro de auditoria, completo. Espelha {@code RegistroAuditoria}.
  *
- * <p>Não há endpoint de escrita para este DTO: quem grava é sempre o mecanismo de
+ * <p>
+ * Não há endpoint de escrita para este DTO: quem grava é sempre o mecanismo de
  * persistência, nunca a API — um endpoint de escrita permitiria forjar trilha.
  */
 @Getter

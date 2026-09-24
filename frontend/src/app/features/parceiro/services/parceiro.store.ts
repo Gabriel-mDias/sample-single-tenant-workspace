@@ -1,10 +1,9 @@
 import { Injectable } from '@angular/core';
 import { GemsBaseStore, GemsPageable } from '@gabriel-mdias/angular-gems-sdk';
 import { Observable } from 'rxjs';
-import { PageResponse } from '../../../commons/page-response';
+import { PageResponse } from '../../../shared/models/page-response';
 import { ParceiroFilterModel } from '../models/parceiro-filter.model';
-import { ParceiroResponseModel } from '../models/parceiro-response.model';
-import { ParceiroModel } from '../models/parceiro.model';
+import { ParceiroModel, ParceiroResponseModel } from '../models/parceiro.model';
 
 /**
  * Acesso HTTP ao recurso de parceiros. Componentes nunca usam `HttpClient` direto — passam por

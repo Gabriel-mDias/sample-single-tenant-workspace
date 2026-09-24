@@ -1,8 +1,10 @@
 package br.com.gems.app.auditoria;
 
+import br.com.gems.app.auditoria.repository.RegistroAuditoriaRepository;
 import br.com.gems.app.model.entity.auditoria.RegistroAuditoria;
 import br.com.gems.app.model.entity.normalizacao.Pessoa;
 import br.com.gems.app.model.enums.OperacaoAuditoria;
+import br.com.gems.app.model.params.AuditoriaFilterParams;
 import br.com.gems.app.support.AbstractIntegrationTest;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.AfterEach;
@@ -13,9 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -49,6 +53,9 @@ class AuditoriaInterceptorIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private TransactionTemplate transactionTemplate;
 
+    @Autowired
+    private RegistroAuditoriaRepository repository;
+
     /** Único por execução — é o que restringe toda asserção ao dado desta classe. */
     private final String sufixo = "Auditoria-" + UUID.randomUUID();
 
@@ -61,8 +68,8 @@ class AuditoriaInterceptorIntegrationTest extends AbstractIntegrationTest {
     // ------------------------------------------------------------------ T010
 
     @Test
-    @DisplayName( "T010: inserir uma entidade de negócio produz INSERCAO com autor e correlação" )
-    void insercaoProduzRegistro() {
+    @DisplayName("T010: inserir uma entidade de negócio produz INSERCAO com autor e correlação")
+    void deveComprovarInsercaoProduzRegistro_quandoExecutaOCenario() {
         MDC.put( "correlationId", "corr-" + sufixo );
         autenticarComo( UUID.randomUUID(), "maria.operadora" );
 
@@ -80,8 +87,8 @@ class AuditoriaInterceptorIntegrationTest extends AbstractIntegrationTest {
     // ------------------------------------------------------------- T011/T013
 
     @Test
-    @DisplayName( "T011/T013: alterar dois campos registra EXATAMENTE dois; o que não mudou fica de fora" )
-    void alteracaoRegistraSomenteOsCamposQueMudaram() {
+    @DisplayName("T011/T013: alterar dois campos registra EXATAMENTE dois; o que não mudou fica de fora")
+    void deveComprovarAlteracaoRegistraSomenteOsCamposQueMudaram_quandoExecutaOCenario() {
         var id = transactionTemplate.execute( status -> gravarPessoa( "Bruno" ).getId() );
 
         transactionTemplate.executeWithoutResult( status -> {
@@ -113,8 +120,8 @@ class AuditoriaInterceptorIntegrationTest extends AbstractIntegrationTest {
     // ------------------------------------------------------------------ T012
 
     @Test
-    @DisplayName( "T012: exclusão LÓGICA é interceptada como EXCLUSAO" )
-    void exclusaoLogicaProduzRegistro() {
+    @DisplayName("T012: exclusão LÓGICA é interceptada como EXCLUSAO")
+    void deveComprovarExclusaoLogicaProduzRegistro_quandoExecutaOCenario() {
         var id = transactionTemplate.execute( status -> gravarPessoa( "Carlos" ).getId() );
 
         transactionTemplate.executeWithoutResult(
@@ -128,9 +135,10 @@ class AuditoriaInterceptorIntegrationTest extends AbstractIntegrationTest {
     // ------------------------------------------------------------------ rollback
 
     @Test
-    @DisplayName( "rollback do dado é rollback da trilha" )
-    void rollbackNaoDeixaRegistro() {
+    @DisplayName("rollback do dado é rollback da trilha")
+    void deveComprovarRollbackNaoDeixaRegistro_quandoExecutaOCenario() {
         var id = UUID.randomUUID();
+        MDC.put( "correlationId", "rollback-" + sufixo );
 
         try {
             transactionTemplate.executeWithoutResult( status -> {
@@ -150,13 +158,14 @@ class AuditoriaInterceptorIntegrationTest extends AbstractIntegrationTest {
     // ------------------------------------------------------------------ T015
 
     @Test
-    @DisplayName( "T015: a trilha não audita a si mesma — não existe trilha da trilha" )
-    void trilhaDaTrilhaNaoExiste() {
+    @DisplayName("T015: a trilha não audita a si mesma — não existe trilha da trilha")
+    void deveComprovarTrilhaDaTrilhaNaoExiste_quandoExecutaOCenario() {
         transactionTemplate.execute( status -> gravarPessoa( "Eduarda" ).getId() );
 
         var trilhaDaTrilha = entityManager.createQuery(
-                        "SELECT COUNT(r) FROM RegistroAuditoria r WHERE r.entidade IN "
-                                + "('RegistroAuditoria', 'CampoAlterado')", Long.class )
+                "SELECT COUNT(r) FROM RegistroAuditoria r WHERE r.entidade IN "
+                        + "('RegistroAuditoria', 'CampoAlterado')",
+                Long.class )
                 .getSingleResult();
 
         assertThat( trilhaDaTrilha )
@@ -167,23 +176,23 @@ class AuditoriaInterceptorIntegrationTest extends AbstractIntegrationTest {
     // ------------------------------------------------------------------ T016
 
     @Test
-    @DisplayName( "T016: sem usuário autenticado, o autor é o sistema e o id fica nulo" )
-    void semAutenticadoAutorEhSistema() {
+    @DisplayName("T016: sem usuário autenticado, o autor é o sistema e o id fica nulo")
+    void deveComprovarSemAutenticadoAutorEhSistema_quandoExecutaOCenario() {
         SecurityContextHolder.clearContext();
 
         var id = transactionTemplate.execute( status -> gravarPessoa( "Fabio" ).getId() );
 
         var registro = trilhaDe( "Pessoa", id ).getFirst();
 
-        assertThat( registro.getAutorNome() ).isEqualTo( "sistema" );
+        assertThat( registro.getAutorNome() ).isEqualTo( "SISTEMA" );
         assertThat( registro.getAutorId() ).isNull();
     }
 
     // ------------------------------------------------------------------ T017
 
     @Test
-    @DisplayName( "T017: com autenticado, grava o sub em ID_AUTOR e o login em NM_AUTOR" )
-    void comAutenticadoGravaSubELogin() {
+    @DisplayName("T017: com autenticado, grava o sub em ID_AUTOR e o login em NM_AUTOR")
+    void deveComprovarComAutenticadoGravaSubELogin_quandoExecutaOCenario() {
         var sub = UUID.randomUUID();
         autenticarComo( sub, "joao.operador" );
 
@@ -193,6 +202,26 @@ class AuditoriaInterceptorIntegrationTest extends AbstractIntegrationTest {
 
         assertThat( registro.getAutorId() ).isEqualTo( sub );
         assertThat( registro.getAutorNome() ).isEqualTo( "joao.operador" );
+    }
+
+    @Test
+    @DisplayName("filtros preservam id estável e data final inclusiva")
+    void deveComprovarFiltrosPorIdEDataInclusiva_quandoExecutaOCenario() {
+        var sub = UUID.randomUUID();
+        autenticarComo( sub, "filtro.operador" );
+        var id = transactionTemplate.execute( status -> gravarPessoa( "Isabela" ).getId() );
+
+        var filtro = new AuditoriaFilterParams();
+        filtro.setEntidade( "Pessoa" );
+        filtro.setRegistroAfetado( id );
+        filtro.setOperacao( "INSERCAO" );
+        filtro.setAutorId( sub );
+        filtro.setDataInicio( LocalDate.now() );
+        filtro.setDataFim( LocalDate.now() );
+
+        assertThat( repository.search( filtro, PageRequest.of( 0, 10 ) ).getContent() )
+                .singleElement()
+                .satisfies( registro -> assertThat( registro.getRegistroAfetado() ).isEqualTo( id ) );
     }
 
     // ------------------------------------------------------------------ apoio
@@ -212,22 +241,21 @@ class AuditoriaInterceptorIntegrationTest extends AbstractIntegrationTest {
 
     private List<RegistroAuditoria> trilhaDe( String entidade, UUID registroAfetado ) {
         return entityManager.createQuery(
-                        "SELECT DISTINCT r FROM RegistroAuditoria r LEFT JOIN FETCH r.camposAlterados "
-                                + "WHERE r.entidade = :entidade AND r.registroAfetado = :id "
-                                + "ORDER BY r.dataOperacao", RegistroAuditoria.class )
+                "SELECT DISTINCT r FROM RegistroAuditoria r LEFT JOIN FETCH r.camposAlterados "
+                        + "WHERE r.entidade = :entidade AND r.registroAfetado = :id "
+                        + "ORDER BY r.dataOperacao",
+                RegistroAuditoria.class )
                 .setParameter( "entidade", entidade )
                 .setParameter( "id", registroAfetado )
                 .getResultList();
     }
 
-    /** Toda a trilha de Pessoa produzida por esta execução — restrita pelo sobrenome-sufixo. */
+    /** Toda a trilha tentada pela transação revertida — restrita pela correlação única. */
     private List<RegistroAuditoria> trilhaDoSufixo() {
         return entityManager.createQuery(
-                        "SELECT r FROM RegistroAuditoria r WHERE r.entidade = 'Pessoa' "
-                                + "AND r.registroAfetado IN ("
-                                + "  SELECT p.id FROM Pessoa p WHERE p.sobrenome = :sufixo)",
-                        RegistroAuditoria.class )
-                .setParameter( "sufixo", sufixo )
+                "SELECT r FROM RegistroAuditoria r WHERE r.correlacaoId = :correlacao",
+                RegistroAuditoria.class )
+                .setParameter( "correlacao", "rollback-" + sufixo )
                 .getResultList();
     }
 

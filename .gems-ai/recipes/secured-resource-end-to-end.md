@@ -1,7 +1,7 @@
 ---
 origem: local
 precedencia: local-vence
-versao: 2.0.0
+versao: 2.1.0
 ---
 
 # Recipe: Recurso Protegido Ponta-a-Ponta
@@ -9,7 +9,7 @@ versao: 2.0.0
 **Objetivo:** Proteger endpoints do backend com JWT (Resource Server) e rotas do frontend com AuthGuard + SessionService, com validação por roles.
 
 **Pré-requisitos:**
-- Spring Security + `gems-exception` (auto-formata 401/403 como ApiResponseDTO)
+- Spring Security + `gems-exception` (formata 401/403 no envelope uniforme)
 - `angular-oauth2-oidc` (PKCE)
 - IdP com suporte a OIDC (Keycloak, Auth0, etc.)
 
@@ -68,29 +68,32 @@ spring:
           # jwk-set-uri: alternativa quando issuer-uri não resolve automaticamente
 ```
 
-### Autorização por Role nos Endpoints
+### Autorização por ação nos endpoints
 ```java
-// Controller — proteger por role
-@PreAuthorize("hasRole('GESTOR')")
+// Controller — cada endpoint nomeia UMA ação concreta do enum AcaoSistema ({app}-security), nunca um nível.
+@PreAuthorize("hasRole('INSERIR_{ENTIDADE}')")
 @PostMapping
-public ResponseEntity<ApiResponseDTO<{Entidade}DTO>> insert(@Valid @RequestBody {Entidade}DTO dto) {
+public ResponseEntity<{Entidade}DTO> insert( @RequestBody {Entidade}DTO dto, HttpServletRequest request ) {
     // ...
 }
 
-@PreAuthorize("hasAnyRole('GESTOR', 'ADMIN')")
+@PreAuthorize("hasRole('ALTERAR_{ENTIDADE}')")
 @PutMapping("/{id}")
-public ResponseEntity<ApiResponseDTO<{Entidade}DTO>> save(
-        @PathVariable String id, @Valid @RequestBody {Entidade}DTO dto) {
+public ResponseEntity<{Entidade}DTO> save( @PathVariable UUID id, @RequestBody {Entidade}DTO dto,
+        HttpServletRequest request ) {
     // ...
 }
 
-// Liberar leitura para todos os autenticados:
+// Leitura também é ação — não existe endpoint "liberado para todos os autenticados":
+@PreAuthorize("hasRole('CONSULTAR_{ENTIDADE}')")
 @GetMapping
-public ResponseEntity<ApiResponseDTO<List<{Entidade}DTO>>> findAll() {
+public ResponseEntity<List<{Entidade}DTO>> findAll() {
     // ...
 }
 ```
 
+A ação entra no enum antes de aparecer aqui; o catálogo do frontend é gerado dele no build e ação
+escrita errada não compila. Autorização negada é **403**. `hasAnyRole('ADMIN')` é o anti-padrão.
 ### Acessar Usuário Logado no Service
 ```java
 public {Entidade} insert({Entidade}DTO dto) {
@@ -157,9 +160,10 @@ export const routes: Routes = [
 ];
 ```
 
-### Restringir por role no template
+### Restringir por ação no template
 ```html
-@if (sessionService.hasRole('GESTOR')) {
+<!-- por ação concreta, nunca por nível — auth.md, anti-patterns -->
+@if (auth.isAuthorized({ scope: 'global', actions: ['INSERIR_{ENTIDADE}'] })) {
   <button class="btn-novo" routerLink="/{modulo}/form">
     <i class="fa-solid fa-plus"></i> Nova {Entidade}
   </button>

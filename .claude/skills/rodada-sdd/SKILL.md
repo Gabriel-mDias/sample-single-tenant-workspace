@@ -4,7 +4,7 @@ description: "Conduz uma rodada de SDD de ponta a ponta — descobre em que fase
 argument-hint: "Número da rodada (ex.: 002) ou vazio para detectar sozinho"
 compatibility: "Requer a estrutura spec-kit do projeto: .specify/, specs/0NN-*/ e utils/documentação do projeto/plano-onda-N/"
 metadata:
-  author: "molde single-tenant"
+  author: "Meduc"
 user-invocable: true
 disable-model-invocation: false
 ---
@@ -61,12 +61,16 @@ Leia, nesta ordem, e pare no primeiro sinal que casar de baixo para cima (isto �
 
 | # | Sinal | Fase |
 | :-- | :--- | :--- |
-| 5 | §12 do roteiro tem `✅ HOMOLOGADA` com data **e** `business/RF0NN-*.md` ainda descreve a feature como planejada | **5 — História** |
-| — | §12 tem `✅ HOMOLOGADA` **e** o `business/` já está atualizado | rodada **encerrada** — reporte e ofereça a próxima |
-| 4 | §12 tem `✅ PORTÃO APROVADO` **e** todas as tarefas do `tasks.md` estão `[x]` | **4 — Homologação** |
-| 3 | §12 tem `✅ PORTÃO APROVADO` com data, e há tarefa `[ ]` no `tasks.md` | **3 — SDD** |
-| 2 | Os artefatos existem e o `/speckit-analyze` já rodou (§9, linha 5), mas a §12 não está assinada | **2 — Plan** |
+| 5 | A seção de critérios do roteiro tem `✅ HOMOLOGADA` com data **e** `business/RF0NN-*.md` ainda descreve a feature como planejada | **5 — História** |
+| — | A seção de critérios tem `✅ HOMOLOGADA` **e** o `business/` já está atualizado | rodada **encerrada** — reporte e ofereça a próxima |
+| 4 | A seção de critérios tem `✅ PORTÃO APROVADO` **e** todas as tarefas do `tasks.md` estão `[x]` | **4 — Homologação** |
+| 3 | A seção de critérios tem `✅ PORTÃO APROVADO` com data, e há tarefa `[ ]` no `tasks.md` | **3 — SDD** |
+| 2 | Os artefatos existem e o `/speckit-analyze` já rodou (§9, linha 5), mas a seção de critérios não está assinada | **2 — Plan** |
 | 1 | Qualquer outro caso: `RODADA` não existe, ou a §9 tem `⚠️ antecipado` / `⛔ pendente`, ou o `roteiro.md` não existe | **1 — Start** |
+
+**"A seção de critérios" é a que tem o título "Critérios de aprovação"** — localize-a pelo título,
+não pelo número: no template ela é a §12, mas há roteiro em que é a §13 (a `005`). "§12" nesta skill
+e nas `references/` é o nome de conveniência dessa seção.
 
 **A §9 e a §12 do `roteiro.md` são o registro de progresso da rodada.** Não crie arquivo de estado —
 leia e escreva nelas. É isso que faz `/rodada-sdd` retomar corretamente depois de um `/compact`, de

@@ -43,7 +43,7 @@ describe('EnterBuscaDirective', () => {
     await TestBed.configureTestingModule({ imports: [HospedeiroComponent] }).compileComponents();
   });
 
-  it('emite a busca no Enter de um campo de texto', () => {
+  it('deveEmitirBusca_quandoPressionarEnterEmCampoDeTexto', () => {
     const fixture = criar();
 
     pressionarEnter(fixture, 'texto');
@@ -51,7 +51,7 @@ describe('EnterBuscaDirective', () => {
     expect(fixture.componentInstance.buscas()).toBe(1);
   });
 
-  it('cancela o evento, para que um botão de submit acrescentado depois não recarregue a página', () => {
+  it('deveCancelarEvento_quandoPressionarEnter', () => {
     const fixture = criar();
 
     const evento = pressionarEnter(fixture, 'texto');
@@ -59,7 +59,7 @@ describe('EnterBuscaDirective', () => {
     expect(evento.defaultPrevented).toBe(true);
   });
 
-  it('não busca no Enter dentro de textarea — ali a tecla é quebra de linha', () => {
+  it('naoDeveBuscar_quandoPressionarEnterEmTextarea', () => {
     const fixture = criar();
 
     const evento = pressionarEnter(fixture, 'area');
@@ -68,7 +68,7 @@ describe('EnterBuscaDirective', () => {
     expect(evento.defaultPrevented).toBe(false);
   });
 
-  it('ignora o Enter que apenas confirma um candidato de IME', () => {
+  it('deveIgnorarEnter_quandoConfirmarCandidatoDeIme', () => {
     const fixture = criar();
     const alvo: HTMLElement = fixture.nativeElement.querySelector('[data-testid="texto"]');
 
@@ -85,7 +85,7 @@ describe('EnterBuscaDirective', () => {
     expect(fixture.componentInstance.buscas()).toBe(0);
   });
 
-  it('ignora outras teclas', () => {
+  it('deveIgnorarEvento_quandoTeclaNaoForEnter', () => {
     const fixture = criar();
     const alvo: HTMLElement = fixture.nativeElement.querySelector('[data-testid="texto"]');
 

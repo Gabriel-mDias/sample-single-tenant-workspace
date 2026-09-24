@@ -1,18 +1,18 @@
 import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
 import {
   GemsBaseStepComponent,
+  GemsFieldErrorComponent,
   GemsFormCardComponent,
   GemsInputTextComponent,
+  GemsNavigationService,
   GemsTextareaComponent,
 } from '@gabriel-mdias/angular-gems-sdk';
-import { Acoes } from '../../../../../core/auth/acoes';
+import { Acoes, globalAuthorization } from '../../../../../core/auth/acoes';
 import { AuthService } from '../../../../../core/auth/auth.service';
 import { DadosPessoaisFieldsComponent } from '../../../../../shared/forms/dados-pessoais/dados-pessoais-fields.component';
 import { createDadosPessoaisForm } from '../../../../../shared/forms/dados-pessoais/dados-pessoais-form';
-import { FieldErrorComponent } from '../../../../../shared/forms/field-error/field-error.component';
-import { ParceiroFormStateService } from '../../../services/parceiro-form-state.service';
+import { ParceiroFormStateService } from '../../parceiro-state.service';
 import { STEP_CONTATO, STEP_DADOS } from '../../parceiro.config';
 
 interface StepDadosPayload {
@@ -36,14 +36,14 @@ interface StepDadosPayload {
     GemsInputTextComponent,
     GemsTextareaComponent,
     DadosPessoaisFieldsComponent,
-    FieldErrorComponent,
+    GemsFieldErrorComponent,
   ],
   templateUrl: './step-dados.component.html',
   styleUrl: './step-dados.component.css',
 })
 export class StepDadosComponent extends GemsBaseStepComponent<StepDadosPayload> {
   private readonly fb = inject(FormBuilder);
-  private readonly router = inject(Router);
+  private readonly navigationService = inject(GemsNavigationService);
   private readonly auth = inject(AuthService);
   protected readonly state = inject(ParceiroFormStateService);
 
@@ -56,7 +56,9 @@ export class StepDadosComponent extends GemsBaseStepComponent<StepDadosPayload> 
    * tem a ação, e ignora o campo na gravação. Se esta linha sumisse, o pior que aconteceria seria
    * exibir um campo permanentemente vazio — nunca vazamento.
    */
-  protected readonly podeVerComissao = this.auth.hasRole(Acoes.VISUALIZAR_COMISSAO);
+  protected readonly podeVerComissao = this.auth.isAuthorized(
+    globalAuthorization(Acoes.VISUALIZAR_COMISSAO),
+  );
 
   protected readonly erroNome = { required: 'O nome do parceiro é obrigatório.' };
   protected readonly erroComissao = { min: 'A comissão não pode ser negativa.' };
@@ -129,7 +131,7 @@ export class StepDadosComponent extends GemsBaseStepComponent<StepDadosPayload> 
 
   /** Primeiro passo: "voltar" é sair do formulário. */
   override goBack(): void {
-    this.router.navigate(['/parceiros']);
+    this.navigationService.navigate(['/parceiros/list']);
   }
 
   /** Em leitura não há o que validar nem salvar — apenas navega. */

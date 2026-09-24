@@ -31,16 +31,24 @@
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.keycloak</groupId>
-            <artifactId>keycloak-admin-client</artifactId>
-        </dependency>
-        <dependency>
             <groupId>br.com.gems</groupId>
             <artifactId>gems-utils</artifactId>
         </dependency>
         <dependency>
             <groupId>br.com.gems</groupId>
             <artifactId>gems-exception</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>br.com.gems</groupId>
+            <artifactId>gems-security-authorization</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>br.com.gems</groupId>
+            <artifactId>gems-keycloak-admin</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>br.com.gems</groupId>
+            <artifactId>gems-auditing</artifactId>
         </dependency>
 
         <!-- Primeiro classpath de teste deste módulo. Não traz Mockito de propósito: o

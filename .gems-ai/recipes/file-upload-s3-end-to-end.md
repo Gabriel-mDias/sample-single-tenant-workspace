@@ -1,7 +1,7 @@
 ---
 origem: local
 precedencia: local-vence
-versao: 2.0.0
+versao: 2.1.0
 ---
 
 # Recipe: Upload de Arquivo S3 Ponta-a-Ponta
@@ -10,7 +10,7 @@ versao: 2.0.0
 
 **Pré-requisitos:**
 - `gems-aws` + `gems-aws-web` (S3Controller, S3Service)
-- `gems-rest-common` (ApiResponseDTO)
+- `gems-exception` (envelope de resposta)
 
 **Rules relacionadas:**
 - [storage-s3.md](../rules/backend-java/storage-s3.md)
@@ -68,7 +68,7 @@ O endpoint retorna:
 // {Entidade}DTO.java — adicionar campo fileKey
 @Data
 public class {Entidade}DTO {
-    private String id;
+    private UUID id;
     private String nome;
     private String fileKey;   // Chave do arquivo no S3 (nunca a URL pública)
 }
@@ -92,8 +92,9 @@ private void validate({Entidade}DTO dto) {
         errors.add("Arquivo é obrigatório.");
     else if (!s3Service.fileExists(dto.getFileKey()))
         errors.add("Arquivo não encontrado no servidor. Faça o upload novamente.");
-    if (!errors.isEmpty())
-        throw new BusinessException(errors);
+    if ( ObjectUtil.isNotNullAndNotEmpty( errors ) ) {
+        throw new BusinessException( errors );
+    }
 }
 ```
 
@@ -105,10 +106,10 @@ Para gerar URL temporária de download (quando necessário exibir o arquivo):
 
 ```java
 @GetMapping("/{id}/download")
-public ResponseEntity<ApiResponseDTO<String>> getDownloadUrl(@PathVariable String id) {
-    {Entidade} entidade = service.findById(id);
-    String url = s3Service.generatePresignedGetUrl(entidade.getFileKey(), Duration.ofMinutes(15));
-    return ResponseEntity.ok(ApiResponseDTO.of(url));
+public ResponseEntity<String> getDownloadUrl( @PathVariable UUID id ) {
+    var dto = service.findById( id );
+    var url = s3Service.generatePresignedGetUrl( dto.getFileKey(), Duration.ofMinutes( 15 ) );
+    return ResponseEntity.ok( url );
 }
 ```
 

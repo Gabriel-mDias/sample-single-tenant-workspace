@@ -10,7 +10,8 @@ import java.util.UUID;
 /**
  * Acesso aos endereços normalizados.
  *
- * <p>Sem busca paginada, pelo mesmo motivo de {@link ContatoRepository}.
+ * <p>
+ * Sem busca paginada, pelo mesmo motivo de {@link ContatoRepository}.
  */
 @Repository
 public interface EnderecoRepository extends JpaRepository<Endereco, UUID>, BaseCustomJpaRepository<Endereco> {

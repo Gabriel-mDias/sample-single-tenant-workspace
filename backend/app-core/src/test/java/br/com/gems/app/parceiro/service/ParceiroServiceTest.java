@@ -6,6 +6,7 @@ import br.com.gems.app.model.response.ParceiroResponseDTO;
 import br.com.gems.app.normalizacao.service.ContatoService;
 import br.com.gems.app.normalizacao.service.EnderecoService;
 import br.com.gems.app.normalizacao.service.PessoaService;
+import br.com.gems.app.parceiro.mapper.ParceiroMapper;
 import br.com.gems.app.parceiro.repository.ParceiroRepository;
 import br.com.gems.app.security.AcaoSistema;
 import br.com.gems.app.security.service.UsuarioAutenticadoService;
@@ -25,17 +26,21 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * A autorização de campo, atacada nos três caminhos.
  *
- * <p>Ela é a regra mais fácil de implementar pela metade: quase todo mundo cobre o {@code toDTO} e
+ * <p>
+ * Ela é a regra mais fácil de implementar pela metade: quase todo mundo cobre o {@code toDTO} e
  * esquece a busca e a gravação. Os três testes abaixo existem porque cada um deles falharia sozinho,
  * sem que os outros dois acusassem nada.
  */
 class ParceiroServiceTest {
 
+    private ParceiroMapper mapper;
     private ParceiroRepository repository;
     private PessoaService pessoaService;
     private ContatoService contatoService;
@@ -47,24 +52,35 @@ class ParceiroServiceTest {
 
     @BeforeEach
     void preparar() {
+        mapper = mock( ParceiroMapper.class );
         repository = mock( ParceiroRepository.class );
         pessoaService = mock( PessoaService.class );
         contatoService = mock( ContatoService.class );
         enderecoService = mock( EnderecoService.class );
         usuarioAutenticadoService = mock( UsuarioAutenticadoService.class );
-        service = new ParceiroService( repository, pessoaService, contatoService, enderecoService,
+        service = new ParceiroService( mapper, repository, pessoaService, contatoService, enderecoService,
                 usuarioAutenticadoService );
 
+        when( mapper.toDTO( any( Parceiro.class ) ) ).thenAnswer( invocation -> {
+            var entity = invocation.getArgument( 0, Parceiro.class );
+            var dto = new ParceiroDTO();
+            dto.setId( entity.getId() );
+            dto.setNome( entity.getNome() );
+            dto.setDescricao( entity.getDescricao() );
+            dto.setComissao( entity.getComissao() );
+            dto.setSolicitacoesConcluidas( entity.getSolicitacoesConcluidas() );
+            return dto;
+        } );
         when( repository.save( any( Parceiro.class ) ) ).thenAnswer( i -> i.getArgument( 0 ) );
     }
 
     @Nested
-    @DisplayName( "O sigilo da comissão" )
+    @DisplayName("O sigilo da comissão")
     class SigiloDaComissao {
 
         @Test
-        @DisplayName( "quem tem a ação enxerga o valor na leitura" )
-        void leituraComAcao() {
+        @DisplayName("quem tem a ação enxerga o valor na leitura")
+        void deveComprovarLeituraComAcao_quandoExecutaOCenario() {
             comAcao( true );
             when( repository.findById( id ) ).thenReturn( Optional.of( parceiroComComissao() ) );
 
@@ -72,8 +88,8 @@ class ParceiroServiceTest {
         }
 
         @Test
-        @DisplayName( "quem não tem a ação recebe null na leitura" )
-        void leituraSemAcao() {
+        @DisplayName("quem não tem a ação recebe null na leitura")
+        void deveComprovarLeituraSemAcao_quandoExecutaOCenario() {
             comAcao( false );
             when( repository.findById( id ) ).thenReturn( Optional.of( parceiroComComissao() ) );
 
@@ -81,8 +97,8 @@ class ParceiroServiceTest {
         }
 
         @Test
-        @DisplayName( "a busca também apaga o valor — filtrar só no findById deixaria a listagem vazando" )
-        void buscaSemAcao() {
+        @DisplayName("a busca também apaga o valor — filtrar só no findById deixaria a listagem vazando")
+        void deveComprovarBuscaSemAcao_quandoExecutaOCenario() {
             comAcao( false );
             var linha = new ParceiroResponseDTO( id, "Parceiro", "12345678909", "a@b.c", "SP",
                     new BigDecimal( "12.50" ), 3 );
@@ -97,8 +113,8 @@ class ParceiroServiceTest {
         }
 
         @Test
-        @DisplayName( "a gravação NÃO sobrescreve a comissão de quem não pode lê-la" )
-        void gravacaoSemAcaoNaoApaga() {
+        @DisplayName("a gravação NÃO sobrescreve a comissão de quem não pode lê-la")
+        void deveComprovarGravacaoSemAcaoNaoApaga_quandoExecutaOCenario() {
             comAcao( false );
             var existente = parceiroComComissao();
             when( repository.findById( id ) ).thenReturn( Optional.of( existente ) );
@@ -117,12 +133,12 @@ class ParceiroServiceTest {
     }
 
     @Nested
-    @DisplayName( "A validação" )
+    @DisplayName("A validação")
     class Validacao {
 
         @Test
-        @DisplayName( "é acumulada: todas as violações saem de uma vez" )
-        void acumulaViolacoes() {
+        @DisplayName("é acumulada: todas as violações saem de uma vez")
+        void deveComprovarAcumulaViolacoes_quandoExecutaOCenario() {
             comAcao( true );
             var dto = new ParceiroDTO();
             dto.setNome( null );
@@ -139,8 +155,8 @@ class ParceiroServiceTest {
         }
 
         @Test
-        @DisplayName( "recusa nome duplicado" )
-        void recusaNomeDuplicado() {
+        @DisplayName("recusa nome duplicado")
+        void deveComprovarRecusaNomeDuplicado_quandoExecutaOCenario() {
             comAcao( true );
             when( repository.existsByNomeIgnoreCase( "Parceiro" ) ).thenReturn( true );
 
@@ -153,8 +169,8 @@ class ParceiroServiceTest {
     }
 
     @Test
-    @DisplayName( "parceiro inexistente é erro de negócio, não NullPointerException" )
-    void inexistenteEhErroDeNegocio() {
+    @DisplayName("parceiro inexistente é erro de negócio, não NullPointerException")
+    void deveComprovarInexistenteEhErroDeNegocio_quandoExecutaOCenario() {
         when( repository.findById( id ) ).thenReturn( Optional.empty() );
 
         assertThatThrownBy( () -> service.findById( id ) )

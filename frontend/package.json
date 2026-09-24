@@ -4,9 +4,9 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
+    "build": "node scripts/verify-silent-check-sso.mjs && node scripts/verify-authorization-actions.mjs && node scripts/verify-conventions.mjs && ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "node scripts/verify-silent-check-sso.mjs && node scripts/verify-authorization-actions.mjs && node scripts/verify-conventions.mjs && ng test"
   },
   "private": true,
   "packageManager": "npm@11.17.0",
@@ -20,7 +20,7 @@
     "@angular/router": "^22.1.6",
     "@fontsource/inter": "^5.2.8",
     "@fortawesome/fontawesome-free": "^7.3.0",
-    "@gabriel-mdias/angular-gems-sdk": "^1.1.0",
+    "@gabriel-mdias/angular-gems-sdk": "^2.1.0",
     "animate.css": "^4.1.1",
     "keycloak-angular": "^16.1.0",
     "keycloak-js": "^26.2.4",
@@ -36,5 +36,12 @@
     "prettier": "^3.9.6",
     "typescript": "~6.0.2",
     "vitest": "^4.1.11"
+  },
+  "overrides": {
+    "keycloak-angular": {
+      "@angular/common": "$@angular/common",
+      "@angular/core": "$@angular/core",
+      "@angular/router": "$@angular/router"
+    }
   }
 }

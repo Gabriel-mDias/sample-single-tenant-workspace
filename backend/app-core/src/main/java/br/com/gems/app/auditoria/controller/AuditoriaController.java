@@ -1,5 +1,6 @@
 package br.com.gems.app.auditoria.controller;
 
+import br.com.gems.security.authorization.GlobalEndpoint;
 import br.com.gems.app.auditoria.service.AuditoriaService;
 import br.com.gems.app.model.params.AuditoriaFilterParams;
 import br.com.gems.app.model.response.RegistroAuditoriaResponseDTO;
@@ -30,12 +31,14 @@ import java.util.UUID;
  * mecanismo de persistência; um endpoint de escrita permitiria forjar trilha, e um de exclusão faria
  * dela algo apagável. Uma trilha apagável não é trilha.
  *
- * <p>A ausência tem teste: {@code AuditoriaControllerSemEscritaTest} falha se um método mapeado de
+ * <p>
+ * A ausência tem teste: {@code AuditoriaControllerSemEscritaTest} falha se um método mapeado de
  * escrita aparecer aqui. Regra que só existe como comentário é regra que será violada.
  */
 @RestController
-@RequestMapping( "/api/auditoria" )
-@Tag( name = "Auditoria", description = "Consulta da trilha de alterações (somente leitura)" )
+@RequestMapping("/api/auditoria")
+@Tag(name = "Auditoria", description = "Consulta da trilha de alterações (somente leitura)")
+@GlobalEndpoint
 public class AuditoriaController extends BaseController {
 
     private final AuditoriaService service;
@@ -44,34 +47,30 @@ public class AuditoriaController extends BaseController {
         this.service = service;
     }
 
-    @GetMapping( "/{entidade}/{id}" )
-    @PreAuthorize( "hasRole('CONSULTAR_AUDITORIA')" )
-    @Operation( summary = "Histórico de um registro",
-            description = "Quem alterou o quê e quando, em ordem cronológica decrescente. "
-                    + "O histórico sobrevive à exclusão lógica do registro." )
-    @ApiResponse( responseCode = "200", description = "Página do histórico — vazia é resposta legítima" )
-    @ApiResponse( responseCode = "400", description = "Nome de entidade desconhecido" )
-    @ApiResponse( responseCode = "403", description = "Sem a ação CONSULTAR_AUDITORIA" )
+    @GetMapping("/{entidade}/{id}")
+    @PreAuthorize("hasRole('CONSULTAR_AUDITORIA')")
+    @Operation(summary = "Histórico de um registro", description = "Quem alterou o quê e quando, em ordem cronológica decrescente. "
+            + "O histórico sobrevive à exclusão lógica do registro.")
+    @ApiResponse(responseCode = "200", description = "Página do histórico — vazia é resposta legítima")
+    @ApiResponse(responseCode = "400", description = "Nome de entidade desconhecido")
+    @ApiResponse(responseCode = "403", description = "Sem a ação CONSULTAR_AUDITORIA")
     public ResponseEntity<Page<RegistroAuditoriaResponseDTO>> historico(
             @PathVariable String entidade,
             @PathVariable UUID id,
-            @PageableDefault( page = 0, size = 20, sort = "dataOperacao",
-                    direction = Sort.Direction.DESC ) Pageable pageable ) {
+            @PageableDefault(page = 0, size = 20, sort = "dataOperacao", direction = Sort.Direction.DESC) Pageable pageable ) {
         return ResponseEntity.ok( service.historico( entidade, id, pageable ) );
     }
 
-    @PostMapping( "/search" )
-    @PreAuthorize( "hasRole('CONSULTAR_AUDITORIA')" )
-    @Operation( summary = "Pesquisar a trilha",
-            description = "Busca ampla, para a investigação que não parte de um registro conhecido. "
-                    + "A data final é INCLUSIVA até o fim do dia." )
-    @ApiResponse( responseCode = "200", description = "Página de registros" )
-    @ApiResponse( responseCode = "400", description = "Entidade ou operação inválida, ou data inicial posterior à final" )
-    @ApiResponse( responseCode = "403", description = "Sem a ação CONSULTAR_AUDITORIA" )
+    @PostMapping("/search")
+    @PreAuthorize("hasRole('CONSULTAR_AUDITORIA')")
+    @Operation(summary = "Pesquisar a trilha", description = "Busca ampla, para a investigação que não parte de um registro conhecido. "
+            + "A data final é INCLUSIVA até o fim do dia.")
+    @ApiResponse(responseCode = "200", description = "Página de registros")
+    @ApiResponse(responseCode = "400", description = "Entidade ou operação inválida, ou data inicial posterior à final")
+    @ApiResponse(responseCode = "403", description = "Sem a ação CONSULTAR_AUDITORIA")
     public ResponseEntity<Page<RegistroAuditoriaResponseDTO>> search(
             @RequestBody AuditoriaFilterParams filterParams,
-            @PageableDefault( page = 0, size = 20, sort = "dataOperacao",
-                    direction = Sort.Direction.DESC ) Pageable pageable ) {
+            @PageableDefault(page = 0, size = 20, sort = "dataOperacao", direction = Sort.Direction.DESC) Pageable pageable ) {
         return ResponseEntity.ok( service.search( filterParams, pageable ) );
     }
 }
