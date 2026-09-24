@@ -22,7 +22,7 @@ WORKDIR /workspace
 
 COPY package.json package-lock.json ./
 
-# A SDK 2.1.0 e os overrides do package.json resolvem os peers no Angular 22.
+# A SDK 2.3.0 e keycloak-angular 22 resolvem os peers no Angular 22.
 RUN --mount=type=secret,id=gems_registry_token,required=true \
     printf '@gabriel-mdias:registry=https://npm.pkg.github.com\n//npm.pkg.github.com/:_authToken=%s\n' "$(cat /run/secrets/gems_registry_token)" > .npmrc \
     && npm ci \
