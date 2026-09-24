@@ -141,12 +141,9 @@ jobs:
 
       - name: Verificar snapshot e código Angular com o toolkit fixado
         shell: bash
-        env:
-          GH_TOKEN: ${{ secrets.GEMS_REGISTRY_TOKEN }}
         run: |
-          test -n "$GH_TOKEN"
-          gh api repos/Gabriel-mDias/gems-ai-sdk/tarball/9abe113f69edf8bf8e7c13fe4cd8cbdedc2a7e5b > "$RUNNER_TEMP/gems-ai-sdk.tar.gz"
-          python -m pip install "$RUNNER_TEMP/gems-ai-sdk.tar.gz"
+          echo '17d2fa32fbc29fe86ccc1931fb203188bedeb6b0f6c521fd3885f37bbf879aab  scripts/vendor/gems_ai-2.0.0-py3-none-any.whl' | sha256sum --check
+          python -m pip install --no-deps scripts/vendor/gems_ai-2.0.0-py3-none-any.whl
           python -m gems_ai check --project . --strict
           python -m gems_ai verify-angular --project .
 
