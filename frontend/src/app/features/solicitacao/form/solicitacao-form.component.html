@@ -27,9 +27,10 @@
     >
       <form [formGroup]="form" class="form-grid">
         <div class="form-group full-width">
-          <label class="required fw-bold">Título</label>
           <gems-input-text
             formControlName="titulo"
+            label="Título"
+            [required]="true"
             placeholder="O que precisa ser feito"
             [maxlength]="255"
           ></gems-input-text>
@@ -40,9 +41,10 @@
         </div>
 
         <div class="form-group full-width">
-          <label class="required fw-bold">Parceiro</label>
           <gems-select
             formControlName="parceiroId"
+            label="Parceiro"
+            [required]="true"
             placeholder="Selecione o parceiro"
             [options]="parceiros()"
           ></gems-select>
@@ -53,8 +55,12 @@
         </div>
 
         <div class="form-group full-width">
-          <label class="fw-bold">Descrição</label>
-          <gems-textarea formControlName="descricao" [rows]="4" [maxlength]="4000"></gems-textarea>
+          <gems-textarea
+            formControlName="descricao"
+            label="Descrição"
+            [rows]="4"
+            [maxlength]="4000"
+          ></gems-textarea>
         </div>
       </form>
 

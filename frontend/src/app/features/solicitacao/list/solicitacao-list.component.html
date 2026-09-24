@@ -19,18 +19,18 @@
   >
     <form [formGroup]="filtroForm" class="form-grid" appEnterBusca (buscar)="aplicarFiltro()">
       <div class="form-group">
-        <label class="fw-bold">Título</label>
         <gems-input-text
           formControlName="titulo"
+          label="Título"
           placeholder="Parte do título"
           icon="fa-solid fa-magnifying-glass"
         ></gems-input-text>
       </div>
 
       <div class="form-group">
-        <label class="fw-bold">Situação</label>
         <gems-select
           formControlName="situacao"
+          label="Situação"
           placeholder="Todas"
           [options]="situacoes"
         ></gems-select>

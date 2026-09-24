@@ -5,9 +5,10 @@
 >
   <form [formGroup]="formGroup" class="form-grid">
     <div class="form-group full-width">
-      <label class="required fw-bold">Nome do parceiro</label>
       <gems-input-text
         formControlName="nome"
+        label="Nome do parceiro"
+        [required]="true"
         placeholder="Como o parceiro é chamado no dia a dia"
         icon="fa-solid fa-handshake"
         [maxlength]="255"
@@ -17,9 +18,9 @@
 
     @if (podeVerComissao) {
       <div class="form-group">
-        <label class="fw-bold">Comissão (%)</label>
         <gems-input-text
           formControlName="comissao"
+          label="Comissão (%)"
           type="number"
           placeholder="Ex.: 12,50"
           icon="fa-solid fa-percent"
@@ -32,9 +33,9 @@
     }
 
     <div class="form-group full-width">
-      <label class="fw-bold">Descrição</label>
       <gems-textarea
         formControlName="descricao"
+        label="Descrição"
         placeholder="Observações sobre a atuação do parceiro"
         [rows]="4"
         [maxlength]="4000"

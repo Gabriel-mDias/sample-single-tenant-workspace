@@ -627,14 +627,38 @@ function httpClientForaDoLugar(relatorio) {
   for (const fonte of fontesTs.filter(
     (f) => f.caminho.endsWith('.component.ts') || f.caminho.endsWith('.store.ts'),
   )) {
+    // Resolve o nome local do símbolo; `HttpClient as ClienteHttp` precisa reprovar igual ao nome
+    // original. A análise permanece sintática e restrita a imports do pacote HTTP do Angular.
+    const nomesHttpClient = new Set();
+    for (const no of fonte.ast.statements) {
+      if (
+        !ts.isImportDeclaration(no) ||
+        !ts.isStringLiteral(no.moduleSpecifier) ||
+        no.moduleSpecifier.text !== '@angular/common/http' ||
+        !no.importClause?.namedBindings ||
+        !ts.isNamedImports(no.importClause.namedBindings)
+      )
+        continue;
+      for (const elemento of no.importClause.namedBindings.elements) {
+        if (elemento.propertyName?.text === 'HttpClient' || elemento.name.text === 'HttpClient') {
+          nomesHttpClient.add(elemento.name.text);
+        }
+      }
+    }
     visitar(fonte.ast, (no) => {
       const ehInject =
         ts.isCallExpression(no) &&
         ts.isIdentifier(no.expression) &&
         no.expression.text === 'inject' &&
         no.arguments[0] &&
-        no.arguments[0].getText() === 'HttpClient';
-      const ehParametro = ts.isParameter(no) && no.type && no.type.getText() === 'HttpClient';
+        ts.isIdentifier(no.arguments[0]) &&
+        nomesHttpClient.has(no.arguments[0].text);
+      const ehParametro =
+        ts.isParameter(no) &&
+        no.type &&
+        ts.isTypeReferenceNode(no.type) &&
+        ts.isIdentifier(no.type.typeName) &&
+        nomesHttpClient.has(no.type.typeName.text);
       if (ehInject || ehParametro) {
         relatorio.registrar(
           fonte.caminho,
