@@ -234,6 +234,48 @@ class ConvencoesArquiteturaTest {
         relatorio.concluir();
     }
 
+    /**
+     * Uma service não pode acionar a regra de outro domínio por import direto. As services de
+     * normalização compõem o agregado Parceiro e são a exceção estrutural explícita do projeto.
+     * O teste lê dependências do bytecode, inclusive tipos usados sem declaração de campo.
+     */
+    @Test
+    void deveUsarEvento_quandoServiceAcionaOutroDominio() {
+        var relatorio = new RelatorioDeConformidade( "ArchUnit · direção entre domínios" );
+        var dominios = Set.of( "parceiro", "solicitacao", "usuario", "normalizacao", "localidade" );
+
+        for ( JavaClass classe : classes ) {
+            var pacote = classe.getPackageName();
+            if ( !pacote.endsWith( ".service" ) || !pacote.startsWith( BASE + "." ) ) {
+                continue;
+            }
+            var origem = pacote.substring( BASE.length() + 1 ).split( "\\." )[0];
+            if ( !dominios.contains( origem ) ) {
+                continue;
+            }
+
+            for ( JavaClass destino : classe.getDirectDependenciesFromSelf().stream()
+                    .map( dependencia -> dependencia.getTargetClass() ).toList() ) {
+                var pacoteDestino = destino.getPackageName();
+                if ( !pacoteDestino.startsWith( BASE + "." ) || !pacoteDestino.endsWith( ".service" ) ) {
+                    continue;
+                }
+                var dominioDestino = pacoteDestino.substring( BASE.length() + 1 ).split( "\\." )[0];
+                if ( !dominios.contains( dominioDestino ) || origem.equals( dominioDestino )
+                        || (classe.getSimpleName().equals( "ParceiroService" )
+                                && dominioDestino.equals( "normalizacao" )) ) {
+                    continue;
+                }
+                relatorio.registrar( chave( classe, "service-cross-domain-" + destino.getName() ),
+                        LocalizadorDeFonte.caminhoRelativo( classe.getName() ), 0, "events.md#1",
+                        classe.getSimpleName() + " depende de " + destino.getSimpleName(),
+                        "publicar evento para regra de outro domínio; apenas ParceiroService compõe normalização" );
+            }
+        }
+
+        relatorio.concluir();
+    }
+
     private static Set<JavaClass> repositorios() {
         return classes.stream()
                 .filter( JavaClass::isInterface )
