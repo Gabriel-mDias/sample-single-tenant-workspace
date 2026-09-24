@@ -57,6 +57,8 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            GEMS_REGISTRY_USER=${{ secrets.GEMS_REGISTRY_USER || github.actor }}
           # As duas dependências GEMS exigem credencial — sem ela o download falha com 401 nos dois registries, com
           # token ausente, e este workflow falhou por isso nas três primeiras vezes em que rodou.
           # O GITHUB_TOKEN automático já serve (o job tem `packages: write`, que inclui leitura), e
