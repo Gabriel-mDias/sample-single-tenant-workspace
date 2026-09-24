@@ -17,6 +17,11 @@ Markdown continues as the source of truth. Before resuming, validate the index w
 `gerar-estado-rodada.ps1`. If it is absent or divergent, reconstruct it from `roteiro.md` and
 `tasks.md`. After each transition or checkpoint, regenerate the index before proceeding.
 
+Contrato de compatibilidade: `estado-rodada.json` é uma projeção versionada e regenerável;
+Markdown continua fonte primária. Antes da retomada, valide o índice. Regenere-o após cada transição
+ou checkpoint e, quando ausente ou divergente, reconstrua-o de `roteiro.md` e `tasks.md` com
+`gerar-estado-rodada.ps1`.
+
 Before implementation, require testable criteria, an approved plan/roteiro, and closed task packages
 with READ, EDIT, CREATE, and TEST boundaries. Use focused gates during execution and one complete
 gate at closure. A round ends only as `completed` or `blocked`; blocked requires a real external

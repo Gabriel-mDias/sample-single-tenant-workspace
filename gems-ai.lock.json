@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "version": "2.0.0",
-  "commit": "6399b59fcc172f379474bf3b092ecbd858af2098",
+  "commit": "f4bb23ba626fee231bd2e50cfdffee7597cbd301",
   "profile": "workspace",
-  "transaction": "20260924T005334Z064942",
+  "transaction": "20260924T104928Z121875",
   "rules": [
     {
       "id": "base.precedence",
@@ -245,7 +245,7 @@
     {
       "kind": "skill",
       "path": ".agents\\skills\\rodada-sdd\\SKILL.md",
-      "sha256": "3e3315fb780facfc2a038b5d85cbacd062ac930f0bba8426547d0b14fe4be9fa"
+      "sha256": "a6b2527f5fdc9196ee70c138666e9e9b4d35352f85bfda2a234d2d017113ce37"
     }
   ],
   "adapters": [
