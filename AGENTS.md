@@ -4,8 +4,14 @@ Instruções raiz são deliberadamente curtas. O arquivo `AGENTS.md` mais próxi
 completa estas regras.
 
 <!-- GEMS-AI:BEGIN -->
-As regras GEMS vivem em `.gems-ai/rules/` e as receitas em `.gems-ai/recipes/`. Leia somente os
-arquivos da camada efetivamente tocada; nunca carregue o catálogo inteiro.
+GEMS AI SDK 2.0.0 is mandatory for this repository. Base rules have highest precedence; profiles,
+task overlays, local facts, and valid waivers may specialize but never weaken them. Generated files
+under `.gems-ai/` must not be edited manually.
+
+Before changing code, run `gems-ai rules bundle --project . --task <type>` and follow every returned
+rule and required gate. Run `gems-ai check --project . --strict` before completion. A waiver must be
+explicitly approved, scoped, unexpired, and recorded in `gems-ai.lock.json`; it cannot hide a broken
+tool, build, functional gate, or infrastructure failure.
 <!-- GEMS-AI:END -->
 
 ## Autoridade e classificação

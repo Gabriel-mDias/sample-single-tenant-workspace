@@ -72,3 +72,14 @@ npm run build
 Feature ativa: o ponteiro está em `.specify/feature.json` e aponta para `specs/<ativa>/`. Não carregue
 seus artefatos até a tarefa exigir.
 <!-- SPECKIT END -->
+
+<!-- GEMS-AI:BEGIN -->
+GEMS AI SDK 2.0.0 is mandatory for this repository. Base rules have highest precedence; profiles,
+task overlays, local facts, and valid waivers may specialize but never weaken them. Generated files
+under `.gems-ai/` must not be edited manually.
+
+Before changing code, run `gems-ai rules bundle --project . --task <type>` and follow every returned
+rule and required gate. Run `gems-ai check --project . --strict` before completion. A waiver must be
+explicitly approved, scoped, unexpired, and recorded in `gems-ai.lock.json`; it cannot hide a broken
+tool, build, functional gate, or infrastructure failure.
+<!-- GEMS-AI:END -->
