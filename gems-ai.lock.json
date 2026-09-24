@@ -1,0 +1,267 @@
+{
+  "schemaVersion": 1,
+  "version": "2.0.0",
+  "commit": "9abe113f69edf8bf8e7c13fe4cd8cbdedc2a7e5b",
+  "profile": "workspace",
+  "transaction": "20260924T225235Z735254",
+  "rules": [
+    {
+      "id": "base.precedence",
+      "path": ".gems-ai/rules/base.precedence.md",
+      "sha256": "1492663b150dbbc25043ae9711ae4b619e98f589f522a15a8e2c16a39bc0493c"
+    },
+    {
+      "id": "base.safe-change",
+      "path": ".gems-ai/rules/base.safe-change.md",
+      "sha256": "1eb1984966b0818fe60a354a5d962196875ebcd237e2f1028096d716d842e53a"
+    },
+    {
+      "id": "base.waivers",
+      "path": ".gems-ai/rules/base.waivers.md",
+      "sha256": "fb10ba739abd4ad58063bfcc55c9d02b8f344f0b06a47691468582209152eea9"
+    },
+    {
+      "id": "profile.angular",
+      "path": ".gems-ai/rules/profile.angular.md",
+      "sha256": "0a7533805865b46ba15f7cc51c1662fc4f32a544f0b10bbdce649ca86261b6cb"
+    },
+    {
+      "id": "profile.java",
+      "path": ".gems-ai/rules/profile.java.md",
+      "sha256": "cdf6c8a123ae06863e53f5e38db72b006fef603721a9baef8232090d64edaa5a"
+    },
+    {
+      "id": "java.architecture",
+      "path": ".gems-ai/rules/java.architecture.md",
+      "sha256": "40d893ebfe7da06b6b9eb2ce54c0dcd3f6fb6ad221cbfc4c86afc6c93a389e79"
+    },
+    {
+      "id": "angular.auth",
+      "path": ".gems-ai/rules/angular.auth.md",
+      "sha256": "9a7f613fc1c7022bd37850d227e5bb2cdc25d66a983d4edc365c4dc3763a797b"
+    },
+    {
+      "id": "angular.feedback-alerts",
+      "path": ".gems-ai/rules/angular.feedback-alerts.md",
+      "sha256": "d99b5423b49d998dea8305f156b1bc2902415b65f5a273488eb934e0f8106c7b"
+    },
+    {
+      "id": "angular.forms",
+      "path": ".gems-ai/rules/angular.forms.md",
+      "sha256": "ba26c2248064d297eb10e5d6c23d5ee4f47064395a61510ed78f310a3a3934d1"
+    },
+    {
+      "id": "angular.gems-components",
+      "path": ".gems-ai/rules/angular.gems-components.md",
+      "sha256": "8030105a10e0671b6edfa34b5f4fc808fbf0740569b49b362872bff671a13eb6"
+    },
+    {
+      "id": "angular.http-interceptors",
+      "path": ".gems-ai/rules/angular.http-interceptors.md",
+      "sha256": "2ea75f99bf1fe38c43098e0882ad197ef2ebb732867c4a45a29a212b331b4137"
+    },
+    {
+      "id": "angular.lists",
+      "path": ".gems-ai/rules/angular.lists.md",
+      "sha256": "1259f7258bd26fbc3e7fad08ed4c93b4cf94a6b343cdd0848e35bee2230e803d"
+    },
+    {
+      "id": "angular.organization",
+      "path": ".gems-ai/rules/angular.organization.md",
+      "sha256": "a97e09c528936b15417ca0bac44607df134a9d09d4f69299df7fdd4aba002e67"
+    },
+    {
+      "id": "angular.signals-standards",
+      "path": ".gems-ai/rules/angular.signals-standards.md",
+      "sha256": "c50755c1cf2ad88f5ba55b1d9eb4e365e22c4a7483605d9db8523e2816ca4d01"
+    },
+    {
+      "id": "angular.stepper",
+      "path": ".gems-ai/rules/angular.stepper.md",
+      "sha256": "7f4b814faec67779c3fa922d8cdcd7981655ce2b4fb6288d18879aa1f5162586"
+    },
+    {
+      "id": "angular.stores",
+      "path": ".gems-ai/rules/angular.stores.md",
+      "sha256": "6fe408bd368f3ad993ff40b2fa277b3a3b81917084a444e02bdfadf48dd56827"
+    },
+    {
+      "id": "angular.testing",
+      "path": ".gems-ai/rules/angular.testing.md",
+      "sha256": "b141f49a75a9c3c05c7920f9953e8a5566b91a0f77d80a40ce1e1e8ce09f5bbd"
+    },
+    {
+      "id": "angular.visual-standards",
+      "path": ".gems-ai/rules/angular.visual-standards.md",
+      "sha256": "2845d4ec177d33d9da1bbe3f0689239c7d0bfe7fa42cfa50b48c38f020cd9cc4"
+    },
+    {
+      "id": "java.controllers",
+      "path": ".gems-ai/rules/java.controllers.md",
+      "sha256": "2f75092424955987dd3a364347d3e9c0f4cb817fca18f4613adc3d3fa5e1261a"
+    },
+    {
+      "id": "java.events",
+      "path": ".gems-ai/rules/java.events.md",
+      "sha256": "f586ade56ededc63313a8cbfa7c21e103a5a8b25db50516caca0e905f5e9e288"
+    },
+    {
+      "id": "java.mapping",
+      "path": ".gems-ai/rules/java.mapping.md",
+      "sha256": "97de6239877ecf7745c3d8a6386582f8fd418c79490017d801af38d15ede54c9"
+    },
+    {
+      "id": "java.multi-tenant",
+      "path": ".gems-ai/rules/java.multi-tenant.md",
+      "sha256": "fa929e9a5eed2b7838054c862c3e2f757ef7810df4ae670d5e860992ac871b6b"
+    },
+    {
+      "id": "java.observability",
+      "path": ".gems-ai/rules/java.observability.md",
+      "sha256": "021a77432c6c8059abcb4215eb558b8bb80a31664abe740bf314148374b5e700"
+    },
+    {
+      "id": "java.openapi",
+      "path": ".gems-ai/rules/java.openapi.md",
+      "sha256": "61bd78e7fd214cae29a567c7033f33d572feddb04d032e7702e21b410dbc5273"
+    },
+    {
+      "id": "java.persistence-db",
+      "path": ".gems-ai/rules/java.persistence-db.md",
+      "sha256": "17a694e01f8a55e6578aaef55749f208b023f0434bd3ce7db1362b202d4ca753"
+    },
+    {
+      "id": "java.repositories",
+      "path": ".gems-ai/rules/java.repositories.md",
+      "sha256": "24f3f489b91b6b33d2ef4446a7c384ad1c73d1be29fb5e6147938d4ed3a93880"
+    },
+    {
+      "id": "java.rest-common",
+      "path": ".gems-ai/rules/java.rest-common.md",
+      "sha256": "1e8c5e1fdd91aead7722a15460676236ff53873e207ba923a97b5334b1a6d866"
+    },
+    {
+      "id": "java.security",
+      "path": ".gems-ai/rules/java.security.md",
+      "sha256": "7667920217a9346944eae5ea17c093e7b7557f3a902018123ac99bd64f3b644d"
+    },
+    {
+      "id": "java.services",
+      "path": ".gems-ai/rules/java.services.md",
+      "sha256": "2ed579617c9029ebf9c039321fe7adc4fef6de9be90f9442c4cf996358573bff"
+    },
+    {
+      "id": "java.storage-s3",
+      "path": ".gems-ai/rules/java.storage-s3.md",
+      "sha256": "d44698ba9fbefb40889ab07c94afa9e1dcfdd8e889303b4263a83af2fc0d0b9c"
+    },
+    {
+      "id": "java.testing",
+      "path": ".gems-ai/rules/java.testing.md",
+      "sha256": "37df3043b900e1db0a909166a6239f7b4528a36eafe8aa56c34a39254395a3e7"
+    },
+    {
+      "id": "java.utils",
+      "path": ".gems-ai/rules/java.utils.md",
+      "sha256": "3dc6aaf07a1fdfba6ffa0ddf4f8ae9da4dd56591fc04c31e9f01217cfceb5983"
+    },
+    {
+      "id": "java.validation",
+      "path": ".gems-ai/rules/java.validation.md",
+      "sha256": "3847afadcb15fff50106a33835815ad6d5d55546c371a9fcdc2c9ace85f27018"
+    },
+    {
+      "id": "profile.workspace",
+      "path": ".gems-ai/rules/profile.workspace.md",
+      "sha256": "280f32cadc00eb46689e182bc7b4265a557c861ffc648712b0d20b2f6a5f8b9c"
+    },
+    {
+      "id": "sdd.round",
+      "path": ".gems-ai/rules/sdd.round.md",
+      "sha256": "ff87ac554da8bcde2033074347774016ca44383e5b3c02735c79cfda5a3d424b"
+    },
+    {
+      "id": "stories.traceability",
+      "path": ".gems-ai/rules/stories.traceability.md",
+      "sha256": "1d5d84bf0ff2592d64676d921fc2e33762cfdeb920b9140fca4c86a370f0bbb3"
+    },
+    {
+      "id": "signature.invariants",
+      "path": ".gems-ai/rules/signature.invariants.md",
+      "sha256": "b24e0c75d831288d64b08ba310c6f27bec767141d778e636717da603b8d1bff4"
+    }
+  ],
+  "assets": [
+    {
+      "kind": "catalog",
+      "path": ".gems-ai/catalog.json",
+      "sha256": "36fee6f0c4139f57bc9d9b144a77ed1e9873e95f2de617e2f88ed680b1cf67f2"
+    },
+    {
+      "kind": "version",
+      "path": ".gems-ai/.version",
+      "sha256": "efdfae9d0dc9b09f9524df6c401bf7143a882469c6243bfbcb0bbeaefe9aa3c1"
+    },
+    {
+      "kind": "schema",
+      "path": ".gems-ai/schemas/gems-ai-lock.schema.json",
+      "sha256": "4d435c60368012d6edc83823a7f0987ebe249044254a30802f5dc6a526dd2564"
+    },
+    {
+      "kind": "schema",
+      "path": ".gems-ai/schemas/gems-ai.schema.json",
+      "sha256": "c13e9b5c50cb7c113fb556adca2ac5c22bafac72fd8da14a5ffe5cd2fc5963f2"
+    },
+    {
+      "kind": "schema",
+      "path": ".gems-ai/schemas/round-state.schema.json",
+      "sha256": "a69536e9249ba59dc13f7e440cd1e44b1eac00e8786d6400bc645e69dc1820b3"
+    },
+    {
+      "kind": "schema",
+      "path": ".gems-ai/schemas/rule.schema.json",
+      "sha256": "ee64b1f481c4430d45f79e428636631f3ee4b9d3b860782b4c1a570f5b591268"
+    },
+    {
+      "kind": "skill",
+      "path": ".agents/skills/gems-ai-sdk/SKILL.md",
+      "sha256": "42cb21f74a8fe088d5b5ec993732986146c13d08a62c5044a1783122f8964cec"
+    },
+    {
+      "kind": "skill",
+      "path": ".agents/skills/gems-ai-sdk/agents/openai.yaml",
+      "sha256": "2adde4e8d9a81636aa7db2a4adcea9d842f087f37edcfba55bed79a69873eafc"
+    },
+    {
+      "kind": "skill",
+      "path": ".agents/skills/rodada-sdd/SKILL.md",
+      "sha256": "163649f1886a1af72ad4ddc310e3508d568f808abaf5989ca0d8fd6fb521f62d"
+    },
+    {
+      "kind": "skill",
+      "path": ".agents/skills/rodada-sdd/agents/openai.yaml",
+      "sha256": "e14de1d138fd16a6afe9e693d68307d996370f95e23d843483270fcf6bd78b67"
+    },
+    {
+      "kind": "skill",
+      "path": ".agents/skills/rodada-sdd/references/phases.md",
+      "sha256": "5ef43b4b609e2fc5aec0958ab097dcd69b556931da5fc14e0dfc06e292e48365"
+    }
+  ],
+  "adapters": [
+    {
+      "path": "AGENTS.md",
+      "managedSha256": "1655c627b0b4dd0d492a25e47e3c361eddc907d83862423f20e208a46f9213b6"
+    },
+    {
+      "path": "CLAUDE.md",
+      "managedSha256": "1655c627b0b4dd0d492a25e47e3c361eddc907d83862423f20e208a46f9213b6"
+    },
+    {
+      "path": "GEMINI.md",
+      "managedSha256": "1655c627b0b4dd0d492a25e47e3c361eddc907d83862423f20e208a46f9213b6"
+    }
+  ],
+  "waivers": [],
+  "localAssertions": []
+}

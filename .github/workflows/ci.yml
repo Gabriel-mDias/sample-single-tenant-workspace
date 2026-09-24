@@ -120,6 +120,11 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package-lock.json
 
+      - name: Python 3.13 para o toolkit GEMS
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
       - name: Credencial do registro privado
         run: |
           printf '@gabriel-mdias:registry=https://npm.pkg.github.com\n//npm.pkg.github.com/:_authToken=%s\n' \
@@ -133,6 +138,17 @@ jobs:
       - name: Instalar dependências
         run: npm ci
         working-directory: frontend
+
+      - name: Verificar snapshot e código Angular com o toolkit fixado
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GEMS_REGISTRY_TOKEN }}
+        run: |
+          test -n "$GH_TOKEN"
+          gh api repos/Gabriel-mDias/gems-ai-sdk/tarball/9abe113f69edf8bf8e7c13fe4cd8cbdedc2a7e5b > "$RUNNER_TEMP/gems-ai-sdk.tar.gz"
+          python -m pip install "$RUNNER_TEMP/gems-ai-sdk.tar.gz"
+          python -m gems_ai check --project . --strict
+          python -m gems_ai verify-angular --project .
 
       - name: Auditar dependências resolvidas do frontend
         run: npm audit --package-lock-only --audit-level=high --registry=https://registry.npmjs.org

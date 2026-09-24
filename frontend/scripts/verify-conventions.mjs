@@ -3,7 +3,7 @@
  * `build` como os três anteriores.
  *
  * O que ele afirma é o que a medição M-01 (`specs/008-padronizacao-de-escrita/medicao-m01.md`)
- * apurou contra as 12 regras de `.gems-ai/rules/frontend-angular/`, depois de elas terem sido
+ * apurou contra as 12 regras de `.gems-ai/local-rules/frontend-angular/`, depois de elas terem sido
  * tornadas verdadeiras na fase 6 — regra que mente não vira gate. As regras aqui, na ordem em que
  * a medição as encontrou desviando (grupo B) ou zeradas (segundo achado):
  *
@@ -59,7 +59,7 @@ const baselinePath = resolve(repoRoot, '.gems-ai', 'conformance-baseline.json');
 /** Total medido e congelado em S-def, T057 (2026-09-14). Só encolhe em S-codex. */
 const CONGELADO_EM = 174;
 
-const REGRAS = '.gems-ai/rules/frontend-angular/';
+const REGRAS = '.gems-ai/local-rules/frontend-angular/';
 const MARCA = 'GEMS-EXCEPTION(';
 const hoje = new Date().toISOString().slice(0, 10);
 
@@ -178,7 +178,7 @@ const totalNoBaseline = baseline.entradas.reduce((soma, e) => soma + e.ocorrenci
 if (totalNoBaseline > CONGELADO_EM) {
   throw new Error(
     `.gems-ai/conformance-baseline.json\n` +
-      `  regra:    .gems-ai/rules/conformance-exceptions.md#4\n` +
+      `  regra:    .gems-ai/local-rules/conformance-exceptions.md#4\n` +
       `  violação: o baseline soma ${totalNoBaseline} ocorrência(s), e o total congelado é ${CONGELADO_EM}\n` +
       `  esperado: o baseline SÓ ENCOLHE (INV-4). Desvio novo é corrigido ou vira GEMS-EXCEPTION(...) no ponto ` +
       `do código, com motivo e prazo — nunca uma entrada nova aqui`,
@@ -981,7 +981,7 @@ const mensagens = [
   ...relatorio.violacoes.map(formatar),
   ...orfas.map(
     (e) =>
-      `${e.caminho}:${e.linhaDoComentario}\n  regra:    .gems-ai/rules/conformance-exceptions.md#3\n` +
+      `${e.caminho}:${e.linhaDoComentario}\n  regra:    .gems-ai/local-rules/conformance-exceptions.md#3\n` +
       `  violação: exceção órfã — a linha coberta já está conforme a ${e.regra}\n` +
       `  esperado: remover a exceção: o que sobrou é ruído com aparência de autorização (INV-1)`,
   ),

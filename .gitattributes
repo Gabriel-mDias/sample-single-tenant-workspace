@@ -24,3 +24,11 @@
 *.ico   binary
 *.png   binary
 *.webp  binary
+
+# Snapshot do toolkit: hashes do lock são dos bytes do pacote, inclusive CRLF.
+.gems-ai/rules/** -text -eol whitespace=cr-at-eol
+.gems-ai/schemas/** -text -eol whitespace=cr-at-eol
+.gems-ai/catalog.json -text -eol whitespace=cr-at-eol
+.gems-ai/.version -text -eol whitespace=cr-at-eol
+.agents/skills/gems-ai-sdk/** -text -eol whitespace=cr-at-eol
+.agents/skills/rodada-sdd/** -text -eol whitespace=cr-at-eol

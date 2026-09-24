@@ -9,10 +9,10 @@ Este arquivo é carregado em toda sessão. Mantenha-o curto. Regras específicas
    alteração arquitetural, de governança, infraestrutura ou feature spec-driven.
 2. `AGENTS.md` contém as regras transversais curtas.
 3. A spec aprovada da feature define comportamento; código e testes mostram o estado real.
-4. As regras de `.gems-ai/rules/` vencem o código consolidado (constituição 2.0.0).
+4. As regras do toolkit em `.gems-ai/rules/` e as regras locais em `.gems-ai/local-rules/` vencem o código consolidado (constituição 2.1.0).
 Código que diverge deve ser corrigido. Desvio autorizado exige
 `GEMS-EXCEPTION(<regra>#<seção>): <motivo>; expira AAAA-MM-DD`, conforme
-`.gems-ai/rules/conformance-exceptions.md`; agente não escreve exceção para desbloquear gate.
+`.gems-ai/local-rules/conformance-exceptions.md`; agente não escreve exceção para desbloquear gate.
 Código vence documentação de negócio e specs; parceiro/solicitacao são referências de forma.
 Adoção de módulo SDK exige publicação, alcance medido, garantia nomeada, equivalência
 provada por teste/mutação neste repositório e remoção da classe local na mesma alteração.
@@ -72,3 +72,14 @@ npm run build
 Feature ativa: o ponteiro está em `.specify/feature.json` e aponta para `specs/<ativa>/`. Não carregue
 seus artefatos até a tarefa exigir.
 <!-- SPECKIT END -->
+
+<!-- GEMS-AI:BEGIN -->
+GEMS AI SDK 2.0.0 is mandatory for this repository. Base rules have highest precedence; profiles,
+task overlays, local facts, and valid waivers may specialize but never weaken them. Generated files
+under `.gems-ai/` must not be edited manually.
+
+Before changing code, run `gems-ai rules bundle --project . --task <type>` and follow every returned
+rule and required gate. Run `gems-ai check --project . --strict` before completion. A waiver must be
+explicitly approved, scoped, unexpired, and recorded in `gems-ai.lock.json`; it cannot hide a broken
+tool, build, functional gate, or infrastructure failure.
+<!-- GEMS-AI:END -->
