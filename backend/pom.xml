@@ -29,6 +29,8 @@
 	</modules>
 	<properties>
 		<java.version>21</java.version>
+		<!-- Corrige os avisos de seguranca do Tomcat 11.0.24 presentes no SBOM do backend. -->
+		<tomcat.version>11.0.26</tomcat.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<!-- 3.3.0 publica os contratos de autorização e ciclo Keycloak exigidos por C11. -->
 		<gems.version>3.3.0</gems.version>
