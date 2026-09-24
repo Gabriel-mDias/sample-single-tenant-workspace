@@ -20,9 +20,9 @@
     "@angular/router": "^22.1.7",
     "@fontsource/inter": "^5.2.8",
     "@fortawesome/fontawesome-free": "^7.3.0",
-    "@gabriel-mdias/angular-gems-sdk": "^2.1.0",
+    "@gabriel-mdias/angular-gems-sdk": "^2.3.0",
     "animate.css": "^4.1.1",
-    "keycloak-angular": "^16.1.0",
+    "keycloak-angular": "^22.0.0",
     "keycloak-js": "^26.2.4",
     "rxjs": "~7.8.0",
     "sweetalert2": "^11.26.25",
@@ -32,16 +32,9 @@
     "@angular/build": "^22.1.8",
     "@angular/cli": "^22.1.8",
     "@angular/compiler-cli": "^22.1.7",
-    "jsdom": "^30.0.1",
+    "jsdom": "^30.1.0",
     "prettier": "^3.9.8",
     "typescript": "~6.0.2",
     "vitest": "^4.1.11"
-  },
-  "overrides": {
-    "keycloak-angular": {
-      "@angular/common": "$@angular/common",
-      "@angular/core": "$@angular/core",
-      "@angular/router": "$@angular/router"
-    }
   }
 }
