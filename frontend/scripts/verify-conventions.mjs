@@ -932,6 +932,26 @@ function nomeDeArquivoPorCamada(relatorio) {
   }
 }
 
+/** 14. Todo controle GEMS usado em template precisa expor um nome acessível. */
+function rotuloEmControleGems(relatorio) {
+  const controle =
+    /<gems-(?:input-text|input-mask|input-document|input-date|select|textarea)\b[^>]*>/gs;
+  const rotulo = /(?:^|\s)(?:label|\[label\]|aria-label|\[attr\.aria-label\])\s*=/;
+  for (const arquivo of arquivos.filter((item) => item.caminho.endsWith('.html'))) {
+    for (const match of arquivo.texto.matchAll(controle)) {
+      if (rotulo.test(match[0])) continue;
+      relatorio.registrar(
+        arquivo.caminho,
+        arquivo.texto.slice(0, match.index).split('\n').length,
+        'forms.md#5',
+        match[0].split(/\s/)[0],
+        'controle GEMS sem rótulo acessível',
+        'informar label na API do componente para associar o rótulo ao input interno',
+      );
+    }
+  }
+}
+
 const regras = [
   hexEmCss,
   objectComoTipo,
@@ -946,6 +966,7 @@ const regras = [
   behaviorSubjectEmComponente,
   direcaoDeImport,
   nomeDeArquivoPorCamada,
+  rotuloEmControleGems,
 ];
 
 // ---------------------------------------------------------------------------------------------
