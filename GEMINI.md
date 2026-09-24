@@ -23,3 +23,14 @@ Código que diverge deve ser corrigido. Desvio autorizado exige
 Código vence documentação de negócio e specs; parceiro/solicitacao são referências de forma.
 Adoção de módulo SDK exige publicação, alcance medido, garantia nomeada, equivalência
 provada por teste/mutação neste repositório e remoção da classe local na mesma alteração.
+
+<!-- GEMS-AI:BEGIN -->
+GEMS AI SDK 2.0.0 is mandatory for this repository. Base rules have highest precedence; profiles,
+task overlays, local facts, and valid waivers may specialize but never weaken them. Generated files
+under `.gems-ai/` must not be edited manually.
+
+Before changing code, run `gems-ai rules bundle --project . --task <type>` and follow every returned
+rule and required gate. Run `gems-ai check --project . --strict` before completion. A waiver must be
+explicitly approved, scoped, unexpired, and recorded in `gems-ai.lock.json`; it cannot hide a broken
+tool, build, functional gate, or infrastructure failure.
+<!-- GEMS-AI:END -->
