@@ -3,7 +3,10 @@ package br.com.gems.app.security;
 import br.com.gems.app.commons.exception.ProvedorExternoException;
 import br.com.gems.app.support.AbstractIntegrationTest;
 import br.com.gems.exception.exception.BusinessException;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Bean;
@@ -21,6 +24,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
@@ -31,6 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @AutoConfigureMockMvc
 @Import(ErrorEnvelopeIntegrationTest.ErrorEndpointConfiguration.class)
+@ExtendWith(OutputCaptureExtension.class)
 class ErrorEnvelopeIntegrationTest extends AbstractIntegrationTest {
 
     private static final String BASE_PATH = "/test/error-envelope";
@@ -68,6 +73,18 @@ class ErrorEnvelopeIntegrationTest extends AbstractIntegrationTest {
 
         assertEnvelope( resultado, 500, "ERRO_NAO_ESPERADO", BASE_PATH + "/inesperado", "GET" )
                 .andExpect( content().string( not( containsString( "segredo-interno" ) ) ) );
+    }
+
+    @Test
+    void deveOmitirDadosDaRequisicaoECausa_quandoHandlersRegistramErros( CapturedOutput output ) throws Exception {
+        var segredo = "segredo-sentinela-p06-987654321";
+
+        mockMvc.perform( get( BASE_PATH + "/inesperado/" + segredo ).with( jwt() ) )
+                .andExpect( status().isInternalServerError() );
+        mockMvc.perform( get( BASE_PATH + "/provedor/" + segredo ).with( jwt() ) )
+                .andExpect( status().isBadGateway() );
+
+        assertThat( output.getOut() + output.getErr() ).doesNotContain( segredo );
     }
 
     @Test
@@ -131,6 +148,12 @@ class ErrorEnvelopeIntegrationTest extends AbstractIntegrationTest {
             throw new ProvedorExternoException( "Falha funcional preservada.", new IOException( "causa" ) );
         }
 
+        @GetMapping("/provedor/{valor}")
+        @PreAuthorize("isAuthenticated()")
+        void provedorComEntrada( @PathVariable String valor ) {
+            throw new ProvedorExternoException( "Falha funcional preservada.", new IOException( valor ) );
+        }
+
         @GetMapping("/restrito")
         @PreAuthorize("hasRole('ACAO_INEXISTENTE')")
         void restrito() {
@@ -146,6 +169,12 @@ class ErrorEnvelopeIntegrationTest extends AbstractIntegrationTest {
         @PreAuthorize("isAuthenticated()")
         void inesperado() {
             throw new IllegalStateException( "segredo-interno" );
+        }
+
+        @GetMapping("/inesperado/{valor}")
+        @PreAuthorize("isAuthenticated()")
+        void inesperadoComEntrada( @PathVariable String valor ) {
+            throw new IllegalStateException( valor );
         }
 
         @GetMapping("/uuid/{id}")
