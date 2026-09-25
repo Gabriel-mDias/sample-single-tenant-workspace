@@ -230,6 +230,21 @@ class ContratosHttpIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Transactional
+    void devePreservarSituacao_quandoConsultaTentaTransicoes() throws Exception {
+        var id = criarSolicitacao();
+        for ( var acao : new String[]{"abrir", "iniciar", "concluir", "cancelar"} ) {
+            var corpo = "cancelar".equals( acao ) ? "{\"motivo\":\"indevido\"}" : null;
+            chamarComAcoes( post( "/api/solicitacoes/{id}/" + acao, id ), 403, corpo,
+                    "CONSULTA", "CONSULTAR_SOLICITACAO" );
+            var leitura = chamarComAcoes( get( "/api/solicitacoes/{id}", id ), 200, null,
+                    "CONSULTA", "CONSULTAR_SOLICITACAO" );
+            assertThat( leitura.path( "situacao" ).asText() ).isEqualTo( "RASCUNHO" );
+            assertThat( leitura.path( "motivoCancelamento" ).isNull() ).isTrue();
+        }
+    }
+
+    @Test
     void deveListarLocalidades_quandoPaisValidoOuInvalido() throws Exception {
         var paises = chamar( get( "/api/localidades/paises" ), null, 200, null );
         assertThat( paises.isArray() ).isTrue();
