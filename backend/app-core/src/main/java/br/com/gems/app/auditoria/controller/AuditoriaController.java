@@ -2,13 +2,13 @@ package br.com.gems.app.auditoria.controller;
 
 import br.com.gems.security.authorization.GlobalEndpoint;
 import br.com.gems.app.auditoria.service.AuditoriaService;
+import br.com.gems.app.commons.response.PageResponseDTO;
 import br.com.gems.app.model.params.AuditoriaFilterParams;
 import br.com.gems.app.model.response.RegistroAuditoriaResponseDTO;
 import br.com.gems.exception.base.BaseController;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -54,11 +54,11 @@ public class AuditoriaController extends BaseController {
     @ApiResponse(responseCode = "200", description = "Página do histórico — vazia é resposta legítima")
     @ApiResponse(responseCode = "400", description = "Nome de entidade desconhecido")
     @ApiResponse(responseCode = "403", description = "Sem a ação CONSULTAR_AUDITORIA")
-    public ResponseEntity<Page<RegistroAuditoriaResponseDTO>> historico(
+    public ResponseEntity<PageResponseDTO<RegistroAuditoriaResponseDTO>> historico(
             @PathVariable String entidade,
             @PathVariable UUID id,
             @PageableDefault(page = 0, size = 20, sort = "dataOperacao", direction = Sort.Direction.DESC) Pageable pageable ) {
-        return ResponseEntity.ok( service.historico( entidade, id, pageable ) );
+        return ResponseEntity.ok( PageResponseDTO.from( service.historico( entidade, id, pageable ) ) );
     }
 
     @PostMapping("/search")
@@ -68,9 +68,9 @@ public class AuditoriaController extends BaseController {
     @ApiResponse(responseCode = "200", description = "Página de registros")
     @ApiResponse(responseCode = "400", description = "Entidade ou operação inválida, ou data inicial posterior à final")
     @ApiResponse(responseCode = "403", description = "Sem a ação CONSULTAR_AUDITORIA")
-    public ResponseEntity<Page<RegistroAuditoriaResponseDTO>> search(
+    public ResponseEntity<PageResponseDTO<RegistroAuditoriaResponseDTO>> search(
             @RequestBody AuditoriaFilterParams filterParams,
             @PageableDefault(page = 0, size = 20, sort = "dataOperacao", direction = Sort.Direction.DESC) Pageable pageable ) {
-        return ResponseEntity.ok( service.search( filterParams, pageable ) );
+        return ResponseEntity.ok( PageResponseDTO.from( service.search( filterParams, pageable ) ) );
     }
 }

@@ -1,6 +1,7 @@
 package br.com.gems.app.solicitacao.controller;
 
 import br.com.gems.security.authorization.GlobalEndpoint;
+import br.com.gems.app.commons.response.PageResponseDTO;
 import br.com.gems.app.model.dto.SolicitacaoDTO;
 import br.com.gems.app.model.params.SolicitacaoFilterParams;
 import br.com.gems.app.model.response.SolicitacaoResponseDTO;
@@ -11,7 +12,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -60,10 +60,10 @@ public class SolicitacaoController extends BaseController {
     @PreAuthorize("hasRole('CONSULTAR_SOLICITACAO')")
     @Operation(summary = "Pesquisar solicitações", description = "Busca paginada. Filtros de título, situação e parceiro são combináveis.")
     @ApiResponse(responseCode = "200", description = "Página de solicitações")
-    public ResponseEntity<Page<SolicitacaoResponseDTO>> search(
+    public ResponseEntity<PageResponseDTO<SolicitacaoResponseDTO>> search(
             @RequestBody SolicitacaoFilterParams filterParams,
             @PageableDefault(page = 0, size = 10, sort = "dataCriacao", direction = Sort.Direction.DESC) Pageable pageable ) {
-        return ResponseEntity.ok( service.search( filterParams, pageable ) );
+        return ResponseEntity.ok( PageResponseDTO.from( service.search( filterParams, pageable ) ) );
     }
 
     @PostMapping
