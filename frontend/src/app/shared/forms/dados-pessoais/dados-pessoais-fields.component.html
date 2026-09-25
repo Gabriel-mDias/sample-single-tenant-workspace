@@ -1,8 +1,9 @@
 <div [formGroup]="form()" class="form-grid">
   <div class="form-group">
-    <label class="required fw-bold">Primeiro nome</label>
     <gems-input-text
       formControlName="primeiroNome"
+      label="Primeiro nome"
+      [required]="true"
       placeholder="Mario"
       icon="fa-solid fa-user"
       [maxlength]="255"
@@ -14,9 +15,10 @@
   </div>
 
   <div class="form-group">
-    <label class="required fw-bold">Sobrenome</label>
     <gems-input-text
       formControlName="sobrenome"
+      label="Sobrenome"
+      [required]="true"
       placeholder="Rossi"
       icon="fa-solid fa-user"
       [maxlength]="255"
@@ -65,10 +67,10 @@
   </div>
 
   <div class="form-group">
-    <label class="fw-bold">RG</label>
     <gems-input-text
       appRgMask
       formControlName="rg"
+      label="RG"
       placeholder="MG-12.345.678"
       icon="fa-solid fa-address-card"
       [maxlength]="20"
@@ -76,9 +78,9 @@
   </div>
 
   <div class="form-group">
-    <label class="required fw-bold">Sexo</label>
     <gems-select
       formControlName="sexo"
+      label="Sexo"
       placeholder="Selecione o sexo"
       [required]="true"
       [options]="sexoOptions"

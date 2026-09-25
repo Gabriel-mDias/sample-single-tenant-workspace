@@ -104,7 +104,7 @@ public class UsuarioKeycloakListener {
                     desfazer.run();
                 } catch ( Exception e ) {
                     log.error( "Compensação no Keycloak falhou após rollback. "
-                            + "Verifique manualmente se restou usuário órfão ou filiação indevida no realm.", e );
+                            + "Verifique manualmente se restou usuário órfão ou filiação indevida no realm." );
                 }
             }
         } );

@@ -60,7 +60,7 @@ final class RelatorioDeConformidade {
             var cabecalho = linha > 0 ? caminho + ":" + linha : caminho;
             return """
                     %s
-                      regra:    .gems-ai/rules/backend-java/%s
+                      regra:    .gems-ai/local-rules/backend-java/%s
                       violação: %s
                       esperado: %s""".formatted( cabecalho, regra, violacao, esperado );
         }
@@ -161,7 +161,7 @@ final class RelatorioDeConformidade {
         if ( entradas.size() > MAXIMO_DE_ENTRADAS ) {
             throw new AssertionError( """
                     backend/app-deploy/src/test/resources/archunit-baseline.txt
-                      regra:    .gems-ai/rules/conformance-exceptions.md#4
+                      regra:    .gems-ai/local-rules/conformance-exceptions.md#4
                       violação: o baseline tem %d entrada(s), e o tamanho congelado é %d
                       esperado: o baseline SÓ ENCOLHE (INV-4). Desvio novo é corrigido ou vira exceção \
                     escrita GEMS-EXCEPTION(...) no ponto do código, com motivo e prazo — nunca uma linha nova aqui"""

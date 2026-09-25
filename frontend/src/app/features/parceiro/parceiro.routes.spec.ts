@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { Acoes } from '../../core/auth/acoes';
+import { Acoes, globalAuthorization } from '../../core/auth/acoes';
 import { roleGuard } from '../../core/guards/role.guard';
 import { PARCEIRO_ROUTES } from './parceiro.routes';
 
@@ -26,10 +26,10 @@ describe('PARCEIRO_ROUTES', () => {
       [roleGuard],
     ]);
     expect(PARCEIRO_ROUTES.slice(1).map((route) => route.data)).toEqual([
-      { roles: [Acoes.CONSULTAR_PARCEIRO] },
-      { roles: [Acoes.INSERIR_PARCEIRO], mode: 'create' },
-      { roles: [Acoes.ALTERAR_PARCEIRO], mode: 'edit' },
-      { roles: [Acoes.CONSULTAR_PARCEIRO], mode: 'view' },
+      { authorization: globalAuthorization(Acoes.CONSULTAR_PARCEIRO) },
+      { authorization: globalAuthorization(Acoes.INSERIR_PARCEIRO), mode: 'create' },
+      { authorization: globalAuthorization(Acoes.ALTERAR_PARCEIRO), mode: 'edit' },
+      { authorization: globalAuthorization(Acoes.CONSULTAR_PARCEIRO), mode: 'view' },
     ]);
   });
 });

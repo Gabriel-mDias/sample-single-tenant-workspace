@@ -31,3 +31,6 @@ CLAUDE.local.md
 
 # Telemetria bruta de custo (pode conter identificadores de sessões)
 .agents/metrics/*.csv
+
+# Backups locais de transações do toolkit; o lock e o snapshot são versionados.
+.gems-ai/transactions/

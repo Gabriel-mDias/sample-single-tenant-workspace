@@ -15,6 +15,10 @@ import br.com.gems.exception.exception.ExternalServiceException;
  */
 public class ProvedorExternoException extends ExternalServiceException {
 
+    public ProvedorExternoException( String message ) {
+        super( "Provedor externo", message, null );
+    }
+
     public ProvedorExternoException( String message, Throwable cause ) {
         super( "Provedor externo", message, cause );
     }

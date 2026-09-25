@@ -2,6 +2,7 @@ package br.com.gems.app.security;
 
 import br.com.gems.app.commons.exception.ProvedorExternoException;
 import br.com.gems.app.support.AbstractIntegrationTest;
+import br.com.gems.exception.exception.BusinessException;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -51,6 +52,28 @@ class ErrorEnvelopeIntegrationTest extends AbstractIntegrationTest {
 
         assertEnvelope( resultado, 403, "ACESSO_NEGADO", BASE_PATH + "/restrito", "GET" )
                 .andExpect( jsonPath( "$.message" ).value( "Você não possui acesso para este serviço!" ) );
+    }
+
+    @Test
+    void deveResponderComEnvelopeSdk_quandoRegraDeNegocioFalha() throws Exception {
+        var resultado = mockMvc.perform( get( BASE_PATH + "/negocio" ).with( jwt() ) );
+
+        assertEnvelope( resultado, 400, "FALHA", BASE_PATH + "/negocio", "GET" )
+                .andExpect( jsonPath( "$.message" ).value( "Regra de teste recusou a operação." ) );
+    }
+
+    @Test
+    void deveOcultarCausaInterna_quandoErroInesperado() throws Exception {
+        var resultado = mockMvc.perform( get( BASE_PATH + "/inesperado" ).with( jwt() ) );
+
+        assertEnvelope( resultado, 500, "ERRO_NAO_ESPERADO", BASE_PATH + "/inesperado", "GET" )
+                .andExpect( content().string( not( containsString( "segredo-interno" ) ) ) );
+    }
+
+    @Test
+    void deveNegarRequisicaoSemCredencial_quandoNaoAutenticado() throws Exception {
+        mockMvc.perform( get( BASE_PATH + "/provedor" ) )
+                .andExpect( status().isUnauthorized() );
     }
 
     @Test
@@ -111,6 +134,18 @@ class ErrorEnvelopeIntegrationTest extends AbstractIntegrationTest {
         @GetMapping("/restrito")
         @PreAuthorize("hasRole('ACAO_INEXISTENTE')")
         void restrito() {
+        }
+
+        @GetMapping("/negocio")
+        @PreAuthorize("isAuthenticated()")
+        void negocio() {
+            throw new BusinessException( "Regra de teste recusou a operação." );
+        }
+
+        @GetMapping("/inesperado")
+        @PreAuthorize("isAuthenticated()")
+        void inesperado() {
+            throw new IllegalStateException( "segredo-interno" );
         }
 
         @GetMapping("/uuid/{id}")

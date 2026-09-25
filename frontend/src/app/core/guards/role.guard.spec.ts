@@ -48,6 +48,17 @@ describe('roleGuard', () => {
     expect(result).toEqual(router.createUrlTree(['/acesso-negado']));
   });
 
+  it('deveNegar_quandoRotaUsaDataRolesLegado', () => {
+    const isAuthorized = vi.fn(() => true);
+    configure({ isLoggedIn: () => true, isAuthorized });
+    const router = TestBed.inject(Router);
+
+    const result = runGuard({ data: { roles: [Acoes.CONSULTAR_PARCEIRO] } });
+
+    expect(result).toEqual(router.createUrlTree(['/acesso-negado']));
+    expect(isAuthorized).not.toHaveBeenCalled();
+  });
+
   it('deveLiberar_quandoAcaoExigidaAutorizada', () => {
     configure({
       isLoggedIn: () => true,

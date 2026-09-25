@@ -9,10 +9,10 @@ quando a classificação abaixo exigir.
 2. seção manual de `AGENTS.md` — regras transversais locais.
 3. spec aprovada da feature — comportamento pretendido.
 4. código e testes — estado real e referência de implementação.
-5. As regras de `.gems-ai/rules/` vencem o código consolidado (constituição 2.0.0).
+5. As regras do toolkit em `.gems-ai/rules/` e as regras locais em `.gems-ai/local-rules/` vencem o código consolidado (constituição 2.1.0).
 Código que diverge deve ser corrigido. Desvio autorizado exige
 `GEMS-EXCEPTION(<regra>#<seção>): <motivo>; expira AAAA-MM-DD`, conforme
-`.gems-ai/rules/conformance-exceptions.md`; agente não escreve exceção para desbloquear gate.
+`.gems-ai/local-rules/conformance-exceptions.md`; agente não escreve exceção para desbloquear gate.
 Código vence documentação de negócio e specs; parceiro/solicitacao são referências de forma.
 Adoção de módulo SDK exige publicação, alcance medido, garantia nomeada, equivalência
 provada por teste/mutação neste repositório e remoção da classe local na mesma alteração.

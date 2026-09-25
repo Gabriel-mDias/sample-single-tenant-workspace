@@ -30,7 +30,7 @@ import org.junit.jupiter.api.Test;
 class ExcecoesEscritasTest {
 
     private static final Path RAIZ_DAS_REGRAS = LocalizadorDeFonte.RAIZ_DO_REPOSITORIO.resolve( ".gems-ai" )
-            .resolve( "rules" );
+            .resolve( "local-rules" );
 
     private static List<ExcecoesEscritas.Excecao> excecoes;
     private static LocalDate hoje;
@@ -53,7 +53,7 @@ class ExcecoesEscritasTest {
         if ( !gerado.equals( versionado ) ) {
             throw new AssertionError( """
                     .gems-ai/conformance-exceptions.json
-                      regra:    .gems-ai/rules/conformance-exceptions.md#3
+                      regra:    .gems-ai/local-rules/conformance-exceptions.md#3
                       violação: o inventário versionado %s do que o código contém (%d exceção(ões) lida(s) da fonte)
                       esperado: o inventário é DERIVADO — regenere com \
                     `.\\mvnw.cmd -pl app-deploy test -Dtest=ExcecoesEscritasTest -Dgems.excecoes.gerar=true` \
@@ -84,7 +84,7 @@ class ExcecoesEscritasTest {
         reprovarSeHouver( "regra inexistente",
                 excecoes.stream().filter( ExcecoesEscritas.Excecao::bemFormada )
                         .filter( excecao -> !regraExiste( excecao.regra() ) ).toList(),
-                excecao -> "a regra " + excecao.regra() + " não resolve em .gems-ai/rules/",
+                excecao -> "a regra " + excecao.regra() + " não resolve em .gems-ai/local-rules/",
                 "<arquivo-de-regra>#<seção> apontando para um arquivo existente e para um título dele — "
                         + "exceção que aponta para o nada não foi revisada por ninguém" );
     }
@@ -168,7 +168,7 @@ class ExcecoesEscritasTest {
         return List.of( RegrasDeFonte::joinsIdenticos, RegrasDeFonte::semComparacaoComNuloEmAppendFilters,
                 RegrasDeFonte::mapperComoPrimeiroCampo, RegrasDeFonte::clausulaDePartida, RegrasDeFonte::ordemDaHeranca,
                 RegrasDeFonte::projecaoPorConstrutor, RegrasDeFonte::ordemDosMetodosDaService,
-                RegrasDeFonte::nomeDeMetodoDeTeste );
+                RegrasDeFonte::nomeDeMetodoDeTeste, RegrasDeFonte::semEscritaEmRepositoryDeOutroDominio );
     }
 
     /**
@@ -209,7 +209,7 @@ class ExcecoesEscritasTest {
         }
         var mensagens = reprovadas.stream().map( excecao -> """
                 %s:%d
-                  regra:    .gems-ai/rules/conformance-exceptions.md#3
+                  regra:    .gems-ai/local-rules/conformance-exceptions.md#3
                   violação: %s — %s
                   esperado: %s""".formatted( excecao.caminho(), excecao.linhaDoComentario(), motivo,
                 violacao.apply( excecao ), esperado ) ).toList();

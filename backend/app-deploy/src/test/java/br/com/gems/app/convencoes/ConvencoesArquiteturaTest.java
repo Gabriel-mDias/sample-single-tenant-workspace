@@ -15,7 +15,7 @@ import org.springframework.data.jpa.repository.Query;
 
 /**
  * N-04 — o gate de arquitetura da rodada 008: o que o <strong>bytecode</strong> sabe afirmar sobre a
- * assinatura que {@code .gems-ai/rules/backend-java/} prescreve.
+ * assinatura que {@code .gems-ai/local-rules/backend-java/} prescreve.
  *
  * <p>
  * <strong>O que este gate NÃO consegue afirmar, e por quê</strong> (R-03, e está aqui para não ser

@@ -1,6 +1,7 @@
 package br.com.gems.app.parceiro.controller;
 
 import br.com.gems.security.authorization.GlobalEndpoint;
+import br.com.gems.app.commons.response.PageResponseDTO;
 import br.com.gems.app.model.dto.ParceiroDTO;
 import br.com.gems.app.model.params.ParceiroFilterParams;
 import br.com.gems.app.model.response.ParceiroResponseDTO;
@@ -11,7 +12,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -63,10 +63,10 @@ public class ParceiroController extends BaseController {
     @PreAuthorize("hasRole('CONSULTAR_PARCEIRO')")
     @Operation(summary = "Pesquisar parceiros", description = "Busca paginada. Filtros de nome (LIKE case-insensitive), CPF e estado são combináveis.")
     @ApiResponse(responseCode = "200", description = "Página de parceiros")
-    public ResponseEntity<Page<ParceiroResponseDTO>> search(
+    public ResponseEntity<PageResponseDTO<ParceiroResponseDTO>> search(
             @RequestBody ParceiroFilterParams filterParams,
             @PageableDefault(page = 0, size = 10, sort = "nome", direction = Sort.Direction.ASC) Pageable pageable ) {
-        return ResponseEntity.ok( service.search( filterParams, pageable ) );
+        return ResponseEntity.ok( PageResponseDTO.from( service.search( filterParams, pageable ) ) );
     }
 
     @PostMapping

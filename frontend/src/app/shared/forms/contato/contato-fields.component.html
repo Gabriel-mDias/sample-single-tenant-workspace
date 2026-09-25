@@ -1,8 +1,9 @@
 <div [formGroup]="form()" class="form-grid">
   <div class="form-group">
-    <label class="required fw-bold">E-mail</label>
     <gems-input-text
       formControlName="email"
+      label="E-mail"
+      [required]="true"
       type="email"
       [placeholder]="placeholderEmail()"
       icon="fa-solid fa-envelope"
@@ -12,9 +13,10 @@
   </div>
 
   <div class="form-group">
-    <label class="required fw-bold">Telefone</label>
     <gems-input-text
       formControlName="telefone"
+      label="Telefone"
+      [required]="true"
       type="tel"
       [placeholder]="placeholderTelefone()"
       icon="fa-solid fa-phone"

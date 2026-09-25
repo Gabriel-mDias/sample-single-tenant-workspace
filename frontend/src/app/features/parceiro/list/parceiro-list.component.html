@@ -15,18 +15,18 @@
   <gems-form-card title="Filtros" subtitle="Refine a lista de parceiros" icon="fa-solid fa-filter">
     <form [formGroup]="filtroForm" class="form-grid" appEnterBusca (buscar)="aplicarFiltro()">
       <div class="form-group">
-        <label class="fw-bold">Nome</label>
         <gems-input-text
           formControlName="nome"
+          label="Nome"
           placeholder="Parte do nome do parceiro"
           icon="fa-solid fa-magnifying-glass"
         ></gems-input-text>
       </div>
 
       <div class="form-group">
-        <label class="fw-bold">CPF</label>
         <gems-input-text
           formControlName="cpf"
+          label="CPF"
           placeholder="Somente dígitos"
           icon="fa-solid fa-id-card"
         ></gems-input-text>

@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * N-05 — o gate de fonte da rodada 008: o que só a <strong>árvore sintática</strong> sabe afirmar
- * sobre a assinatura de {@code .gems-ai/rules/backend-java/}, na ordem de valor do FR-029. As regras
+ * sobre a assinatura de {@code .gems-ai/local-rules/backend-java/}, na ordem de valor do FR-029. As regras
  * vivem em {@link RegrasDeFonte}; aqui cada uma ganha um teste, o relatório e a exceção escrita.
  *
  * <p>
@@ -87,6 +87,11 @@ class ConvencoesFonteTest {
     @Test
     void deveNomearComoDeveXQuandoY_quandoOMetodoEAnotadoComoTeste() {
         avaliar( "Fonte · nome de método de teste", RegrasDeFonte::nomeDeMetodoDeTeste );
+    }
+
+    @Test
+    void deveUsarEvento_quandoEscreveEmOutroDominio() {
+        avaliar( "Fonte · escrita entre domínios", RegrasDeFonte::semEscritaEmRepositoryDeOutroDominio );
     }
 
     private static void avaliar( String gate, Consumer<RelatorioDeConformidade> regra ) {

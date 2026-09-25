@@ -1,4 +1,25 @@
 <!--
+SYNC IMPACT REPORT — v2.1.2
+Version change: 2.1.1 → 2.1.2 (PATCH: documenta gate de escrita interdomínio adicionado na P06).
+Atualizados: Princípio I, gate Java de fonte, AGENTS.md e instruções aninhadas de camada.
+O gate recusa chamadas diretas save/delete/update/insert/flush em repository de outro domínio;
+consultas permanecem permitidas. Inspeção continua necessária para escrita indireta.
+-->
+<!--
+SYNC IMPACT REPORT — v2.1.1
+Version change: 2.1.0 → 2.1.1 (PATCH: corrige a chave documental de autorização de rotas).
+Atualizados: Princípio V, comentário das rotas de solicitação e registro de mudança P06.
+O contrato executado pelo roleGuard e verificado por routes-coverage.spec.ts é data.authorization;
+nenhuma regra ou comportamento de autorização foi alterado.
+-->
+<!--
+SYNC IMPACT REPORT — v2.1.0
+Version change: 2.0.0 → 2.1.0 (MINOR: integra regras locais ao snapshot do toolkit sem perder os gates existentes).
+Atualizados: AGENTS.md e adaptadores de agente; testes de convenções Java e frontend; caminhos de rules locais.
+O snapshot versionado do toolkit vive em .gems-ai/rules/; regras específicas do Sample vivem em
+.gems-ai/local-rules/. Ambas são obrigatórias, e o toolkit não administra a segunda pasta.
+-->
+<!--
 SYNC IMPACT REPORT — v2.0.0
 Version change: 1.0.0 → 2.0.0 (MAJOR: regras de escrita vencem código consolidado).
 Aprovado na rodada 010 do Meduc, roteiro §12, 2026-09-14.
@@ -96,7 +117,9 @@ Regras não negociáveis:
     tornaria a resposta assíncrona sem ganho de isolamento nenhum.
   - O que continua proibido é **escrever** no dado de outro domínio, direta ou indiretamente:
     chamar o service dele, ou salvar pelo repository dele.
-- Esta regra é **convenção revisada em code review** — não há gate automatizado que a verifique.
+- A chamada direta de `save`/`delete`/`update`/`insert`/`flush` em repository de outro domínio é
+  reprovada por `ConvencoesFonteTest`; leitura permanece permitida. Escrita indireta, inclusive
+  mutação de entidade obtida por leitura, continua sob revisão de código.
 - **Nota sobre entrega de eventos em memória**: não há registro persistido de publicações, então
   eventos de domínio são entregues **apenas em memória**, dentro do próprio processo. Se a aplicação
   cair entre a publicação e a execução do listener, o evento se perde — não há reprocessamento.
@@ -204,14 +227,14 @@ nem altera tabela.
   ação de `AcaoSistema`. Aceitar a situação num `PUT` genérico transforma a máquina de estados em
   sugestão e a autorização por transição em ficção.
 - A UI **espelha a ação concreta**: `isAuthorized(Acoes.EXCLUIR_PARCEIRO)` no sinal que controla o botão,
-  `data: { roles: [Acoes.INSERIR_PARCEIRO] }` na rota. O JSON frontend é gerado e verificado a partir de
+  `data: { authorization: globalAuthorization(Acoes.INSERIR_PARCEIRO) }` na rota. O JSON frontend é gerado e verificado a partir de
   `AcaoSistema.java`, verificado por diff dos dois conjuntos.
 - **As duas varreduras que fecham a falha silenciosa são obrigatórias**, e toda rodada nova MUST
   entrar nelas: `CoberturaPreAuthorizeTest` falha se um método mapeado de `br.com.gems.app` não
   tiver `@PreAuthorize`; `routes-coverage.spec.ts` percorre `app.routes.ts`, resolve cada
-  `loadChildren` e falha se uma rota guardada não declarar `data.roles`. Sem elas, o endpoint
+  `loadChildren` e falha se uma rota guardada não declarar `data.authorization`. Sem elas, o endpoint
   esquecido não gera erro — gera acesso.
-- O `roleGuard` do frontend falha **fechado**: rota guardada sem `data.roles` é negada, nunca
+- O `roleGuard` do frontend falha **fechado**: rota guardada sem `data.authorization` é negada, nunca
   liberada.
 - Segurança stateless, CSRF desabilitado, `@EnableMethodSecurity`. Público apenas: `OPTIONS`,
   `/actuator/health`, `/api/auth/**` e endpoints anotados com `@PublicEndpoint`. **`/actuator/**`
@@ -260,7 +283,7 @@ nem altera tabela.
   features. Uma feature importar de outra feature é defeito estrutural; `core/` ou `shared/`
   importar de `features/` é o mesmo defeito, invertido.
 - A mesma rota base atende os três modos, com os nomes de
-  `.gems-ai/rules/frontend-angular/organization.md`: `/<recurso>/list`, `/<recurso>/form` (novo),
+  `.gems-ai/local-rules/frontend-angular/organization.md`: `/<recurso>/list`, `/<recurso>/form` (novo),
   `/<recurso>/form/:id` (edição) e `/<recurso>/view/:id` (leitura); a base `/<recurso>` redireciona
   para `list`. Menu, redirects e `navigate([...])` mudam juntos, com teste.
 
@@ -442,7 +465,7 @@ não a constituição.
 
 ### A regra de escrita vence o código consolidado
 
-**As regras de `.gems-ai/rules/` prevalecem sobre o código já consolidado.** Quando o código do
+**As regras de `.gems-ai/rules/` e `.gems-ai/local-rules/` prevalecem sobre o código já consolidado.** Quando o código do
 repositório divergir de uma regra de escrita, é **o código** que se corrige — e enquanto não se
 corrige, o desvio MUST carregar uma **exceção escrita** no próprio ponto do código.
 
@@ -456,7 +479,7 @@ esta seção troca. O que muda é **apenas** a relação entre código e **regra
 | Quando divergem | Quem vence | Onde |
 | :--- | :--- | :--- |
 | Constituição × qualquer outro documento | **a constituição** | acima |
-| Regra de `.gems-ai/rules/` × código consolidado | **a regra** | esta seção |
+| Regra de `.gems-ai/rules/` ou `.gems-ai/local-rules/` × código consolidado | **a regra** | esta seção |
 | Spec, requisito ou documento de negócio × código | **o código** | Princípio VIII |
 
 **A regra também pode estar errada, e então é ela que se corrige.** A inversão não transforma a
@@ -464,6 +487,12 @@ regra em verdade revelada: quando obedecê-la literalmente produziria código qu
 quebra comportamento provado, a saída é emendar a regra — com a mesma cerimônia desta seção —, nunca
 ignorá-la em silêncio. A anotação transacional do Princípio IV é alinhada a
 `services.md`.
+
+O toolkit 2.0.0 administra apenas `.gems-ai/rules/`. As regras específicas do Sample ficam em
+`.gems-ai/local-rules/` e continuam obrigatórias, com os gates Java e frontend apontando para esse
+diretório. Uma atualização do toolkit não remove o overlay local; mudança entre as duas camadas
+exige revisão de conflito e alteração explícita da regra ou desta constituição. Quando as duas
+fontes se sobrepõem, aplica-se a exigência mais restritiva até a divergência ser resolvida em revisão.
 
 ### Exceção escrita de conformidade
 
@@ -474,7 +503,7 @@ GEMS-EXCEPTION(<arquivo-de-regra>#<seção>): <motivo>; expira AAAA-MM-DD
 ```
 
 O formato completo, os portadores por linguagem, o ciclo de vida e as três formas de reprovar —
-vencida, órfã e regra inexistente — vivem em **`.gems-ai/rules/conformance-exceptions.md`**, que
+vencida, órfã e regra inexistente — vivem em **`.gems-ai/local-rules/conformance-exceptions.md`**, que
 esta seção autoriza e não duplica.
 
 Três exigências são constitucionais:
@@ -502,4 +531,4 @@ Toda revisão de PR MUST verificar conformidade com estes princípios. Complexid
 justificada por escrito no `plan.md` da feature — ausência de justificativa é motivo suficiente para
 recusar o PR.
 
-**Version**: 2.0.0 | **Ratified**: 2026-09-05 | **Last Amended**: 2026-09-14
+**Version**: 2.1.2 | **Ratified**: 2026-09-05 | **Last Amended**: 2026-09-24

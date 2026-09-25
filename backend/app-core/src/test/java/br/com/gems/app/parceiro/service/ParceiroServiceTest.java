@@ -1,6 +1,8 @@
 package br.com.gems.app.parceiro.service;
 
 import br.com.gems.app.model.dto.ParceiroDTO;
+import br.com.gems.app.model.dto.PessoaDTO;
+import br.com.gems.app.model.entity.normalizacao.Pessoa;
 import br.com.gems.app.model.entity.parceiro.Parceiro;
 import br.com.gems.app.model.response.ParceiroResponseDTO;
 import br.com.gems.app.normalizacao.service.ContatoService;
@@ -26,6 +28,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -137,6 +140,25 @@ class ParceiroServiceTest {
     class Validacao {
 
         @Test
+        @DisplayName("ignora o id de pessoa forjado no corpo ao verificar CPF duplicado")
+        void deveUsarIdDaPessoaGerenciada_quandoCorpoContemOutroId() {
+            var existente = parceiroComComissao();
+            var idPessoaGerenciada = existente.getPessoa().getId();
+            when( repository.findById( id ) ).thenReturn( Optional.of( existente ) );
+
+            var dto = new ParceiroDTO();
+            dto.setNome( "Parceiro" );
+            var pessoa = new PessoaDTO();
+            pessoa.setId( UUID.randomUUID() );
+            pessoa.setCpf( "12345678909" );
+            dto.setPessoa( pessoa );
+
+            service.save( id, dto );
+
+            verify( pessoaService ).validar( eq( pessoa ), eq( idPessoaGerenciada ), any() );
+        }
+
+        @Test
         @DisplayName("é acumulada: todas as violações saem de uma vez")
         void deveComprovarAcumulaViolacoes_quandoExecutaOCenario() {
             comAcao( true );
@@ -186,6 +208,7 @@ class ParceiroServiceTest {
         return Parceiro.builder()
                 .id( id )
                 .nome( "Parceiro" )
+                .pessoa( Pessoa.builder().id( UUID.randomUUID() ).build() )
                 .comissao( new BigDecimal( "12.50" ) )
                 .solicitacoesConcluidas( 3 )
                 .build();
