@@ -115,9 +115,9 @@ public class CepService {
                     .retrieve()
                     .body( ViaCepResponse.class );
         } catch ( Exception ex ) {
-            log.warn( "Falha ao consultar o CEP {} no provedor externo: {}", cep, ex.getMessage() );
+            log.warn( "Falha ao consultar o provedor externo de CEP: {}", ex.getClass().getSimpleName() );
             throw new ProvedorExternoException(
-                    "Não foi possível consultar o CEP no momento. Preencha o endereço manualmente.", ex );
+                    "Não foi possível consultar o CEP no momento. Preencha o endereço manualmente." );
         }
     }
 

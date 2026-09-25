@@ -15,6 +15,7 @@ import br.com.gems.utils.ObjectUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -69,6 +70,7 @@ public class UsuarioService {
      *            dados de contato, usados para o e-mail da conta.
      * @return instância <b>gerenciada</b>, pronta para ser referenciada pelo usuário.
      */
+    @Transactional(rollbackFor = Exception.class)
     public Usuario insert( UsuarioDTO dto, PerfilAtuacao perfil, Pessoa pessoa, Contato contato ) {
         var usuario = Usuario.builder()
                 .login( dto.getLogin().trim() )
@@ -92,6 +94,7 @@ public class UsuarioService {
      * usuário é recolocado no grupo do perfil do novo vínculo — que pode ser diferente do
      * anterior.
      */
+    @Transactional(rollbackFor = Exception.class)
     public Usuario reativar( Usuario usuario, PerfilAtuacao perfil ) {
         usuario.setAtivo( true );
         publisher.publishEvent( new UsuarioReativadoEvent( usuario, perfil ) );
@@ -104,6 +107,7 @@ public class UsuarioService {
      * <p>
      * Chamado na edição de um vínculo. O login não muda por aqui — ele é a identidade da conta.
      */
+    @Transactional(rollbackFor = Exception.class)
     public void sincronizar( Usuario usuario, PerfilAtuacao perfil, Pessoa pessoa, Contato contato ) {
         publisher.publishEvent( new UsuarioAtualizadoEvent(
                 usuario, perfil, contato.getEmail(), pessoa.getPrimeiroNome(), pessoa.getSobrenome() ) );
@@ -113,6 +117,7 @@ public class UsuarioService {
     /**
      * Desativa a credencial ao encerrar um vínculo. A conta não é excluída, aqui nem no Keycloak.
      */
+    @Transactional(rollbackFor = Exception.class)
     public void desativar( Usuario usuario ) {
         if ( ObjectUtil.isNullOrEmpty( usuario ) ) {
             return;
