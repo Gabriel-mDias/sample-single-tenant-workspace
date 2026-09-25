@@ -11,4 +11,4 @@
 - Um executor lê somente a spec atual, seu pacote, contrato e referências nomeadas.
 - Specs concluídas são históricas e não entram no contexto salvo quando citadas como referência.
 
-Regras GEMS vencem código consolidado; referência não autoriza desvio. Consulte a constituição 2.0.0 e a seção Adoção de Módulo da SDK GEMS.
+Regras GEMS vencem código consolidado; referência não autoriza desvio. Consulte a constituição 2.1.0 e a seção Adoção de Módulo da SDK GEMS.

@@ -44,4 +44,4 @@
 Transição aprovada na constituição 2.0.0: SDK transversal substitui implementações locais com prova de equivalência. A anotação Jakarta, handlers, auditoria e autorização locais ainda existem e serão conformados na rodada 002.
 Todo controller estende BaseController, inclusive GET; não estender exige motivo no Javadoc.
 
-Regras GEMS vencem código consolidado; referência não autoriza desvio. Consulte a constituição 2.0.0 e a seção Adoção de Módulo da SDK GEMS.
+Regras GEMS vencem código consolidado; referência não autoriza desvio. Consulte a constituição 2.1.0 e a seção Adoção de Módulo da SDK GEMS.

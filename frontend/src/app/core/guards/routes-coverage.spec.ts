@@ -6,12 +6,13 @@ import { Route, Routes } from '@angular/router';
 import { describe, expect, it } from 'vitest';
 import { routes as APP_ROUTES } from '../../app.routes';
 import { roleGuard } from './role.guard';
+import { Acoes, AuthorizationRequirement } from '../auth/acoes';
 
 /**
  * Varredura de rotas — espelho, no frontend, do `CoberturaPreAuthorizeTest` do backend.
  *
  * Percorre **todas** as rotas alcançáveis a partir de `app.routes.ts` e falha, nomeando o caminho
- * completo, se alguma rota guardada por `roleGuard` não declarar `data.roles` como array não vazio.
+ * completo, se alguma rota guardada por `roleGuard` não declarar `data.authorization` como array não vazio.
  * Como o `roleGuard` falha **fechado**, uma rota guardada sem ação declarada já é
  * negada em runtime — esta varredura existe para pegar o erro em CI, antes de chegar lá.
  *
@@ -56,7 +57,7 @@ async function coletar(routes: Routes, prefixo: string): Promise<RotaVisitada[]>
 const TODAS = await coletar(APP_ROUTES, '');
 const GUARDADAS = TODAS.filter((v) => (v.route.canActivate ?? []).includes(roleGuard));
 
-describe('cobertura de rotas — data.roles', () => {
+describe('cobertura de rotas — data.authorization', () => {
   it('deveAlcancarRotasGuardadas_quandoVarrerTodasAsFeatures', () => {
     // O piso é deliberadamente folgado — existe para acusar uma varredura que parou de enxergar
     // (uma feature inteira ignorada, um `loadChildren` que deixou de resolver), não para ser
@@ -66,12 +67,16 @@ describe('cobertura de rotas — data.roles', () => {
   });
 
   for (const { caminho, route } of GUARDADAS) {
-    it(`"${caminho}" guardada por roleGuard declara data.roles não vazio`, () => {
-      const roles = route.data?.['roles'];
-      const isNonEmptyArray = Array.isArray(roles) && roles.length > 0;
+    it(`"${caminho}" guardada por roleGuard declara data.authorization não vazio`, () => {
+      const authorization = route.data?.['authorization'] as AuthorizationRequirement | undefined;
+      const isValid =
+        authorization?.scope === 'global' &&
+        Array.isArray(authorization.actions) &&
+        authorization.actions.length > 0 &&
+        authorization.actions.every((action) => Object.values(Acoes).includes(action));
 
       // O caminho já vai no título do `it` acima — é o que aparece no relatório de falha.
-      expect(isNonEmptyArray).toBe(true);
+      expect(isValid).toBe(true);
     });
   }
 });

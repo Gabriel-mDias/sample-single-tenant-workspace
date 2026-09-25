@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { Acoes } from '../../core/auth/acoes';
+import { Acoes, globalAuthorization } from '../../core/auth/acoes';
 import { roleGuard } from '../../core/guards/role.guard';
 import { SOLICITACAO_ROUTES } from './solicitacao.routes';
 
@@ -26,10 +26,10 @@ describe('SOLICITACAO_ROUTES', () => {
       [roleGuard],
     ]);
     expect(SOLICITACAO_ROUTES.slice(1).map((route) => route.data)).toEqual([
-      { roles: [Acoes.CONSULTAR_SOLICITACAO] },
-      { roles: [Acoes.INSERIR_SOLICITACAO], mode: 'create' },
-      { roles: [Acoes.ALTERAR_SOLICITACAO], mode: 'edit' },
-      { roles: [Acoes.CONSULTAR_SOLICITACAO], mode: 'view' },
+      { authorization: globalAuthorization(Acoes.CONSULTAR_SOLICITACAO) },
+      { authorization: globalAuthorization(Acoes.INSERIR_SOLICITACAO), mode: 'create' },
+      { authorization: globalAuthorization(Acoes.ALTERAR_SOLICITACAO), mode: 'edit' },
+      { authorization: globalAuthorization(Acoes.CONSULTAR_SOLICITACAO), mode: 'view' },
     ]);
   });
 });
