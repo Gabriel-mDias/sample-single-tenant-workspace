@@ -117,7 +117,7 @@ public class ParceiroService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ParceiroDTO insert( ParceiroDTO dto ) {
-        validate( dto, true );
+        validate( dto, true, null );
 
         var parceiro = Parceiro.builder()
                 .pessoa( pessoaService.insert( dto.getPessoa() ) )
@@ -143,7 +143,7 @@ public class ParceiroService {
         // O id da rota é a autoridade: o corpo pode vir sem ele, e a checagem de duplicidade precisa
         // dele para ignorar o próprio registro.
         dto.setId( id );
-        validate( dto, false );
+        validate( dto, false, parceiro.getPessoa().getId() );
 
         // As instâncias já são gerenciadas; os services aplicam o payload sobre elas, preservando a
         // identidade de cada agregado.
@@ -195,11 +195,6 @@ public class ParceiroService {
         return usuarioAutenticadoService.possuiAcao( AcaoSistema.VISUALIZAR_COMISSAO );
     }
 
-    /** {@code null} no insert; o id da pessoa já gravada na edição. */
-    private UUID idDaPessoa( ParceiroDTO dto ) {
-        return ObjectUtil.isNullOrEmpty( dto.getPessoa() ) ? null : dto.getPessoa().getId();
-    }
-
     private boolean existeDuplicado( ParceiroDTO dto, boolean isInsert ) {
         var nome = dto.getNome().trim();
 
@@ -216,7 +211,7 @@ public class ParceiroService {
      * Os serviços de normalização acumulam na mesma lista e nunca lançam — este é o único ponto
      * que dispara a {@link BusinessException}.
      */
-    private void validate( ParceiroDTO dto, boolean isInsert ) {
+    private void validate( ParceiroDTO dto, boolean isInsert, UUID idPessoaExistente ) {
         var errors = new ArrayList<String>();
 
         if ( ObjectUtil.isNullOrEmpty( dto.getNome() ) ) {
@@ -230,8 +225,8 @@ public class ParceiroService {
             errors.add( "A comissão não pode ser negativa." );
         }
 
-        // O id da pessoa é passado para que a checagem de CPF duplicado ignore o próprio registro.
-        pessoaService.validar( dto.getPessoa(), idDaPessoa( dto ), errors );
+        // O id confiável vem da pessoa gerenciada, nunca do corpo enviado pelo cliente.
+        pessoaService.validar( dto.getPessoa(), idPessoaExistente, errors );
         contatoService.validar( dto.getContato(), errors );
         enderecoService.validar( dto.getEndereco(), errors );
 
