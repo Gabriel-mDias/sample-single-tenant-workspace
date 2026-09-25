@@ -168,7 +168,7 @@ class ExcecoesEscritasTest {
         return List.of( RegrasDeFonte::joinsIdenticos, RegrasDeFonte::semComparacaoComNuloEmAppendFilters,
                 RegrasDeFonte::mapperComoPrimeiroCampo, RegrasDeFonte::clausulaDePartida, RegrasDeFonte::ordemDaHeranca,
                 RegrasDeFonte::projecaoPorConstrutor, RegrasDeFonte::ordemDosMetodosDaService,
-                RegrasDeFonte::nomeDeMetodoDeTeste );
+                RegrasDeFonte::nomeDeMetodoDeTeste, RegrasDeFonte::semEscritaEmRepositoryDeOutroDominio );
     }
 
     /**

@@ -6,12 +6,14 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.BinaryExpr;
+import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.NullLiteralExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -247,6 +249,65 @@ final class RegrasDeFonte {
                 }
             }
         }
+    }
+
+    /** Repositories externos servem para consulta; escrita no domínio dono ocorre após um evento. */
+    static void semEscritaEmRepositoryDeOutroDominio( RelatorioDeConformidade relatorio ) {
+        for ( var entrada : FontesJava.producao().entrySet() ) {
+            var unidade = entrada.getValue();
+            var pacote = unidade.getPackageDeclaration().map( declaracao -> declaracao.getNameAsString() )
+                    .orElse( "" );
+            var partes = pacote.split( "\\." );
+            if ( partes.length < 6 || !pacote.startsWith( "br.com.gems.app." ) ) {
+                continue;
+            }
+            var dominioOrigem = partes[4];
+            var dominioPorTipo = new HashMap<String, String>();
+            for ( var importacao : unidade.getImports() ) {
+                var importado = importacao.getNameAsString();
+                var segmentos = importado.split( "\\." );
+                if ( segmentos.length == 7 && importado.startsWith( "br.com.gems.app." )
+                        && segmentos[5].equals( "repository" ) ) {
+                    dominioPorTipo.put( segmentos[6], segmentos[4] );
+                }
+            }
+
+            for ( var tipo : unidade.findAll( ClassOrInterfaceDeclaration.class ) ) {
+                var dominioPorCampo = new HashMap<String, String>();
+                for ( var campo : tipo.getFields() ) {
+                    var dominioDestino = dominioPorTipo.get( nomeDoTipo( campo ) );
+                    if ( dominioDestino != null && !dominioOrigem.equals( dominioDestino ) ) {
+                        for ( var variavel : campo.getVariables() ) {
+                            dominioPorCampo.put( variavel.getNameAsString(), dominioDestino );
+                        }
+                    }
+                }
+                for ( var chamada : tipo.findAll( MethodCallExpr.class ) ) {
+                    if ( chamada.getScope().isEmpty() || !ehMetodoDeEscrita( chamada.getNameAsString() ) ) {
+                        continue;
+                    }
+                    var escopo = chamada.getScope().get();
+                    var campo = escopo instanceof NameExpr nome
+                            ? nome.getNameAsString()
+                            : escopo instanceof FieldAccessExpr acesso && acesso.getScope().isThisExpr()
+                                    ? acesso.getNameAsString()
+                                    : "";
+                    var destino = dominioPorCampo.get( campo );
+                    if ( destino != null ) {
+                        relatorio.registrar( chave( entrada.getKey(), "repository-cross-domain|" + chamada ),
+                                entrada.getKey(), linha( chamada ), "events.md#1",
+                                dominioOrigem + " chama " + chamada.getNameAsString() + " em repository de "
+                                        + destino,
+                                "publicar evento; a escrita pertence ao listener do domínio " + destino );
+                    }
+                }
+            }
+        }
+    }
+
+    private static boolean ehMetodoDeEscrita( String nome ) {
+        return nome.startsWith( "save" ) || nome.startsWith( "delete" ) || nome.startsWith( "update" )
+                || nome.startsWith( "insert" ) || nome.equals( "flush" );
     }
 
     private static boolean nomeDeTesteSegueOPadrao( String nome ) {

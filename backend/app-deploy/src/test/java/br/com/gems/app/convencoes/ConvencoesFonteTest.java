@@ -89,6 +89,11 @@ class ConvencoesFonteTest {
         avaliar( "Fonte · nome de método de teste", RegrasDeFonte::nomeDeMetodoDeTeste );
     }
 
+    @Test
+    void deveUsarEvento_quandoEscreveEmOutroDominio() {
+        avaliar( "Fonte · escrita entre domínios", RegrasDeFonte::semEscritaEmRepositoryDeOutroDominio );
+    }
+
     private static void avaliar( String gate, Consumer<RelatorioDeConformidade> regra ) {
         var relatorio = new RelatorioDeConformidade( gate, excecoes, RelatorioDeConformidade.Modo.SUPRIMIR );
         regra.accept( relatorio );

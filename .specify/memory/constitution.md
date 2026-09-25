@@ -1,4 +1,11 @@
 <!--
+SYNC IMPACT REPORT — v2.1.2
+Version change: 2.1.1 → 2.1.2 (PATCH: documenta gate de escrita interdomínio adicionado na P06).
+Atualizados: Princípio I, gate Java de fonte, AGENTS.md e instruções aninhadas de camada.
+O gate recusa chamadas diretas save/delete/update/insert/flush em repository de outro domínio;
+consultas permanecem permitidas. Inspeção continua necessária para escrita indireta.
+-->
+<!--
 SYNC IMPACT REPORT — v2.1.1
 Version change: 2.1.0 → 2.1.1 (PATCH: corrige a chave documental de autorização de rotas).
 Atualizados: Princípio V, comentário das rotas de solicitação e registro de mudança P06.
@@ -110,7 +117,9 @@ Regras não negociáveis:
     tornaria a resposta assíncrona sem ganho de isolamento nenhum.
   - O que continua proibido é **escrever** no dado de outro domínio, direta ou indiretamente:
     chamar o service dele, ou salvar pelo repository dele.
-- Esta regra é **convenção revisada em code review** — não há gate automatizado que a verifique.
+- A chamada direta de `save`/`delete`/`update`/`insert`/`flush` em repository de outro domínio é
+  reprovada por `ConvencoesFonteTest`; leitura permanece permitida. Escrita indireta, inclusive
+  mutação de entidade obtida por leitura, continua sob revisão de código.
 - **Nota sobre entrega de eventos em memória**: não há registro persistido de publicações, então
   eventos de domínio são entregues **apenas em memória**, dentro do próprio processo. Se a aplicação
   cair entre a publicação e a execução do listener, o evento se perde — não há reprocessamento.
@@ -522,4 +531,4 @@ Toda revisão de PR MUST verificar conformidade com estes princípios. Complexid
 justificada por escrito no `plan.md` da feature — ausência de justificativa é motivo suficiente para
 recusar o PR.
 
-**Version**: 2.1.1 | **Ratified**: 2026-09-05 | **Last Amended**: 2026-09-24
+**Version**: 2.1.2 | **Ratified**: 2026-09-05 | **Last Amended**: 2026-09-24

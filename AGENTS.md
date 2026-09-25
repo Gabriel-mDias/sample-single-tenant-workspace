@@ -19,7 +19,7 @@ tool, build, functional gate, or infrastructure failure.
 1. `.specify/memory/constitution.md` é a autoridade máxima.
 2. Estas regras e o `AGENTS.md` aninhado da camada vêm em seguida.
 3. A spec aprovada define comportamento; código/testes consolidados mostram o estado real.
-4. As regras do toolkit em `.gems-ai/rules/` e as regras locais em `.gems-ai/local-rules/` vencem o código consolidado (constituição 2.1.0).
+4. As regras do toolkit em `.gems-ai/rules/` e as regras locais em `.gems-ai/local-rules/` vencem o código consolidado (constituição 2.1.2).
 Código que diverge deve ser corrigido. Desvio autorizado exige
 `GEMS-EXCEPTION(<regra>#<seção>): <motivo>; expira AAAA-MM-DD`, conforme
 `.gems-ai/local-rules/conformance-exceptions.md`; agente não escreve exceção para desbloquear gate.

@@ -29,4 +29,4 @@ Transição aprovada na constituição 2.0.0: a rodada 002 usa SDK 2.1.0,
 `gems-field-error`, somente `shared/`, `isAuthorized` e rotas `list`/`form`/`form/:id`/`view/:id`.
 `gems-input-password` permanece no checkpoint frontend seguinte.
 
-Regras GEMS vencem código consolidado; referência não autoriza desvio. Consulte a constituição 2.1.0 e a seção Adoção de Módulo da SDK GEMS.
+Regras GEMS vencem código consolidado; referência não autoriza desvio. Consulte a constituição 2.1.2 e a seção Adoção de Módulo da SDK GEMS.
