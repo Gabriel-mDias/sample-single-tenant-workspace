@@ -1,4 +1,11 @@
 <!--
+SYNC IMPACT REPORT — v2.1.1
+Version change: 2.1.0 → 2.1.1 (PATCH: corrige a chave documental de autorização de rotas).
+Atualizados: Princípio V, comentário das rotas de solicitação e registro de mudança P06.
+O contrato executado pelo roleGuard e verificado por routes-coverage.spec.ts é data.authorization;
+nenhuma regra ou comportamento de autorização foi alterado.
+-->
+<!--
 SYNC IMPACT REPORT — v2.1.0
 Version change: 2.0.0 → 2.1.0 (MINOR: integra regras locais ao snapshot do toolkit sem perder os gates existentes).
 Atualizados: AGENTS.md e adaptadores de agente; testes de convenções Java e frontend; caminhos de rules locais.
@@ -211,14 +218,14 @@ nem altera tabela.
   ação de `AcaoSistema`. Aceitar a situação num `PUT` genérico transforma a máquina de estados em
   sugestão e a autorização por transição em ficção.
 - A UI **espelha a ação concreta**: `isAuthorized(Acoes.EXCLUIR_PARCEIRO)` no sinal que controla o botão,
-  `data: { roles: [Acoes.INSERIR_PARCEIRO] }` na rota. O JSON frontend é gerado e verificado a partir de
+  `data: { authorization: globalAuthorization(Acoes.INSERIR_PARCEIRO) }` na rota. O JSON frontend é gerado e verificado a partir de
   `AcaoSistema.java`, verificado por diff dos dois conjuntos.
 - **As duas varreduras que fecham a falha silenciosa são obrigatórias**, e toda rodada nova MUST
   entrar nelas: `CoberturaPreAuthorizeTest` falha se um método mapeado de `br.com.gems.app` não
   tiver `@PreAuthorize`; `routes-coverage.spec.ts` percorre `app.routes.ts`, resolve cada
-  `loadChildren` e falha se uma rota guardada não declarar `data.roles`. Sem elas, o endpoint
+  `loadChildren` e falha se uma rota guardada não declarar `data.authorization`. Sem elas, o endpoint
   esquecido não gera erro — gera acesso.
-- O `roleGuard` do frontend falha **fechado**: rota guardada sem `data.roles` é negada, nunca
+- O `roleGuard` do frontend falha **fechado**: rota guardada sem `data.authorization` é negada, nunca
   liberada.
 - Segurança stateless, CSRF desabilitado, `@EnableMethodSecurity`. Público apenas: `OPTIONS`,
   `/actuator/health`, `/api/auth/**` e endpoints anotados com `@PublicEndpoint`. **`/actuator/**`
@@ -515,4 +522,4 @@ Toda revisão de PR MUST verificar conformidade com estes princípios. Complexid
 justificada por escrito no `plan.md` da feature — ausência de justificativa é motivo suficiente para
 recusar o PR.
 
-**Version**: 2.1.0 | **Ratified**: 2026-09-05 | **Last Amended**: 2026-09-24
+**Version**: 2.1.1 | **Ratified**: 2026-09-05 | **Last Amended**: 2026-09-24

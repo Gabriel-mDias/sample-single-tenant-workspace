@@ -5,7 +5,7 @@ import { roleGuard } from '../../core/guards/role.guard';
 /**
  * Rotas da feature de solicitações, registradas no `app.routes.ts` raiz por `loadChildren`.
  *
- * Toda rota guardada declara `data.roles`. O `routes-coverage.spec.ts` percorre esta lista e falha
+ * Toda rota guardada declara `data.authorization`. O `routes-coverage.spec.ts` percorre esta lista e falha
  * se alguma esquecer — e o `roleGuard` nega por padrão, então o esquecimento fecharia a tela em vez
  * de abri-la.
  */
