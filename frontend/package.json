@@ -20,7 +20,7 @@
     "@angular/router": "^22.1.6",
     "@fontsource/inter": "^5.2.8",
     "@fortawesome/fontawesome-free": "^7.3.0",
-    "@gabriel-mdias/angular-gems-sdk": "2.3.2",
+    "@gabriel-mdias/angular-gems-sdk": "2.3.4",
     "animate.css": "^4.1.1",
     "keycloak-angular": "22.0.0",
     "keycloak-js": "^26.2.4",
