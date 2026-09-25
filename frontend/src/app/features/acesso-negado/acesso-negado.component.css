@@ -28,7 +28,7 @@
 }
 
 .acesso-negado p {
-  color: var(--gems-text-muted);
+  color: var(--gems-text-main);
   font-size: 1.1rem;
   line-height: 1.6;
   margin: 0;
