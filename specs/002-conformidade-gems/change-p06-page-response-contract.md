@@ -1,6 +1,6 @@
 ﻿# Registro de mudança P06 — contrato paginado estável
 
-**Estado:** em andamento, sem validação. **Branch/PR:** `task/p06-sample-frontend`, draft #35. **Base validada anterior:** `13e48fd5d659ced39e77bb465615dd62cdfa75c0`.
+**Estado:** em validação. **Branch/PR:** `task/p06-sample-frontend`, draft #35. **Base do contrato:** `8d75c22a944f1eac58a95db496370ebb8c3c7a09`.
 
 ## Motivo e evidência
 
@@ -16,14 +16,18 @@ Arquivos afetados neste checkpoint:
 - `backend/app-core/src/main/java/br/com/gems/app/parceiro/controller/ParceiroController.java`
 - `backend/app-core/src/main/java/br/com/gems/app/solicitacao/controller/SolicitacaoController.java`
 - `backend/app-core/src/main/java/br/com/gems/app/auditoria/controller/AuditoriaController.java`
+- `backend/app-core/src/test/java/br/com/gems/app/commons/response/PageResponseDTOTest.java` (regressão de JSON)
+- `backend/app-core/src/test/java/br/com/gems/app/commons/response/BuscaPaginadaControllerTest.java` (quatro rotas HTTP)
+- `specs/001-parceiro-e-solicitacao/contracts/rest-api.md` (contrato público das buscas)
 
 ## Validação obrigatória antes de considerar pronto
 
-- Criar teste de serialização com uma página não trivial (página 2, tamanho 10, 21 elementos): confirmar `content`, `totalElements=21`, `totalPages=3`, `number=2`, `size=10`; confirmar que a resposta expõe exatamente os nomes de contrato necessários e não campos internos de `PageImpl`.
+- Teste de serialização com página 2, tamanho 10 e 21 elementos: `PageResponseDTOTest` confere os cinco nomes e valores e reprova qualquer campo adicional de `PageImpl`. Passou no teste focalizado de 25/09/2026 (exit 0).
+- `BuscaPaginadaControllerTest` exercita via MockMvc as buscas de parceiro, solicitação e auditoria e o histórico de auditoria com página 2/tamanho 10; exige os cinco campos e a ausência de `pageable`. Passou no teste focalizado de 25/09/2026 (exit 0).
 - Executar bundle/gates do backend, testes focados e `mvnw clean install`; analisar impacto sobre consumidores e exercitar endpoints paginados no frontend.
 - Repetir frontend build/test, gates/scanners e CI conforme análise de impacto; repetir Lighthouse autenticado se houver impacto em telas auditadas.
 - Registrar procedimento, esperado, observado, exit codes, resultado e SHA atualizado em evidências/matriz/PR.
 
 ## Limite deste registro
 
-No momento do checkpoint não existe teste de regressão para esta classe, os testes/build ainda não foram executados sobre o diff, não há commit validado nem CI deste conteúdo. A PR #35 deve permanecer draft e P06 aberta. Descartar ou corrigir a implementação se qualquer gate ou contrato não passar; não declarar a estabilidade apenas pela forma do DTO.
+Os testes focalizados confirmam o JSON do DTO e o roteamento/JSON HTTP com serviços simulados. A execução autenticada com banco real, o CI no novo SHA e a matriz 12/12 ainda precisam de prova. A PR #35 permanece draft e P06 aberta.

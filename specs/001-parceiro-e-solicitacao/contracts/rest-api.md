@@ -37,7 +37,8 @@ Filtro no corpo, paginação em query params (`page`, `size`, `sort`). Campo aus
 { "nome": "alfa", "cpf": "12345678909", "estadoId": "uuid" }
 ```
 
-**200** com `Page<ParceiroResponseDTO>`. `comissao` é apagada **linha a linha** para quem não tem a
+**200** com página JSON estável: `content`, `totalElements`, `totalPages`, `number` e `size`.
+Cada item de `content` é um `ParceiroResponseDTO`; `comissao` é apagada **linha a linha** para quem não tem a
 ação — filtrar só no `findById` deixaria o valor vazando pela listagem.
 
 Ordenação aceita: `nome`, `cpf`, `email`, `estadoSigla`, `solicitacoesConcluidas`. Propriedade
@@ -86,6 +87,9 @@ quando o chamador não pode vê-la.
 
 Ordenação aceita: `titulo`, `situacao`, `parceiroNome`, `dataCriacao`, `dataConclusao`. Padrão
 `dataCriacao,desc`.
+
+**200** com os mesmos cinco campos de página da busca de parceiros; cada item de `content` é um
+`SolicitacaoResponseDTO`.
 
 ### `POST /api/solicitacoes` — `INSERIR_SOLICITACAO`
 
