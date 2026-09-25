@@ -92,6 +92,11 @@ public interface SolicitacaoRepository extends JpaRepository<Solicitacao, UUID>,
             HashMap<String, Object> params ) {
         hql.append( " WHERE 1=1 " );
 
+        if ( ObjectUtil.isNotNullAndNotEmpty( filterParams.getId() ) ) {
+            hql.append( " AND s.id = :id " );
+            params.put( "id", filterParams.getId() );
+        }
+
         if ( ObjectUtil.isNotNullAndNotEmpty( filterParams.getTitulo() ) ) {
             hql.append( " AND LOWER(s.titulo) LIKE :titulo " );
             params.put( "titulo", "%" + filterParams.getTitulo().toLowerCase() + "%" );

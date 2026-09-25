@@ -122,6 +122,11 @@ public interface ParceiroRepository extends JpaRepository<Parceiro, UUID>, BaseC
     private void appendFilters( ParceiroFilterParams filterParams, StringBuilder hql, HashMap<String, Object> params ) {
         hql.append( " WHERE 1=1 " );
 
+        if ( ObjectUtil.isNotNullAndNotEmpty( filterParams.getId() ) ) {
+            hql.append( " AND pa.id = :id " );
+            params.put( "id", filterParams.getId() );
+        }
+
         if ( ObjectUtil.isNotNullAndNotEmpty( filterParams.getNome() ) ) {
             hql.append( " AND LOWER(pa.nome) LIKE :nome " );
             params.put( "nome", "%" + filterParams.getNome().toLowerCase() + "%" );
