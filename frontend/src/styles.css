@@ -80,7 +80,7 @@ body:has(.gems-modal-backdrop) .app-content {
   /* Texto secundário (subtítulos, previews). A SDK aplica opacity nos subtítulos;
    * como isso lava o texto sobre a primária, neutralizamos a opacity e usamos esta
    * cor já esmaecida no lugar. */
-  --app-header-fg-muted: color-mix(in srgb, var(--gems-bg) 78%, transparent);
+  --app-header-fg-muted: color-mix(in srgb, var(--gems-bg) 85%, transparent);
 
   /* Realce de interação (hover em coluna ordenável). */
   --app-header-hover: var(--gems-primary-700);

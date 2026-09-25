@@ -11,7 +11,7 @@ import { Routes } from '@angular/router';
  *
  * Cada domínio de negócio entra aqui como um único `loadChildren` — a raiz não conhece os
  * componentes internos da feature. O `routes-coverage.spec.ts` percorre esta lista, resolve cada
- * `loadChildren` e falha se uma rota guardada não declarar `data.roles`.
+ * `loadChildren` e falha se uma rota guardada não declarar `data.authorization`.
  */
 export const routes: Routes = [
   {
