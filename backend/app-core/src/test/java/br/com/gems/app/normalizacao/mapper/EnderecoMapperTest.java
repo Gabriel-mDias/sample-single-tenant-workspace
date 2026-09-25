@@ -17,7 +17,7 @@ class EnderecoMapperTest {
     private final EnderecoMapper mapper = Mappers.getMapper( EnderecoMapper.class );
 
     @Test
-    void deveMapearTodosOsCamposPublicosParaDTO() {
+    void deveMapearCamposPublicos_quandoEnderecoInformado() {
         var id = UUID.randomUUID();
         var paisId = UUID.randomUUID();
         var estadoId = UUID.randomUUID();
@@ -51,7 +51,7 @@ class EnderecoMapperTest {
     }
 
     @Test
-    void deveAtualizarCamposEditaveisPreservandoIdentidadeAuditoriaERelacoesGerenciadas() {
+    void devePreservarIdentidadeERelacoes_quandoAtualizarEndereco() {
         var id = UUID.randomUUID();
         var pais = Pais.builder().id( UUID.randomUUID() ).nome( "Brasil" ).build();
         var estado = Estado.builder().id( UUID.randomUUID() ).pais( pais ).nome( "Paraná" ).siglaEstado( "PR" ).build();

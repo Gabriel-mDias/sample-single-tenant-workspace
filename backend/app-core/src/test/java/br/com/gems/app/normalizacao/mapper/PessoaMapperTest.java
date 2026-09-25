@@ -16,7 +16,7 @@ class PessoaMapperTest {
     private final PessoaMapper mapper = Mappers.getMapper( PessoaMapper.class );
 
     @Test
-    void deveMapearTodosOsCamposPublicosParaDTO() {
+    void deveMapearCamposPublicos_quandoPessoaInformada() {
         var id = UUID.randomUUID();
         var nascimento = LocalDate.of( 1985, 4, 12 );
         var obito = LocalDate.of( 2020, 3, 1 );
@@ -47,7 +47,7 @@ class PessoaMapperTest {
     }
 
     @Test
-    void deveAtualizarCamposEditaveisEPreservarIdentidadeEAuditoria() {
+    void deveAtualizarCamposEditaveis_quandoEntidadeExistente() {
         var id = UUID.randomUUID();
         var criacao = LocalDateTime.of( 2020, 1, 1, 0, 0 );
         var exclusao = LocalDateTime.of( 2025, 1, 1, 0, 0 );

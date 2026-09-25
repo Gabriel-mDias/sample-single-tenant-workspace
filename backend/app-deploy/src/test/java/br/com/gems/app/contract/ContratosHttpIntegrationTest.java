@@ -28,6 +28,7 @@ import java.math.BigDecimal;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -63,7 +64,7 @@ class ContratosHttpIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     @Transactional
-    void deveCobrirCadastroBuscaEdicaoEExclusaoDeParceiro() throws Exception {
+    void deveCobrirOperacoesDeParceiro_quandoDadosValidos() throws Exception {
         var nome = nomeUnico( "parceiro" );
         var corpo = parceiro( nome );
         var criado = chamar( post( "/api/parceiros" ), "INSERIR_PARCEIRO", 201, corpo );
@@ -102,7 +103,7 @@ class ContratosHttpIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     @Transactional
-    void deveRejeitarCadastroEEdicaoInvalidosDeParceiro() throws Exception {
+    void deveRejeitarCadastroEEdicaoDeParceiro_quandoDadosInvalidos() throws Exception {
         var vazio = chamar( post( "/api/parceiros" ), "INSERIR_PARCEIRO", 400, new ParceiroDTO() );
         assertThat( vazio.path( "message" ).asText() ).isNotBlank();
         var id = chamar( post( "/api/parceiros" ), "INSERIR_PARCEIRO", 201,
@@ -120,7 +121,46 @@ class ContratosHttpIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     @Transactional
-    void deveCobrirCadastroBuscaEdicaoEExclusaoDeSolicitacao() throws Exception {
+    void deveRestringirComissao_quandoPerfilNaoTemAcao() throws Exception {
+        var corpo = parceiro( nomeUnico( "comissao" ) );
+        var criado = chamarComAcoes( post( "/api/parceiros" ), 201, corpo,
+                "INSERIR_PARCEIRO", "VISUALIZAR_COMISSAO" );
+        var id = criado.path( "id" ).asText();
+        assertThat( criado.path( "comissao" ).decimalValue() ).isEqualByComparingTo( "12.50" );
+
+        for ( var perfil : new String[]{"OPERADOR", "CONSULTA"} ) {
+            var leitura = chamarComAcoes( get( "/api/parceiros/{id}", id ), 200, null,
+                    perfil, "CONSULTAR_PARCEIRO" );
+            assertThat( leitura.path( "comissao" ).isNull() ).isTrue();
+            var busca = chamarComAcoes( post( "/api/parceiros/search" ), 200,
+                    "{\"id\":\"" + id + "\"}", perfil, "CONSULTAR_PARCEIRO" );
+            assertThat( busca.path( "totalElements" ).asLong() ).isEqualTo( 1 );
+            assertThat( busca.path( "content" ).get( 0 ).path( "comissao" ).isNull() ).isTrue();
+        }
+
+        corpo.setComissao( new BigDecimal( "99.00" ) );
+        var editado = chamarComAcoes( put( "/api/parceiros/{id}", id ), 200, corpo,
+                "OPERADOR", "ALTERAR_PARCEIRO" );
+        assertThat( editado.path( "comissao" ).isNull() ).isTrue();
+        var negado = chamarComAcoes( put( "/api/parceiros/{id}", id ), 403, corpo,
+                "CONSULTA", "CONSULTAR_PARCEIRO" );
+        assertThat( negado.path( "message" ).asText() ).isNotBlank();
+        var finalAdmin = chamarComAcoes( get( "/api/parceiros/{id}", id ), 200, null,
+                "ADMINISTRADOR", "CONSULTAR_PARCEIRO", "VISUALIZAR_COMISSAO" );
+        assertThat( finalAdmin.path( "comissao" ).decimalValue() ).isEqualByComparingTo( "12.50" );
+
+        var novo = parceiro( nomeUnico( "operador" ) );
+        var semComissao = chamarComAcoes( post( "/api/parceiros" ), 201, novo,
+                "OPERADOR", "INSERIR_PARCEIRO" );
+        assertThat( semComissao.path( "comissao" ).isNull() ).isTrue();
+        var lidoAdmin = chamarComAcoes( get( "/api/parceiros/{id}", semComissao.path( "id" ).asText() ),
+                200, null, "ADMINISTRADOR", "CONSULTAR_PARCEIRO", "VISUALIZAR_COMISSAO" );
+        assertThat( lidoAdmin.path( "comissao" ).isNull() ).isTrue();
+    }
+
+    @Test
+    @Transactional
+    void deveCobrirOperacoesDeSolicitacao_quandoDadosValidos() throws Exception {
         var parceiroId = criarParceiro();
         var titulo = nomeUnico( "solicitacao" );
         var payload = solicitacao( parceiroId, titulo );
@@ -151,7 +191,7 @@ class ContratosHttpIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     @Transactional
-    void deveRejeitarEntradasInvalidasDeSolicitacao() throws Exception {
+    void deveRejeitarEntradasDeSolicitacao_quandoDadosInvalidos() throws Exception {
         assertThat( chamar( post( "/api/solicitacoes" ), "INSERIR_SOLICITACAO", 400,
                 new SolicitacaoDTO() ).path( "message" ).asText() ).isNotBlank();
         var id = criarSolicitacao();
@@ -165,7 +205,7 @@ class ContratosHttpIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     @Transactional
-    void deveExercitarOrigemValidaEInvalidaDeCadaTransicao() throws Exception {
+    void deveValidarTransicoes_quandoEstadoPermiteOuNega() throws Exception {
         var id = criarSolicitacao();
         assertSituacao( post( "/api/solicitacoes/{id}/iniciar", id ), "INICIAR_SOLICITACAO", 400, null, null );
         assertSituacao( post( "/api/solicitacoes/{id}/concluir", id ), "CONCLUIR_SOLICITACAO", 400, null, null );
@@ -190,7 +230,7 @@ class ContratosHttpIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void deveCobrirListasDeLocalidadeEConversaoInvalida() throws Exception {
+    void deveListarLocalidades_quandoPaisValidoOuInvalido() throws Exception {
         var paises = chamar( get( "/api/localidades/paises" ), null, 200, null );
         assertThat( paises.isArray() ).isTrue();
         var brasil = localidades.listarPaises().stream().filter( p -> "Brasil".equalsIgnoreCase( p.getNome() ) )
@@ -205,7 +245,7 @@ class ContratosHttpIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void deveCobrirCepValidoInexistenteEProvedorIndisponivel() throws Exception {
+    void deveConsultarCep_quandoValidoInexistenteOuIndisponivel() throws Exception {
         var endereco = chamar( get( "/api/enderecos/cep/01001000" ), null, 200, null );
         assertThat( endereco.path( "cidade" ).asText() ).isEqualTo( "São Paulo" );
         assertThat( endereco.path( "estado" ).path( "siglaEstado" ).asText() ).isEqualTo( "SP" );
@@ -219,7 +259,7 @@ class ContratosHttpIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void deveCobrirHistoricoBuscaEFiltrosInvalidosDeAuditoria() throws Exception {
+    void deveConsultarAuditoria_quandoFiltroValidoOuInvalido() throws Exception {
         var id = criarParceiro();
         var historico = chamar( get( "/api/auditoria/Parceiro/{id}", id ), "CONSULTAR_AUDITORIA", 200, null );
         assertThat( historico.path( "content" ).isArray() ).isTrue();
@@ -255,10 +295,16 @@ class ContratosHttpIntegrationTest extends AbstractIntegrationTest {
 
     private JsonNode chamar( MockHttpServletRequestBuilder request, String acao, int status, Object corpo )
             throws Exception {
-        if ( acao != null )
-            request.with( jwt().authorities( new SimpleGrantedAuthority( "ROLE_" + acao ) ) );
-        else
-            request.with( jwt().authorities() );
+        return acao == null
+                ? chamarComAcoes( request, status, corpo )
+                : chamarComAcoes( request, status, corpo, acao );
+    }
+
+    private JsonNode chamarComAcoes( MockHttpServletRequestBuilder request, int status, Object corpo,
+            String... acoes ) throws Exception {
+        request.with( jwt().authorities( Arrays.stream( acoes )
+                .map( acao -> new SimpleGrantedAuthority( "ROLE_" + acao ) )
+                .toArray( SimpleGrantedAuthority[]::new ) ) );
         if ( corpo != null )
             request.contentType( MediaType.APPLICATION_JSON )
                     .content( corpo instanceof String s ? s : JSON.writeValueAsString( corpo ) );

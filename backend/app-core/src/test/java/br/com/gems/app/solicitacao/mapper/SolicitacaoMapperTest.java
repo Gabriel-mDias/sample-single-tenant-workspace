@@ -16,7 +16,7 @@ class SolicitacaoMapperTest {
     private final SolicitacaoMapper mapper = Mappers.getMapper( SolicitacaoMapper.class );
 
     @Test
-    void deveMapearTodosOsCamposDaSolicitacaoParceiroEEtapas() {
+    void deveMapearParceiroEEtapas_quandoSolicitacaoInformada() {
         var parceiro = new Parceiro();
         parceiro.setId( UUID.randomUUID() );
         parceiro.setNome( "Parceiro X" );
@@ -55,7 +55,7 @@ class SolicitacaoMapperTest {
     }
 
     @Test
-    void deveMapearTodosOsCamposDeEtapa() {
+    void deveMapearCampos_quandoEtapaInformada() {
         var data = LocalDateTime.of( 2025, 6, 7, 8, 9 );
         var etapa = new EtapaSolicitacao();
         etapa.setId( UUID.randomUUID() );

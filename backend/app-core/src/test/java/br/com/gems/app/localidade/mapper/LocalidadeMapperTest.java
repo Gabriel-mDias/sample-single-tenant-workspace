@@ -13,7 +13,7 @@ class LocalidadeMapperTest {
     private final LocalidadeMapper mapper = Mappers.getMapper( LocalidadeMapper.class );
 
     @Test
-    void deveMapearTodosOsCamposDePais() {
+    void deveMapearCampos_quandoPaisInformado() {
         var pais = Pais.builder().id( UUID.randomUUID() ).nome( "Brasil" ).build();
         var dto = mapper.toPaisDTO( pais );
         assertEquals( pais.getId(), dto.getId() );
@@ -21,7 +21,7 @@ class LocalidadeMapperTest {
     }
 
     @Test
-    void deveMapearEstadoEIgnorarPaisNoContratoDeListagem() {
+    void deveIgnorarPais_quandoMapearEstadoParaListagem() {
         var pais = Pais.builder().id( UUID.randomUUID() ).nome( "Brasil" ).build();
         var estado = Estado.builder().id( UUID.randomUUID() ).pais( pais ).nome( "São Paulo" ).siglaEstado( "SP" )
                 .build();

@@ -13,7 +13,7 @@ class ContatoMapperTest {
     private final ContatoMapper mapper = Mappers.getMapper( ContatoMapper.class );
 
     @Test
-    void deveMapearTodosOsCamposPublicosParaDTO() {
+    void deveMapearCamposPublicos_quandoContatoInformado() {
         var id = UUID.randomUUID();
         var contato = new Contato();
         contato.setId( id );
@@ -28,7 +28,7 @@ class ContatoMapperTest {
     }
 
     @Test
-    void deveAtualizarCamposEditaveisEPreservarIdentidadeEAuditoria() {
+    void deveAtualizarCamposEditaveis_quandoEntidadeExistente() {
         var id = UUID.randomUUID();
         var criacao = LocalDateTime.of( 2020, 1, 1, 0, 0 );
         var exclusao = LocalDateTime.of( 2024, 1, 1, 0, 0 );

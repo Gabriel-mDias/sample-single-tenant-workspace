@@ -29,7 +29,7 @@ class ParceiroMapperTest {
     }
 
     @Test
-    void deveMapearTodosOsCamposDoParceiroEAgregados() {
+    void deveMapearCamposEAgregados_quandoParceiroInformado() {
         var p = new Pessoa();
         p.setId( UUID.randomUUID() );
         p.setPrimeiroNome( "Ana" );
